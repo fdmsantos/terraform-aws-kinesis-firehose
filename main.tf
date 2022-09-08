@@ -1,15 +1,15 @@
-# Work in Progress
-#    Lambda Transformation Processor => Add support to Lambda RoleArn Parameter
-
 data "aws_caller_identity" "current" {
-  count = var.enable_data_format_conversion ? 1 : 0
+  count = var.enable_data_format_conversion || var.s3_backup_enable_log ? 1 : 0
 }
 
 data "aws_region" "current" {
-  count = var.enable_data_format_conversion ? 1 : 0
+  count = var.enable_data_format_conversion || var.enable_s3_backup ? 1 : 0
 }
 
 locals {
+  firehose_role_arn = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
+
+  # Data Transformation
   enable_processing     = var.transform_lambda_arn != null || var.enable_dynamic_partitioning
   enable_transformation = var.transform_lambda_arn != null
   lambda_processor = local.enable_processing && local.enable_transformation ? {
@@ -82,6 +82,7 @@ locals {
     local.record_deaggregation_processor
   ] : each if local.enable_processing && each != null]
 
+  # Data Format conversion
   data_format_conversion_glue_catalog_id = (var.enable_data_format_conversion ?
     (var.data_format_conversion_glue_catalog_id != null ? var.data_format_conversion_glue_catalog_id : data.aws_caller_identity.current[0].account_id)
   : null)
@@ -90,10 +91,17 @@ locals {
     (var.data_format_conversion_glue_region != null ? var.data_format_conversion_glue_region : data.aws_region.current[0].name)
   : null)
 
-  firehose_role_arn = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
   data_format_conversion_glue_role = (var.enable_data_format_conversion ? (
-    var.data_format_conversion_glue_use_firehose_role ? local.firehose_role_arn : var.data_format_conversion_glue_role_arn
+    var.data_format_conversion_glue_use_existing_role ? local.firehose_role_arn : var.data_format_conversion_glue_role_arn
   ) : null)
+
+  # S3 Backup
+  s3_backup_mode = var.enable_s3_backup ? "Enabled" : "Disabled"
+  s3_backup_mode_role_arn = (var.enable_s3_backup ? (
+    var.s3_backup_use_existing_role ? local.firehose_role_arn : var.s3_backup_role_arn
+  ) : null)
+  s3_backup_cw_log_group_name  = var.enable_s3_backup && var.s3_backup_log_group_name != null ? var.s3_backup_log_group_name : "/aws/kinesisfirehose/${var.name}"
+  s3_backup_cw_log_stream_name = var.enable_s3_backup && var.s3_backup_log_group_name != null ? var.s3_backup_log_stream_name : "BackupDelivery"
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
@@ -106,6 +114,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     prefix              = var.s3_prefix
     error_output_prefix = var.s3_error_output_prefix
     buffer_size         = var.buffer_size
+    buffer_interval     = var.buffer_interval
+    s3_backup_mode      = local.s3_backup_mode
 
     dynamic_partitioning_configuration {
       enabled        = var.enable_dynamic_partitioning
@@ -193,9 +203,47 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       }
     }
 
+    dynamic "s3_backup_configuration" {
+      for_each = var.enable_s3_backup ? [1] : []
+      content {
+        bucket_arn          = var.s3_backup_bucket_arn
+        role_arn            = local.s3_backup_mode_role_arn
+        prefix              = var.s3_backup_prefix
+        buffer_size         = var.s3_backup_buffer_size
+        buffer_interval     = var.s3_backup_buffer_interval
+        compression_format  = var.s3_backup_compression
+        error_output_prefix = var.s3_backup_error_output_prefix
+        kms_key_arn         = var.s3_backup_kms_key_arn
+        cloudwatch_logging_options {
+          enabled         = var.s3_backup_enable_log
+          log_group_name  = local.s3_backup_cw_log_group_name
+          log_stream_name = local.s3_backup_cw_log_stream_name
+        }
+      }
+    }
+
   }
 
-
+  tags = var.tags
 
 }
 
+##################
+# Cloudwatch
+##################
+resource "aws_cloudwatch_log_group" "s3_backup" {
+  count = var.enable_s3_backup && var.s3_backup_create_cw_log_group ? 1 : 0
+
+  name              = local.s3_backup_cw_log_group_name
+  retention_in_days = var.s3_backup_log_retention_in_days
+  #  kms_key_id        = var.s3_backup_kms_key_arn
+
+  tags = merge(var.tags, var.s3_backup_cw_tags)
+}
+
+resource "aws_cloudwatch_log_stream" "s3_backup" {
+  count = var.enable_s3_backup && var.s3_backup_create_cw_log_group ? 1 : 0
+
+  name           = local.s3_backup_cw_log_stream_name
+  log_group_name = aws_cloudwatch_log_group.s3_backup[0].name
+}

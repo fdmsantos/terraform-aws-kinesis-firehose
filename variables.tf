@@ -22,10 +22,20 @@ variable "create_role" {
 ######
 # All Destinations
 ######
-variable "buffer_size" { // Add validation
+variable "buffer_size" { // Add validation, // default Value is wrong
   description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
   type        = number
   default     = 5
+}
+
+variable "buffer_interval" {
+  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
+    condition     = var.buffer_interval >= 60 && var.buffer_interval <= 900
+  }
 }
 
 variable "transform_lambda_arn" {
@@ -70,16 +80,16 @@ variable "enable_data_format_conversion" {
   default     = false
 }
 
-variable "data_format_conversion_glue_use_firehose_role" {
-  description = "Indicates if want use the kinesis firehose role to glue access."
-  type        = bool
-  default     = true
-}
-
 variable "data_format_conversion_glue_database" {
   description = "Name of the AWS Glue database that contains the schema for the output data."
   type        = string
   default     = null
+}
+
+variable "data_format_conversion_glue_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to glue access."
+  type        = bool
+  default     = true
 }
 
 variable "data_format_conversion_glue_role_arn" {
@@ -290,8 +300,106 @@ variable "data_format_conversion_orc_stripe_size" {
   }
 }
 
-variable "firehose_role" {
-  description = "IAM role ARN attached to the Kinesis Firehose Stream."
+variable "enable_s3_backup" {
+  description = "The Amazon S3 backup mode"
+  type        = bool
+  default     = false
+}
+
+variable "s3_backup_bucket_arn" {
+  description = "The ARN of the S3 backup bucket"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_prefix" {
+  description = "The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_buffer_size" { // Add validation, default value is wrong
+  description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
+  type        = number
+  default     = 5
+}
+
+variable "s3_backup_buffer_interval" {
+  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
+    condition     = var.s3_backup_buffer_interval >= 60 && var.s3_backup_buffer_interval <= 900
+  }
+}
+
+variable "s3_backup_compression" {
+  description = "The compression format"
+  type        = string
+  default     = "UNCOMPRESSED"
+  validation {
+    error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
+    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.s3_backup_compression)
+  }
+}
+
+variable "s3_backup_error_output_prefix" {
+  description = "Prefix added to failed records before writing them to S3"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_kms_key_arn" {
+  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to s3 backup bucket access."
+  type        = bool
+  default     = true
+}
+
+variable "s3_backup_role_arn" {
+  description = "The role that Kinesis Data Firehose can use to access S3 Backup."
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_enable_log" {
+  description = "Enables or disables the logging"
+  type        = bool
+  default     = false
+}
+
+variable "s3_backup_create_cw_log_group" {
+  description = "Enables or disables the cloudwatch log group creation"
+  type        = bool
+  default     = true
+}
+
+variable "s3_backup_log_retention_in_days" { // Add Validation
+  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
+  type        = number
+  default     = 30
+}
+
+variable "s3_backup_cw_tags" {
+  description = "A map of tags to assign to the resource."
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_backup_log_group_name" {
+  description = "he CloudWatch group name for logging"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_log_stream_name" {
+  description = "The CloudWatch log stream name for logging"
   type        = string
   default     = null
 }
@@ -374,6 +482,12 @@ variable "dynamic_partition_record_deaggregation_delimiter" {
 ######
 # IAM
 ######
+variable "firehose_role" {
+  description = "IAM role ARN attached to the Kinesis Firehose Stream."
+  type        = string
+  default     = null
+}
+
 variable "role_name" {
   description = "Name of IAM role to use for Kinesis Firehose Stream"
   type        = string
