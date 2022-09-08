@@ -193,10 +193,10 @@ resource "aws_iam_role_policy_attachment" "glue" {
 }
 
 ##################
-# S3 Backup
+# S3
 ##################
-data "aws_iam_policy_document" "s3_backup" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role ? 1 : 0
+data "aws_iam_policy_document" "s3" {
+  count = var.create_role && (local.s3_destination || (var.enable_s3_backup && var.s3_backup_use_existing_role)) ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -207,29 +207,34 @@ data "aws_iam_policy_document" "s3_backup" {
       "s3:ListBucketMultipartUploads",
       "s3:PutObject"
     ]
-    resources = [
+    resources = distinct([
+      var.s3_bucket_arn,
+      "${var.s3_bucket_arn}/*",
       var.s3_backup_bucket_arn,
       "${var.s3_backup_bucket_arn}/*"
-    ]
+    ])
   }
 }
 
-resource "aws_iam_policy" "s3_backup" {
+resource "aws_iam_policy" "s3" {
   count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role ? 1 : 0
 
-  name   = "${local.role_name}-s3-backup"
+  name   = "${local.role_name}-s3"
   path   = var.policy_path
-  policy = data.aws_iam_policy_document.s3_backup[0].json
+  policy = data.aws_iam_policy_document.s3[0].json
   tags   = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "s3_backup" {
+resource "aws_iam_role_policy_attachment" "s3" {
   count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role ? 1 : 0
 
   role       = aws_iam_role.firehose[0].name
-  policy_arn = aws_iam_policy.s3_backup[0].arn
+  policy_arn = aws_iam_policy.s3[0].arn
 }
 
+##################
+# S3 Backup
+##################
 data "aws_iam_policy_document" "s3_backup_cw" {
   count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log ? 1 : 0
   statement {

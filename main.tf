@@ -8,6 +8,7 @@ data "aws_region" "current" {
 
 locals {
   firehose_role_arn = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
+  s3_destination    = var.destination == "extended_s3" ? true : false
 
   # Data Transformation
   enable_processing     = var.transform_lambda_arn != null || var.enable_dynamic_partitioning
