@@ -7,8 +7,11 @@ data "aws_region" "current" {
 }
 
 locals {
-  firehose_role_arn = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
-  s3_destination    = var.destination == "extended_s3" ? true : false
+  firehose_role_arn           = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
+  s3_destination              = var.destination == "extended_s3" ? true : false
+  cw_log_group_name           = "/aws/kinesisfirehose/${var.name}"
+  cw_log_delivery_stream_name = "DestinationDelivery"
+  cw_log_backup_stream_name   = "BackupDelivery"
 
   # Data Transformation
   enable_processing     = var.transform_lambda_arn != null || var.enable_dynamic_partitioning
@@ -101,14 +104,18 @@ locals {
   s3_backup_mode_role_arn = (var.enable_s3_backup ? (
     var.s3_backup_use_existing_role ? local.firehose_role_arn : var.s3_backup_role_arn
   ) : null)
-  s3_backup_cw_log_group_name  = var.enable_s3_backup && var.s3_backup_log_group_name != null ? var.s3_backup_log_group_name : "/aws/kinesisfirehose/${var.name}"
-  s3_backup_cw_log_stream_name = var.enable_s3_backup && var.s3_backup_log_group_name != null ? var.s3_backup_log_stream_name : "BackupDelivery"
+  s3_backup_cw_log_group_name  = var.create_destination_cw_log_group ? local.cw_log_group_name : var.s3_backup_log_group_name
+  s3_backup_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_backup_stream_name : var.s3_backup_log_stream_name
 
   # Kinesis source Stream
   enable_kinesis_source = var.kinesis_source_stream_arn != null
   kinesis_source_stream_role = (local.enable_kinesis_source ? (
     var.kinesis_source_use_existing_role ? local.firehose_role_arn : var.kinesis_source_role_arn
   ) : null)
+
+  # Destination Log
+  destination_cw_log_group_name  = var.create_destination_cw_log_group ? local.cw_log_group_name : var.destination_log_group_name
+  destination_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_delivery_stream_name : var.destination_log_stream_name
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
@@ -246,6 +253,12 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       }
     }
 
+    cloudwatch_logging_options {
+      enabled         = var.enable_destination_log
+      log_group_name  = local.destination_cw_log_group_name
+      log_stream_name = local.destination_cw_log_stream_name
+    }
+
   }
 
   tags = var.tags
@@ -255,19 +268,26 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
 ##################
 # Cloudwatch
 ##################
-resource "aws_cloudwatch_log_group" "s3_backup" {
-  count = var.enable_s3_backup && var.s3_backup_create_cw_log_group ? 1 : 0
+resource "aws_cloudwatch_log_group" "log" {
+  count = (var.enable_destination_log && var.create_destination_cw_log_group) || (var.enable_s3_backup && var.s3_backup_create_cw_log_group) ? 1 : 0
 
-  name              = local.s3_backup_cw_log_group_name
-  retention_in_days = var.s3_backup_log_retention_in_days
+  name              = local.cw_log_group_name
+  retention_in_days = var.cw_log_retention_in_days
   #  kms_key_id        = var.s3_backup_kms_key_arn
 
-  tags = merge(var.tags, var.s3_backup_cw_tags)
+  tags = merge(var.tags, var.cw_tags)
 }
 
-resource "aws_cloudwatch_log_stream" "s3_backup" {
+resource "aws_cloudwatch_log_stream" "backup" {
   count = var.enable_s3_backup && var.s3_backup_create_cw_log_group ? 1 : 0
 
-  name           = local.s3_backup_cw_log_stream_name
-  log_group_name = aws_cloudwatch_log_group.s3_backup[0].name
+  name           = local.cw_log_backup_stream_name
+  log_group_name = aws_cloudwatch_log_group.log[0].name
+}
+
+resource "aws_cloudwatch_log_stream" "destination" {
+  count = var.enable_destination_log && var.create_destination_cw_log_group ? 1 : 0
+
+  name           = local.destination_cw_log_stream_name
+  log_group_name = aws_cloudwatch_log_group.log[0].name
 }

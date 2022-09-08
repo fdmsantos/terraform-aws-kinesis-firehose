@@ -380,18 +380,6 @@ variable "s3_backup_create_cw_log_group" {
   default     = true
 }
 
-variable "s3_backup_log_retention_in_days" { // Add Validation
-  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
-  type        = number
-  default     = null
-}
-
-variable "s3_backup_cw_tags" {
-  description = "A map of tags to assign to the resource."
-  type        = map(string)
-  default     = {}
-}
-
 variable "s3_backup_log_group_name" {
   description = "he CloudWatch group name for logging"
   type        = string
@@ -402,6 +390,42 @@ variable "s3_backup_log_stream_name" {
   description = "The CloudWatch log stream name for logging"
   type        = string
   default     = null
+}
+
+variable "enable_destination_log" {
+  description = "The CloudWatch Logging Options for the delivery stream"
+  type        = bool
+  default     = false
+}
+
+variable "create_destination_cw_log_group" {
+  description = "Enables or disables the cloudwatch log group creation to destination"
+  type        = bool
+  default     = true
+}
+
+variable "destination_log_group_name" {
+  description = "The CloudWatch group name for destination logs"
+  type        = string
+  default     = null
+}
+
+variable "destination_log_stream_name" {
+  description = "The CloudWatch log stream name for destination logs"
+  type        = string
+  default     = null
+}
+
+variable "cw_log_retention_in_days" {
+  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
+  type        = number
+  default     = null
+}
+
+variable "cw_tags" {
+  description = "A map of tags to assign to the resource."
+  type        = map(string)
+  default     = {}
 }
 
 variable "s3_bucket_arn" {

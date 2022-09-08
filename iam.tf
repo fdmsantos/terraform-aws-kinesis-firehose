@@ -233,33 +233,34 @@ resource "aws_iam_role_policy_attachment" "s3" {
 }
 
 ##################
-# S3 Backup
+# Cloudwatch
 ##################
-data "aws_iam_policy_document" "s3_backup_cw" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log ? 1 : 0
+data "aws_iam_policy_document" "cw" {
+  count = var.create_role && ((var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log) || var.enable_destination_log) ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
       "logs:PutLogEvents"
     ]
-    resources = [
+    resources = distinct([
+      "arn:aws:logs:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:log-group:${local.destination_cw_log_group_name}:log-stream:${local.destination_cw_log_stream_name}",
       "arn:aws:logs:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:log-group:${local.s3_backup_cw_log_group_name}:log-stream:${local.s3_backup_cw_log_stream_name}"
-    ]
+    ])
   }
 }
 
-resource "aws_iam_policy" "s3_backup_cw" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log ? 1 : 0
+resource "aws_iam_policy" "cw" {
+  count = var.create_role && ((var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log) || var.enable_destination_log) ? 1 : 0
 
-  name   = "${local.role_name}-s3-backup-cw"
+  name   = "${local.role_name}-cw"
   path   = var.policy_path
-  policy = data.aws_iam_policy_document.s3_backup_cw[0].json
+  policy = data.aws_iam_policy_document.cw[0].json
   tags   = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "s3_backup_cw" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log ? 1 : 0
+resource "aws_iam_role_policy_attachment" "cw" {
+  count = var.create_role && ((var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_enable_log) || var.enable_destination_log) ? 1 : 0
 
   role       = aws_iam_role.firehose[0].name
-  policy_arn = aws_iam_policy.s3_backup_cw[0].arn
+  policy_arn = aws_iam_policy.cw[0].arn
 }
