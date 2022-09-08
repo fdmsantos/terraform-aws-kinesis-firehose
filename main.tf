@@ -102,16 +102,33 @@ locals {
   ) : null)
   s3_backup_cw_log_group_name  = var.enable_s3_backup && var.s3_backup_log_group_name != null ? var.s3_backup_log_group_name : "/aws/kinesisfirehose/${var.name}"
   s3_backup_cw_log_stream_name = var.enable_s3_backup && var.s3_backup_log_group_name != null ? var.s3_backup_log_stream_name : "BackupDelivery"
+
+  # Kinesis source Stream
+  enable_kinesis_source = var.kinesis_source_stream_arn != null
+  kinesis_source_stream_role = (local.enable_kinesis_source ? (
+    var.kinesis_source_use_existing_role ? local.firehose_role_arn : var.kinesis_source_role_arn
+  ) : null)
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
   name        = var.name
   destination = var.destination
 
-  server_side_encryption {
-    enabled = var.sse_enabled
-    key_arn = var.sse_key_arn
-    key_type = var.ss3_key_type
+  dynamic "kinesis_source_configuration" {
+    for_each = local.enable_kinesis_source ? [1] : []
+    content {
+      kinesis_stream_arn = var.kinesis_source_stream_arn
+      role_arn           = local.kinesis_source_stream_role
+    }
+  }
+
+  dynamic "server_side_encryption" {
+    for_each = var.sse_enabled ? [1] : []
+    content {
+      enabled  = var.sse_enabled
+      key_arn  = var.sse_key_arn
+      key_type = var.ss3_key_type
+    }
   }
 
   extended_s3_configuration {

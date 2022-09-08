@@ -411,14 +411,14 @@ variable "s3_bucket_arn" {
 
 variable "sse_enabled" {
   description = "Whether to enable encryption at rest"
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "ss3_key_type" {
   description = "Type of encryption key."
-  type = string
-  default = "AWS_OWNED_CMK"
+  type        = string
+  default     = "AWS_OWNED_CMK"
   validation {
     error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK"
     condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.ss3_key_type)
@@ -427,8 +427,38 @@ variable "ss3_key_type" {
 
 variable "sse_key_arn" {
   description = "Amazon Resource Name (ARN) of the encryption key"
-  type = string
-  default = null
+  type        = string
+  default     = null
+}
+
+variable "kinesis_source_stream_arn" {
+  description = "The kinesis stream used as the source of the firehose delivery stream"
+  type        = string
+  default     = null
+}
+
+variable "kinesis_source_role_arn" {
+  description = "The ARN of the role that provides access to the source Kinesis stream"
+  type        = string
+  default     = null
+}
+
+variable "kinesis_source_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to kinesis data stream access."
+  type        = bool
+  default     = true
+}
+
+variable "kinesis_source_is_encrypted" {
+  description = "Indicates if Kinesis data stream source is encrypted"
+  type        = bool
+  default     = false
+}
+
+variable "kinesis_source_kms_arn" {
+  description = "Kinesis Source KMS Key to add Firehose role to decrypt the records"
+  type        = string
+  default     = null
 }
 
 variable "tags" {

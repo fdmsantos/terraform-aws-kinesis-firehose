@@ -28,6 +28,60 @@ resource "aws_iam_role" "firehose" {
 }
 
 ##################
+# Kinesis Source
+##################
+data "aws_iam_policy_document" "kinesis" {
+  count = var.create_role && local.enable_kinesis_source && var.kinesis_source_use_existing_role ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "kinesis:DescribeStream",
+      "kinesis:GetShardIterator",
+      "kinesis:GetRecords",
+      "kinesis:ListShards"
+    ]
+    resources = [var.kinesis_source_stream_arn]
+  }
+
+  dynamic "statement" {
+    for_each = var.kinesis_source_is_encrypted ? [1] : []
+    content {
+      effect = "Allow"
+      actions = [
+        "kinesis:Decrypt"
+      ]
+      resources = [var.kinesis_source_kms_arn]
+      condition {
+        test     = "StringEquals"
+        values   = ["kinesis.${data.aws_region.current[0].name}.amazonaws.com"]
+        variable = "kms:ViaService"
+      }
+      condition {
+        test     = "StringLike"
+        values   = [var.kinesis_source_stream_arn]
+        variable = "kms:EncryptionContext:aws:kinesis:arn"
+      }
+    }
+  }
+}
+
+resource "aws_iam_policy" "kinesis" {
+  count = var.create_role && local.enable_kinesis_source && var.kinesis_source_use_existing_role ? 1 : 0
+
+  name   = "${local.role_name}-kinesis"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.kinesis[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "kinesis" {
+  count = var.create_role && local.enable_kinesis_source && var.kinesis_source_use_existing_role ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.kinesis[0].arn
+}
+
+##################
 # Lambda
 ##################
 data "aws_iam_policy_document" "lambda" {
