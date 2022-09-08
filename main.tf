@@ -108,6 +108,12 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   name        = var.name
   destination = var.destination
 
+  server_side_encryption {
+    enabled = var.sse_enabled
+    key_arn = var.sse_key_arn
+    key_type = var.ss3_key_type
+  }
+
   extended_s3_configuration {
     role_arn            = local.firehose_role_arn
     bucket_arn          = var.s3_bucket_arn

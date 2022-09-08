@@ -383,7 +383,7 @@ variable "s3_backup_create_cw_log_group" {
 variable "s3_backup_log_retention_in_days" { // Add Validation
   description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
   type        = number
-  default     = 30
+  default     = null
 }
 
 variable "s3_backup_cw_tags" {
@@ -407,6 +407,28 @@ variable "s3_backup_log_stream_name" {
 variable "s3_bucket_arn" {
   description = "The ARN of the S3 bucket"
   type        = string
+}
+
+variable "sse_enabled" {
+  description = "Whether to enable encryption at rest"
+  type = bool
+  default = false
+}
+
+variable "ss3_key_type" {
+  description = "Type of encryption key."
+  type = string
+  default = "AWS_OWNED_CMK"
+  validation {
+    error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK"
+    condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.ss3_key_type)
+  }
+}
+
+variable "sse_key_arn" {
+  description = "Amazon Resource Name (ARN) of the encryption key"
+  type = string
+  default = null
 }
 
 variable "tags" {

@@ -59,6 +59,50 @@ resource "aws_iam_role_policy_attachment" "lambda" {
 }
 
 ##################
+# KMS
+##################
+data "aws_iam_policy_document" "kms" {
+  count = var.create_role && ((var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_kms_key_arn != null) || var.sse_enabled) ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
+    ]
+    resources = distinct([
+      var.sse_key_arn,
+      var.s3_backup_kms_key_arn
+    ])
+    condition {
+      test     = "StringEquals"
+      values   = ["s3.${data.aws_region.current[0].name}.amazonaws.com"]
+      variable = "kms:ViaService"
+    }
+    condition {
+      test     = "StringLike"
+      values   = distinct(["${var.s3_backup_bucket_arn}/*", "${var.s3_bucket_arn}/*"])
+      variable = "kms:EncryptionContext:aws:s3:arn"
+    }
+  }
+}
+
+resource "aws_iam_policy" "kms" {
+  count = var.create_role && ((var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_kms_key_arn != null) || var.sse_enabled) ? 1 : 0
+
+  name   = "${local.role_name}-kms"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.kms[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "kms" {
+  count = var.create_role && ((var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_kms_key_arn != null) || var.sse_enabled) ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.kms[0].arn
+}
+
+##################
 # Glue
 ##################
 data "aws_iam_policy_document" "glue" {
@@ -130,46 +174,6 @@ resource "aws_iam_role_policy_attachment" "s3_backup" {
 
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.s3_backup[0].arn
-}
-
-data "aws_iam_policy_document" "s3_backup_kms" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_kms_key_arn != null ? 1 : 0
-  statement {
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey"
-    ]
-    resources = [
-      var.s3_backup_kms_key_arn
-    ]
-    condition {
-      test     = "StringEquals"
-      values   = ["s3.${data.aws_region.current[0].name}.amazonaws.com"]
-      variable = "kms:ViaService"
-    }
-    condition {
-      test     = "StringLike"
-      values   = ["${var.s3_backup_bucket_arn}/*"]
-      variable = "kms:EncryptionContext:aws:s3:arn"
-    }
-  }
-}
-
-resource "aws_iam_policy" "s3_backup_kms" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_kms_key_arn != null ? 1 : 0
-
-  name   = "${local.role_name}-s3-backup-kms"
-  path   = var.policy_path
-  policy = data.aws_iam_policy_document.s3_backup_kms[0].json
-  tags   = var.tags
-}
-
-resource "aws_iam_role_policy_attachment" "s3_backup_kms" {
-  count = var.create_role && var.enable_s3_backup && var.s3_backup_use_existing_role && var.s3_backup_kms_key_arn != null ? 1 : 0
-
-  role       = aws_iam_role.firehose[0].name
-  policy_arn = aws_iam_policy.s3_backup_kms[0].arn
 }
 
 data "aws_iam_policy_document" "s3_backup_cw" {
