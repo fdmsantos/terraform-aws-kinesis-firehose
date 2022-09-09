@@ -354,6 +354,12 @@ variable "s3_backup_error_output_prefix" {
   default     = null
 }
 
+variable "s3_backup_enable_encryption" {
+  description = "Indicates if want enable KMS Encryption in S3 Backup Bucket"
+  type        = bool
+  default     = false
+}
+
 variable "s3_backup_kms_key_arn" {
   description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used"
   type        = string
@@ -432,12 +438,19 @@ variable "cw_tags" {
   default     = {}
 }
 
-variable "s3_bucket_arn" {
-  description = "The ARN of the S3 bucket"
+variable "destination_s3_bucket_arn" {
+  description = "The ARN of the S3 destination bucket"
   type        = string
+  default     = null
 }
 
-variable "kms_key_arn" {
+variable "enable_s3_encryption" {
+  description = "Indicates if want use encryption in S3 bucket."
+  type        = bool
+  default     = false
+}
+
+variable "s3_kms_key_arn" {
   description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used."
   type        = string
   default     = null
@@ -459,20 +472,26 @@ variable "sse_enabled" {
   default     = false
 }
 
-variable "ss3_key_type" {
+variable "sse_kms_key_type" {
   description = "Type of encryption key."
   type        = string
   default     = "AWS_OWNED_CMK"
   validation {
     error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK"
-    condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.ss3_key_type)
+    condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.sse_kms_key_type)
   }
 }
 
-variable "sse_key_arn" {
+variable "sse_kms_key_arn" {
   description = "Amazon Resource Name (ARN) of the encryption key"
   type        = string
   default     = null
+}
+
+variable "enable_kinesis_source" {
+  description = "Set it to true to use kinesis data stream as source"
+  type        = bool
+  default     = false
 }
 
 variable "kinesis_source_stream_arn" {

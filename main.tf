@@ -1,10 +1,6 @@
-data "aws_caller_identity" "current" {
-  count = var.enable_data_format_conversion || var.s3_backup_enable_log ? 1 : 0
-}
+data "aws_caller_identity" "current" {}
 
-data "aws_region" "current" {
-  count = var.enable_data_format_conversion || var.enable_s3_backup ? 1 : 0
-}
+data "aws_region" "current" {}
 
 locals {
   firehose_role_arn           = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
@@ -88,11 +84,11 @@ locals {
 
   # Data Format conversion
   data_format_conversion_glue_catalog_id = (var.enable_data_format_conversion ?
-    (var.data_format_conversion_glue_catalog_id != null ? var.data_format_conversion_glue_catalog_id : data.aws_caller_identity.current[0].account_id)
+    (var.data_format_conversion_glue_catalog_id != null ? var.data_format_conversion_glue_catalog_id : data.aws_caller_identity.current.account_id)
   : null)
 
   data_format_conversion_glue_region = (var.enable_data_format_conversion ?
-    (var.data_format_conversion_glue_region != null ? var.data_format_conversion_glue_region : data.aws_region.current[0].name)
+    (var.data_format_conversion_glue_region != null ? var.data_format_conversion_glue_region : data.aws_region.current.name)
   : null)
 
   data_format_conversion_glue_role = (var.enable_data_format_conversion ? (
@@ -108,8 +104,7 @@ locals {
   s3_backup_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_backup_stream_name : var.s3_backup_log_stream_name
 
   # Kinesis source Stream
-  enable_kinesis_source = var.kinesis_source_stream_arn != null
-  kinesis_source_stream_role = (local.enable_kinesis_source ? (
+  kinesis_source_stream_role = (var.enable_kinesis_source ? (
     var.kinesis_source_use_existing_role ? local.firehose_role_arn : var.kinesis_source_role_arn
   ) : null)
 
@@ -123,7 +118,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   destination = var.destination
 
   dynamic "kinesis_source_configuration" {
-    for_each = local.enable_kinesis_source ? [1] : []
+    for_each = var.enable_kinesis_source ? [1] : []
     content {
       kinesis_stream_arn = var.kinesis_source_stream_arn
       role_arn           = local.kinesis_source_stream_role
@@ -134,133 +129,144 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     for_each = var.sse_enabled ? [1] : []
     content {
       enabled  = var.sse_enabled
-      key_arn  = var.sse_key_arn
-      key_type = var.ss3_key_type
+      key_arn  = var.sse_kms_key_arn
+      key_type = var.sse_kms_key_type
     }
   }
 
-  extended_s3_configuration {
-    role_arn            = local.firehose_role_arn
-    bucket_arn          = var.s3_bucket_arn
-    prefix              = var.s3_prefix
-    error_output_prefix = var.s3_error_output_prefix
-    buffer_size         = var.buffer_size
-    buffer_interval     = var.buffer_interval
-    s3_backup_mode      = local.s3_backup_mode
-    kms_key_arn         = var.kms_key_arn
-    compression_format  = var.compression_format
+  dynamic "extended_s3_configuration" {
+    for_each = local.s3_destination ? [1] : []
+    content {
+      role_arn            = local.firehose_role_arn
+      bucket_arn          = var.destination_s3_bucket_arn
+      prefix              = var.s3_prefix
+      error_output_prefix = var.s3_error_output_prefix
+      buffer_size         = var.buffer_size
+      buffer_interval     = var.buffer_interval
+      s3_backup_mode      = local.s3_backup_mode
+      kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
+      compression_format  = var.compression_format
 
-    dynamic_partitioning_configuration {
-      enabled        = var.enable_dynamic_partitioning
-      retry_duration = var.dynamic_partitioning_retry_duration
-    }
-
-    processing_configuration {
-      enabled = local.enable_processing
-      dynamic "processors" {
-        for_each = local.processors
+      dynamic "dynamic_partitioning_configuration" {
+        for_each = var.enable_dynamic_partitioning ? [1] : []
         content {
-          type = processors.value["type"]
-          dynamic "parameters" {
-            for_each = processors.value["parameters"]
+          enabled        = var.enable_dynamic_partitioning
+          retry_duration = var.dynamic_partitioning_retry_duration
+        }
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
             content {
-              parameter_name  = parameters.value["name"]
-              parameter_value = parameters.value["value"]
-            }
-          }
-        }
-      }
-    }
-
-    dynamic "data_format_conversion_configuration" {
-      for_each = var.enable_data_format_conversion ? [1] : []
-      content {
-        input_format_configuration {
-          deserializer {
-            dynamic "open_x_json_ser_de" {
-              for_each = var.data_format_conversion_deserializer == "OpenX" ? [1] : []
-              content {
-                case_insensitive                         = var.data_format_conversion_openX_case_insensitive
-                convert_dots_in_json_keys_to_underscores = var.data_format_conversion_openX_convert_dots_to_underscores
-                column_to_json_key_mappings              = var.data_format_conversion_openX_column_to_json_key_mappings
-              }
-            }
-            dynamic "hive_json_ser_de" {
-              for_each = var.data_format_conversion_deserializer == "HIVE" ? [1] : []
-              content {
-                timestamp_formats = var.data_format_conversion_hive_timestamps
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
               }
             }
           }
         }
+      }
 
-        output_format_configuration {
-          serializer {
-            dynamic "parquet_ser_de" {
-              for_each = var.data_format_conversion_serializer == "PARQUET" ? [1] : []
-              content {
-                block_size_bytes              = var.data_format_conversion_block_size
-                compression                   = var.data_format_conversion_parquet_compression
-                enable_dictionary_compression = var.data_format_conversion_parquet_dict_compression
-                max_padding_bytes             = var.data_format_conversion_parquet_max_padding
-                page_size_bytes               = var.data_format_conversion_parquet_page_size
-                writer_version                = var.data_format_conversion_parquet_writer_version
+      dynamic "data_format_conversion_configuration" {
+        for_each = var.enable_data_format_conversion ? [1] : []
+        content {
+          input_format_configuration {
+            deserializer {
+              dynamic "open_x_json_ser_de" {
+                for_each = var.data_format_conversion_deserializer == "OpenX" ? [1] : []
+                content {
+                  case_insensitive                         = var.data_format_conversion_openX_case_insensitive
+                  convert_dots_in_json_keys_to_underscores = var.data_format_conversion_openX_convert_dots_to_underscores
+                  column_to_json_key_mappings              = var.data_format_conversion_openX_column_to_json_key_mappings
+                }
               }
-            }
-            dynamic "orc_ser_de" {
-              for_each = var.data_format_conversion_serializer == "ORC" ? [1] : []
-              content {
-                block_size_bytes                        = var.data_format_conversion_block_size
-                compression                             = var.data_format_conversion_orc_compression
-                format_version                          = var.data_format_conversion_orc_format_version
-                enable_padding                          = var.data_format_conversion_orc_enable_padding
-                padding_tolerance                       = var.data_format_conversion_orc_padding_tolerance
-                dictionary_key_threshold                = var.data_format_conversion_orc_dict_key_threshold
-                bloom_filter_columns                    = var.data_format_conversion_orc_bloom_filter_columns
-                bloom_filter_false_positive_probability = var.data_format_conversion_orc_bloom_filter_false_positive_probability
-                row_index_stride                        = var.data_format_conversion_orc_row_index_stripe
-                stripe_size_bytes                       = var.data_format_conversion_orc_stripe_size
+              dynamic "hive_json_ser_de" {
+                for_each = var.data_format_conversion_deserializer == "HIVE" ? [1] : []
+                content {
+                  timestamp_formats = var.data_format_conversion_hive_timestamps
+                }
               }
             }
           }
-        }
 
-        schema_configuration {
-          database_name = var.data_format_conversion_glue_database
-          role_arn      = local.data_format_conversion_glue_role
-          table_name    = var.data_format_conversion_glue_table_name
-          catalog_id    = local.data_format_conversion_glue_catalog_id
-          region        = local.data_format_conversion_glue_region
-          version_id    = var.data_format_conversion_glue_version_id
+          output_format_configuration {
+            serializer {
+              dynamic "parquet_ser_de" {
+                for_each = var.data_format_conversion_serializer == "PARQUET" ? [1] : []
+                content {
+                  block_size_bytes              = var.data_format_conversion_block_size
+                  compression                   = var.data_format_conversion_parquet_compression
+                  enable_dictionary_compression = var.data_format_conversion_parquet_dict_compression
+                  max_padding_bytes             = var.data_format_conversion_parquet_max_padding
+                  page_size_bytes               = var.data_format_conversion_parquet_page_size
+                  writer_version                = var.data_format_conversion_parquet_writer_version
+                }
+              }
+              dynamic "orc_ser_de" {
+                for_each = var.data_format_conversion_serializer == "ORC" ? [1] : []
+                content {
+                  block_size_bytes                        = var.data_format_conversion_block_size
+                  compression                             = var.data_format_conversion_orc_compression
+                  format_version                          = var.data_format_conversion_orc_format_version
+                  enable_padding                          = var.data_format_conversion_orc_enable_padding
+                  padding_tolerance                       = var.data_format_conversion_orc_padding_tolerance
+                  dictionary_key_threshold                = var.data_format_conversion_orc_dict_key_threshold
+                  bloom_filter_columns                    = var.data_format_conversion_orc_bloom_filter_columns
+                  bloom_filter_false_positive_probability = var.data_format_conversion_orc_bloom_filter_false_positive_probability
+                  row_index_stride                        = var.data_format_conversion_orc_row_index_stripe
+                  stripe_size_bytes                       = var.data_format_conversion_orc_stripe_size
+                }
+              }
+            }
+          }
+
+          schema_configuration {
+            database_name = var.data_format_conversion_glue_database
+            role_arn      = local.data_format_conversion_glue_role
+            table_name    = var.data_format_conversion_glue_table_name
+            catalog_id    = local.data_format_conversion_glue_catalog_id
+            region        = local.data_format_conversion_glue_region
+            version_id    = var.data_format_conversion_glue_version_id
+          }
+        }
+      }
+
+      dynamic "s3_backup_configuration" {
+        for_each = var.enable_s3_backup ? [1] : []
+        content {
+          bucket_arn          = var.s3_backup_bucket_arn
+          role_arn            = local.s3_backup_mode_role_arn
+          prefix              = var.s3_backup_prefix
+          buffer_size         = var.s3_backup_buffer_size
+          buffer_interval     = var.s3_backup_buffer_interval
+          compression_format  = var.s3_backup_compression
+          error_output_prefix = var.s3_backup_error_output_prefix
+          kms_key_arn         = var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null
+          cloudwatch_logging_options {
+            enabled         = var.s3_backup_enable_log
+            log_group_name  = local.s3_backup_cw_log_group_name
+            log_stream_name = local.s3_backup_cw_log_stream_name
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
         }
       }
     }
-
-    dynamic "s3_backup_configuration" {
-      for_each = var.enable_s3_backup ? [1] : []
-      content {
-        bucket_arn          = var.s3_backup_bucket_arn
-        role_arn            = local.s3_backup_mode_role_arn
-        prefix              = var.s3_backup_prefix
-        buffer_size         = var.s3_backup_buffer_size
-        buffer_interval     = var.s3_backup_buffer_interval
-        compression_format  = var.s3_backup_compression
-        error_output_prefix = var.s3_backup_error_output_prefix
-        kms_key_arn         = var.s3_backup_kms_key_arn
-        cloudwatch_logging_options {
-          enabled         = var.s3_backup_enable_log
-          log_group_name  = local.s3_backup_cw_log_group_name
-          log_stream_name = local.s3_backup_cw_log_stream_name
-        }
-      }
-    }
-
-    cloudwatch_logging_options {
-      enabled         = var.enable_destination_log
-      log_group_name  = local.destination_cw_log_group_name
-      log_stream_name = local.destination_cw_log_stream_name
-    }
-
   }
 
   tags = var.tags
@@ -275,7 +281,6 @@ resource "aws_cloudwatch_log_group" "log" {
 
   name              = local.cw_log_group_name
   retention_in_days = var.cw_log_retention_in_days
-  #  kms_key_id        = var.s3_backup_kms_key_arn
 
   tags = merge(var.tags, var.cw_tags)
 }

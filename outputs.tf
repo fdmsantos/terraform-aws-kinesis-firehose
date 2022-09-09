@@ -4,6 +4,16 @@ output "kinesis_firehose_arn" {
   value       = aws_kinesis_firehose_delivery_stream.this.arn
 }
 
+output "kinesis_firehose_destination_id" {
+  description = "The Destination id of the Kinesis Firehose Stream"
+  value       = aws_kinesis_firehose_delivery_stream.this.destination_id
+}
+
+output "kinesis_firehose_version_id" {
+  description = "The Version id of the Kinesis Firehose Stream"
+  value       = aws_kinesis_firehose_delivery_stream.this.version_id
+}
+
 # CloudWatch Log Group
 output "kinesis_firehose_cloudwatch_log_group_arn" {
   description = "The ARN of the created Cloudwatch Log Group"
