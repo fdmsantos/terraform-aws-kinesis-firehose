@@ -147,6 +147,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     buffer_size         = var.buffer_size
     buffer_interval     = var.buffer_interval
     s3_backup_mode      = local.s3_backup_mode
+    kms_key_arn         = var.kms_key_arn
+    compression_format  = var.compression_format
 
     dynamic_partitioning_configuration {
       enabled        = var.enable_dynamic_partitioning

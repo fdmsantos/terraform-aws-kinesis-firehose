@@ -433,6 +433,22 @@ variable "s3_bucket_arn" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used."
+  type        = string
+  default     = null
+}
+
+variable "compression_format" {
+  description = "The compression format."
+  type        = string
+  default     = "UNCOMPRESSED"
+  validation {
+    error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
+    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.compression_format)
+  }
+}
+
 variable "sse_enabled" {
   description = "Whether to enable encryption at rest"
   type        = bool
