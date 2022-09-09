@@ -22,10 +22,14 @@ variable "create_role" {
 ######
 # All Destinations
 ######
-variable "buffer_size" { // Add validation, // default Value is wrong
+variable "buffer_size" {
   description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
   type        = number
   default     = 5
+  validation {
+    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB"
+    condition     = var.buffer_size >= 1 && var.buffer_size <= 128
+  }
 }
 
 variable "buffer_interval" {

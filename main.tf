@@ -37,7 +37,7 @@ locals {
       },
     ]
   } : null
-  metadata_extractor_processor = local.enable_processing && var.dynamic_partition_metadata_extractor_query != null ? {
+  metadata_extractor_processor = var.enable_dynamic_partitioning && var.dynamic_partition_metadata_extractor_query != null ? {
     type = "MetadataExtraction"
     parameters = [
       {
@@ -50,7 +50,7 @@ locals {
       },
     ]
   } : null
-  append_delimiter_processor = local.enable_processing && var.dynamic_partition_append_delimiter_to_record ? {
+  append_delimiter_processor = var.enable_dynamic_partitioning && var.dynamic_partition_append_delimiter_to_record ? {
     type       = "AppendDelimiterToRecord"
     parameters = []
   } : null
@@ -76,7 +76,7 @@ locals {
       },
     ]
   }
-  record_deaggregation_processor = (local.enable_processing && var.dynamic_partition_enable_record_deaggregation ?
+  record_deaggregation_processor = (var.enable_dynamic_partitioning && var.dynamic_partition_enable_record_deaggregation ?
     (var.dynamic_partition_record_deaggregation_type == "JSON" ? local.record_deaggregation_processor_json : local.record_deaggregation_processor_delimiter)
   : null)
   processors = [for each in [
