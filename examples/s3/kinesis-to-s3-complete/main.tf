@@ -7,7 +7,7 @@ resource "aws_s3_bucket" "s3" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket" "s3-backup" {
+resource "aws_s3_bucket" "s3_backup" {
   bucket        = "${var.name_prefix}-backup-bucket-${random_pet.this.id}"
   force_destroy = true
 }
@@ -51,7 +51,7 @@ module "firehose" {
   s3_kms_key_arn                                = aws_kms_key.this.arn
   enable_destination_log                        = true
   enable_s3_backup                              = true
-  s3_backup_bucket_arn                          = aws_s3_bucket.s3-backup.arn
+  s3_backup_bucket_arn                          = aws_s3_bucket.s3_backup.arn
   s3_backup_prefix                              = "backup/"
   s3_backup_error_output_prefix                 = "error/"
   s3_backup_buffer_interval                     = 100

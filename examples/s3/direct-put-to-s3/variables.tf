@@ -1,4 +1,5 @@
 variable "name_prefix" {
-  type    = string
-  default = "direct-put-to-s3"
+  description = "Name prefix to use in resources"
+  type        = string
+  default     = "direct-put-to-s3"
 }

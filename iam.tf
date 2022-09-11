@@ -123,7 +123,7 @@ resource "aws_iam_role_policy_attachment" "lambda" {
 ##################
 # KMS
 ##################
-data "aws_iam_policy_document" "s3-kms" {
+data "aws_iam_policy_document" "s3_kms" {
   count = local.add_s3_kms_policy ? 1 : 0
   statement {
     effect = "Allow"
@@ -151,20 +151,20 @@ data "aws_iam_policy_document" "s3-kms" {
   }
 }
 
-resource "aws_iam_policy" "s3-kms" {
+resource "aws_iam_policy" "s3_kms" {
   count = local.add_s3_kms_policy ? 1 : 0
 
   name   = "${local.role_name}-s3-kms"
   path   = var.policy_path
-  policy = data.aws_iam_policy_document.s3-kms[0].json
+  policy = data.aws_iam_policy_document.s3_kms[0].json
   tags   = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "s3-kms" {
+resource "aws_iam_role_policy_attachment" "s3_kms" {
   count = local.add_s3_kms_policy ? 1 : 0
 
   role       = aws_iam_role.firehose[0].name
-  policy_arn = aws_iam_policy.s3-kms[0].arn
+  policy_arn = aws_iam_policy.s3_kms[0].arn
 }
 
 #data "aws_iam_policy_document" "sse-kms" {

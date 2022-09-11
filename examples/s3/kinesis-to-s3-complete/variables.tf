@@ -1,16 +1,20 @@
 variable "name_prefix" {
-  type    = string
-  default = "kinesis-to-s3-complete"
+  description = "Name prefix to use in resources"
+  type        = string
+  default     = "kinesis-to-s3-complete"
 }
 
 variable "lambda_arn" {
-  type = string
+  description = "ARN of AWS Lambda to use in data transformation"
+  type        = string
 }
 
 variable "glue_database_name" {
-  type = string
+  description = "GLUE Database name to Data Format Conversion"
+  type        = string
 }
 
 variable "glue_table_name" {
-  type = string
+  description = "GLUE Table name to Data Format Conversion"
+  type        = string
 }

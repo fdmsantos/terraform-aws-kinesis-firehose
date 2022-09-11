@@ -1,3 +1,6 @@
+# Test Direct Put Server Side Encryption
+# Lambda transformation with lambda created in terraform
+# Change Variables Name
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
@@ -183,9 +186,9 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
               dynamic "open_x_json_ser_de" {
                 for_each = var.data_format_conversion_deserializer == "OpenX" ? [1] : []
                 content {
-                  case_insensitive                         = var.data_format_conversion_openX_case_insensitive
-                  convert_dots_in_json_keys_to_underscores = var.data_format_conversion_openX_convert_dots_to_underscores
-                  column_to_json_key_mappings              = var.data_format_conversion_openX_column_to_json_key_mappings
+                  case_insensitive                         = var.data_format_conversion_openx_case_insensitive
+                  convert_dots_in_json_keys_to_underscores = var.data_format_conversion_openx_convert_dots_to_underscores
+                  column_to_json_key_mappings              = var.data_format_conversion_openx_column_to_json_key_mappings
                 }
               }
               dynamic "hive_json_ser_de" {

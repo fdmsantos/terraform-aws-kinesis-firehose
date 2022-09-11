@@ -8,7 +8,7 @@ variable "destination" {
   type        = string
 
   validation {
-    error_message = "Please use a valid destination"
+    error_message = "Please use a valid destination!"
     condition     = contains(["extended_s3"], var.destination)
   }
 }
@@ -27,7 +27,7 @@ variable "buffer_size" {
   type        = number
   default     = 5
   validation {
-    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB"
+    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
     condition     = var.buffer_size >= 1 && var.buffer_size <= 128
   }
 }
@@ -53,7 +53,7 @@ variable "transform_lambda_buffer_size" {
   type        = number
   default     = 3
   validation {
-    error_message = "Valid Values: minimum: 1 MB, maximum: 3 MB"
+    error_message = "Valid Values: minimum: 1 MB, maximum: 3 MB."
     condition     = var.transform_lambda_buffer_size >= 1 && var.transform_lambda_buffer_size <= 3
   }
 }
@@ -131,24 +131,24 @@ variable "data_format_conversion_deserializer" {
   type        = string
   default     = "OpenX"
   validation {
-    error_message = "Valid values are HIVE and OPENX"
+    error_message = "Valid values are HIVE and OPENX."
     condition     = contains(["HIVE", "OpenX"], var.data_format_conversion_deserializer)
   }
 }
 
-variable "data_format_conversion_openX_case_insensitive" {
+variable "data_format_conversion_openx_case_insensitive" {
   description = "When set to true, Kinesis Data Firehose converts JSON keys to lowercase before deserializing them."
   type        = bool
   default     = true
 }
 
-variable "data_format_conversion_openX_convert_dots_to_underscores" {
+variable "data_format_conversion_openx_convert_dots_to_underscores" {
   description = "Specifies that the names of the keys include dots and that you want Kinesis Data Firehose to replace them with underscores. This is useful because Apache Hive does not allow dots in column names."
   type        = bool
   default     = false
 }
 
-variable "data_format_conversion_openX_column_to_json_key_mappings" {
+variable "data_format_conversion_openx_column_to_json_key_mappings" {
   description = "A map of column names to JSON keys that aren't identical to the column names. This is useful when the JSON contains keys that are Hive keywords."
   type        = map(string)
   default     = null
@@ -165,7 +165,7 @@ variable "data_format_conversion_serializer" {
   type        = string
   default     = "PARQUET"
   validation {
-    error_message = "Valid values are ORC and PARQUET"
+    error_message = "Valid values are ORC and PARQUET."
     condition     = contains(["ORC", "PARQUET"], var.data_format_conversion_serializer)
   }
 }
@@ -175,7 +175,7 @@ variable "data_format_conversion_block_size" {
   type        = number
   default     = 268435456
   validation {
-    error_message = "Minimum Value is 64 MiB"
+    error_message = "Minimum Value is 64 MiB."
     condition     = var.data_format_conversion_block_size >= 67108864
   }
 }
@@ -185,7 +185,7 @@ variable "data_format_conversion_parquet_compression" {
   type        = string
   default     = "SNAPPY"
   validation {
-    error_message = "Valid values are UNCOMPRESSED, SNAPPY and GZIP"
+    error_message = "Valid values are UNCOMPRESSED, SNAPPY and GZIP."
     condition     = contains(["UNCOMPRESSED", "SNAPPY", "GZIP"], var.data_format_conversion_parquet_compression)
   }
 }
@@ -207,7 +207,7 @@ variable "data_format_conversion_parquet_page_size" {
   type        = number
   default     = 1048576
   validation {
-    error_message = "Minimum Value is 64 KiB"
+    error_message = "Minimum Value is 64 KiB."
     condition     = var.data_format_conversion_parquet_page_size >= 65536
   }
 }
@@ -217,7 +217,7 @@ variable "data_format_conversion_parquet_writer_version" {
   type        = string
   default     = "V1"
   validation {
-    error_message = "Valid values are V1 and V2"
+    error_message = "Valid values are V1 and V2."
     condition     = contains(["V1", "V2"], var.data_format_conversion_parquet_writer_version)
   }
 }
@@ -227,7 +227,7 @@ variable "data_format_conversion_orc_compression" {
   type        = string
   default     = "SNAPPY"
   validation {
-    error_message = "Valid values are NONE, ZLIB and SNAPPY"
+    error_message = "Valid values are NONE, ZLIB and SNAPPY."
     condition     = contains(["NONE", "ZLIB", "SNAPPY"], var.data_format_conversion_orc_compression)
   }
 }
@@ -237,7 +237,7 @@ variable "data_format_conversion_orc_format_version" {
   type        = string
   default     = "V0_12"
   validation {
-    error_message = "Valid values are V0_11 and V0_12"
+    error_message = "Valid values are V0_11 and V0_12."
     condition     = contains(["V0_11", "V0_12"], var.data_format_conversion_orc_format_version)
   }
 }
@@ -253,7 +253,7 @@ variable "data_format_conversion_orc_padding_tolerance" {
   type        = number
   default     = 0.05
   validation {
-    error_message = "Valid values are V0_11 and V0_12"
+    error_message = "Valid values are V0_11 and V0_12."
     condition     = var.data_format_conversion_orc_padding_tolerance >= 0 && var.data_format_conversion_orc_padding_tolerance <= 1
   }
 }
@@ -263,7 +263,7 @@ variable "data_format_conversion_orc_dict_key_threshold" {
   type        = number
   default     = 0.0
   validation {
-    error_message = "Valid values are between 0 and 1"
+    error_message = "Valid values are between 0 and 1."
     condition     = var.data_format_conversion_orc_dict_key_threshold >= 0 && var.data_format_conversion_orc_dict_key_threshold <= 1
   }
 }
@@ -279,7 +279,7 @@ variable "data_format_conversion_orc_bloom_filter_false_positive_probability" {
   type        = number
   default     = 0.05
   validation {
-    error_message = "Valid values are between 0 and 1"
+    error_message = "Valid values are between 0 and 1."
     condition     = var.data_format_conversion_orc_bloom_filter_false_positive_probability >= 0 && var.data_format_conversion_orc_bloom_filter_false_positive_probability <= 1
   }
 }
@@ -289,7 +289,7 @@ variable "data_format_conversion_orc_row_index_stripe" {
   type        = number
   default     = 10000
   validation {
-    error_message = "Minimum value is 1000"
+    error_message = "Minimum value is 1000."
     condition     = var.data_format_conversion_orc_row_index_stripe >= 1000
   }
 }
@@ -299,7 +299,7 @@ variable "data_format_conversion_orc_stripe_size" {
   type        = number
   default     = 67108864
   validation {
-    error_message = "Minimum Value is 8 MiB"
+    error_message = "Minimum Value is 8 MiB."
     condition     = var.data_format_conversion_orc_stripe_size >= 8388608
   }
 }
@@ -322,10 +322,14 @@ variable "s3_backup_prefix" {
   default     = null
 }
 
-variable "s3_backup_buffer_size" { // Add validation, default value is wrong
+variable "s3_backup_buffer_size" {
   description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
   type        = number
   default     = 5
+  validation {
+    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
+    condition     = var.s3_backup_buffer_size >= 1 && var.s3_backup_buffer_size <= 128
+  }
 }
 
 variable "s3_backup_buffer_interval" {
@@ -355,13 +359,13 @@ variable "s3_backup_error_output_prefix" {
 }
 
 variable "s3_backup_enable_encryption" {
-  description = "Indicates if want enable KMS Encryption in S3 Backup Bucket"
+  description = "Indicates if want enable KMS Encryption in S3 Backup Bucket."
   type        = bool
   default     = false
 }
 
 variable "s3_backup_kms_key_arn" {
-  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used"
+  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used."
   type        = string
   default     = null
 }
@@ -477,7 +481,7 @@ variable "sse_kms_key_type" {
   type        = string
   default     = "AWS_OWNED_CMK"
   validation {
-    error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK"
+    error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK."
     condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.sse_kms_key_type)
   }
 }
@@ -556,7 +560,7 @@ variable "dynamic_partitioning_retry_duration" {
   type        = number
   default     = 300
   validation {
-    error_message = "Valid values between 0 and 7200"
+    error_message = "Valid values between 0 and 7200."
     condition     = var.dynamic_partitioning_retry_duration >= 0 && var.dynamic_partitioning_retry_duration <= 7200
   }
 }
@@ -568,8 +572,9 @@ variable "dynamic_partition_append_delimiter_to_record" {
 }
 
 variable "dynamic_partition_metadata_extractor_query" {
-  type    = string
-  default = null
+  description = "Dynamic Partition JQ query."
+  type        = string
+  default     = null
 }
 
 variable "dynamic_partition_enable_record_deaggregation" {
@@ -583,7 +588,7 @@ variable "dynamic_partition_record_deaggregation_type" {
   type        = string
   default     = "JSON"
   validation {
-    error_message = "Valid values are JSON and DELIMITED"
+    error_message = "Valid values are JSON and DELIMITED."
     condition     = contains(["JSON", "DELIMITED"], var.dynamic_partition_record_deaggregation_type)
   }
 }

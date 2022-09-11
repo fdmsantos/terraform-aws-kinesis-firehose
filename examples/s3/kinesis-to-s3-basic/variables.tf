@@ -1,4 +1,5 @@
 variable "name_prefix" {
-  type    = string
-  default = "kinesis-to-s3-basic"
+  description = "Name prefix to use in resources"
+  type        = string
+  default     = "kinesis-to-s3-basic"
 }

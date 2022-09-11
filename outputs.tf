@@ -4,6 +4,11 @@ output "kinesis_firehose_arn" {
   value       = aws_kinesis_firehose_delivery_stream.this.arn
 }
 
+output "kinesis_firehose_name" {
+  description = "The name of the Kinesis Firehose Stream"
+  value       = aws_kinesis_firehose_delivery_stream.this.name
+}
+
 output "kinesis_firehose_destination_id" {
   description = "The Destination id of the Kinesis Firehose Stream"
   value       = aws_kinesis_firehose_delivery_stream.this.destination_id
