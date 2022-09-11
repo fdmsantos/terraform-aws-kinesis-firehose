@@ -1,6 +1,5 @@
-# Test Direct Put Server Side Encryption
 # Lambda transformation with lambda created in terraform
-# Change Variables Name
+
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
@@ -129,9 +128,9 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 
   dynamic "server_side_encryption" {
-    for_each = var.sse_enabled ? [1] : []
+    for_each = var.enable_sse ? [1] : []
     content {
-      enabled  = var.sse_enabled
+      enabled  = var.enable_sse
       key_arn  = var.sse_kms_key_arn
       key_type = var.sse_kms_key_type
     }
@@ -141,14 +140,14 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     for_each = local.s3_destination ? [1] : []
     content {
       role_arn            = local.firehose_role_arn
-      bucket_arn          = var.destination_s3_bucket_arn
+      bucket_arn          = var.s3_bucket_arn
       prefix              = var.s3_prefix
       error_output_prefix = var.s3_error_output_prefix
       buffer_size         = var.buffer_size
       buffer_interval     = var.buffer_interval
       s3_backup_mode      = local.s3_backup_mode
       kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
-      compression_format  = var.compression_format
+      compression_format  = var.s3_compression_format
 
       dynamic "dynamic_partitioning_configuration" {
         for_each = var.enable_dynamic_partitioning ? [1] : []
@@ -203,7 +202,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
           output_format_configuration {
             serializer {
               dynamic "parquet_ser_de" {
-                for_each = var.data_format_conversion_serializer == "PARQUET" ? [1] : []
+                for_each = var.data_format_conversion_output_format == "PARQUET" ? [1] : []
                 content {
                   block_size_bytes              = var.data_format_conversion_block_size
                   compression                   = var.data_format_conversion_parquet_compression
@@ -214,7 +213,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
                 }
               }
               dynamic "orc_ser_de" {
-                for_each = var.data_format_conversion_serializer == "ORC" ? [1] : []
+                for_each = var.data_format_conversion_output_format == "ORC" ? [1] : []
                 content {
                   block_size_bytes                        = var.data_format_conversion_block_size
                   compression                             = var.data_format_conversion_orc_compression

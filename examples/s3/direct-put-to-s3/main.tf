@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "this" {
 }
 
 resource "aws_iam_policy" "this" {
-  name   = "${var.name_prefix}-admin"
+  name   = "${var.name_prefix}-backup-role"
   policy = data.aws_iam_policy_document.this.json
 }
 
@@ -53,8 +53,8 @@ module "firehose" {
   source                        = "../../../"
   name                          = "${var.name_prefix}-delivery-stream"
   destination                   = "extended_s3"
-  destination_s3_bucket_arn     = aws_s3_bucket.s3.arn
-  sse_enabled                   = true
+  s3_bucket_arn                 = aws_s3_bucket.s3.arn
+  enable_sse                    = true
   sse_kms_key_type              = "CUSTOMER_MANAGED_CMK"
   sse_kms_key_arn               = aws_kms_key.this.arn
   enable_destination_log        = true
@@ -65,7 +65,7 @@ module "firehose" {
   s3_backup_buffer_interval     = 100
   s3_backup_buffer_size         = 100
   s3_backup_compression         = "GZIP"
-  s3_backup_use_existing_role   = false
+  s3_backup_use_existing_role   = true
   s3_backup_role_arn            = aws_iam_role.this.arn
   s3_backup_enable_encryption   = true
   s3_backup_kms_key_arn         = aws_kms_key.this.arn

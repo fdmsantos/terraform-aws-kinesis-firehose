@@ -4,7 +4,7 @@ locals {
   add_kinesis_source_policy = var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
   add_lambda_policy         = var.create_role && local.enable_transformation
   add_s3_kms_policy         = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
-  #  add_sse_kms_policy        = var.create_role && var.sse_enabled && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
+  #  add_sse_kms_policy        = var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
   add_glue_policy = var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
   add_s3_policy   = var.create_role && (local.s3_destination || local.add_backup_policies)
   add_cw_policy   = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
@@ -144,7 +144,7 @@ data "aws_iam_policy_document" "s3_kms" {
       test = "StringLike"
       values = distinct(compact([
         var.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : "",
-        var.enable_s3_encryption ? "${var.destination_s3_bucket_arn}/*" : ""
+        var.enable_s3_encryption ? "${var.s3_bucket_arn}/*" : ""
       ]))
       variable = "kms:EncryptionContext:aws:s3:arn"
     }
@@ -260,8 +260,8 @@ data "aws_iam_policy_document" "s3" {
       "s3:PutObject"
     ]
     resources = distinct(compact([
-      var.destination_s3_bucket_arn,
-      "${var.destination_s3_bucket_arn}/*",
+      var.s3_bucket_arn,
+      "${var.s3_bucket_arn}/*",
       var.enable_s3_backup ? var.s3_backup_bucket_arn : "",
       var.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : ""
     ]))

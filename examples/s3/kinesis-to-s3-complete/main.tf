@@ -44,7 +44,7 @@ module "firehose" {
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = aws_kinesis_stream.this.arn
   destination                                   = "extended_s3"
-  destination_s3_bucket_arn                     = aws_s3_bucket.s3.arn
+  s3_bucket_arn                                 = aws_s3_bucket.s3.arn
   s3_prefix                                     = "prod/user_id=!{partitionKeyFromQuery:user_id}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
   s3_error_output_prefix                        = "error/"
   enable_s3_encryption                          = true
@@ -64,7 +64,7 @@ module "firehose" {
   data_format_conversion_glue_database          = var.glue_database_name
   data_format_conversion_glue_table_name        = var.glue_table_name
   data_format_conversion_deserializer           = "HIVE"
-  data_format_conversion_serializer             = "ORC"
+  data_format_conversion_output_format          = "ORC"
   transform_lambda_arn                          = var.lambda_arn
   transform_lambda_buffer_size                  = 3
   transform_lambda_buffer_interval              = 60

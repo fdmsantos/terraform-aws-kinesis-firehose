@@ -16,6 +16,8 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
 
 ### Kinesis Firehose with Kinesis Data Stream as Source
 
+**Note:** If Kinesis Data Stream is encrypted, it's necessary pass this info to module, putting the `kinesis_source_is_encrypted` variable to true and indicate the KMS Key through `kinesis_source_kms_arn` for module add policy with permissions to decrypt to Kinesis Firehose Role.
+
 ```hcl
 module "firehose" {
   source                    = "."
@@ -23,7 +25,7 @@ module "firehose" {
   enable_kinesis_source     = true
   kinesis_source_stream_arn = "<kinesis_stream_arn>"
   destination               = "extended_s3"
-  destination_s3_bucket_arn = "<bucket_arn>"
+  s3_bucket_arn             = "<bucket_arn>"
 }
 
 ```
@@ -32,10 +34,13 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                        = "."
-  name                          = "firehose-delivery-stream"
-  destination                   = "extended_s3"
-  destination_s3_bucket_arn     = "<bucket_arn>"
+  source           = "."
+  name             = "firehose-delivery-stream"
+  destination      = "extended_s3"
+  s3_bucket_arn    = "<bucket_arn>"
+  enable_sse       = true
+  sse_kms_key_type = "CUSTOMER_MANAGED_CMK"
+  sse_kms_key_arn  = aws_kms_key.this.arn
 }
 
 ```
@@ -44,16 +49,16 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                                        = "."
-  name                                          = "firehose-delivery-stream"
-  enable_kinesis_source                         = true
-  kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
-  destination                                   = "extended_s3"
-  destination_s3_bucket_arn                     = "<bucket_arn>"
-  transform_lambda_arn                          = "<lambda_arn>"
-  transform_lambda_buffer_size                  = 3
-  transform_lambda_buffer_interval              = 60
-  transform_lambda_number_retries               = 3
+  source                           = "."
+  name                             = "firehose-delivery-stream"
+  enable_kinesis_source            = true
+  kinesis_source_stream_arn        = "<kinesis_stream_arn>"
+  destination                      = "extended_s3"
+  s3_bucket_arn                    = "<bucket_arn>"
+  transform_lambda_arn             = "<lambda_arn>"
+  transform_lambda_buffer_size     = 3
+  transform_lambda_buffer_interval = 60
+  transform_lambda_number_retries  = 3
 }
 
 ```
@@ -62,17 +67,17 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                                        = "."
-  name                                          = "firehose-delivery-stream"
-  enable_kinesis_source                         = true
-  kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
-  destination                                   = "extended_s3"
-  destination_s3_bucket_arn                     = "<bucket_arn>"
-  enable_data_format_conversion                 = true
-  data_format_conversion_glue_database          = "<glue_database_name>"
-  data_format_conversion_glue_table_name        = "<glue_table_name>"
-  data_format_conversion_deserializer           = "HIVE"
-  data_format_conversion_serializer             = "ORC"
+  source                                 = "."
+  name                                   = "firehose-delivery-stream"
+  enable_kinesis_source                  = true
+  kinesis_source_stream_arn              = "<kinesis_stream_arn>"
+  destination                            = "extended_s3"
+  s3_bucket_arn                          = "<bucket_arn>"
+  enable_data_format_conversion          = true
+  data_format_conversion_glue_database   = "<glue_database_name>"
+  data_format_conversion_glue_table_name = "<glue_table_name>"
+  data_format_conversion_deserializer    = "HIVE"
+  data_format_conversion_output_format   = "ORC"
 }
 
 ```
@@ -86,7 +91,7 @@ module "firehose" {
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
   destination                                   = "extended_s3"
-  destination_s3_bucket_arn                     = "<bucket_arn>"
+  s3_bucket_arn                                 = "<bucket_arn>"
   s3_prefix                                     = "prod/user_id=!{partitionKeyFromQuery:user_id}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
   enable_dynamic_partitioning                   = true
   dynamic_partitioning_retry_duration           = 350
@@ -96,6 +101,13 @@ module "firehose" {
 }
 
 ```
+
+## Examples
+
+- [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
+- [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination .
+- [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -152,7 +164,6 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
-| <a name="input_compression_format"></a> [compression\_format](#input\_compression\_format) | The compression format. | `string` | `"UNCOMPRESSED"` | no |
 | <a name="input_create_destination_cw_log_group"></a> [create\_destination\_cw\_log\_group](#input\_create\_destination\_cw\_log\_group) | Enables or disables the cloudwatch log group creation to destination | `bool` | `true` | no |
 | <a name="input_create_role"></a> [create\_role](#input\_create\_role) | Controls whether IAM role for Kinesis Firehose Stream should be created | `bool` | `true` | no |
 | <a name="input_cw_log_retention_in_days"></a> [cw\_log\_retention\_in\_days](#input\_cw\_log\_retention\_in\_days) | Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | `number` | `null` | no |
@@ -179,16 +190,15 @@ No modules.
 | <a name="input_data_format_conversion_orc_padding_tolerance"></a> [data\_format\_conversion\_orc\_padding\_tolerance](#input\_data\_format\_conversion\_orc\_padding\_tolerance) | A float between 0 and 1 that defines the tolerance for block padding as a decimal fraction of stripe size. | `number` | `0.05` | no |
 | <a name="input_data_format_conversion_orc_row_index_stripe"></a> [data\_format\_conversion\_orc\_row\_index\_stripe](#input\_data\_format\_conversion\_orc\_row\_index\_stripe) | The number of rows between index entries. | `number` | `10000` | no |
 | <a name="input_data_format_conversion_orc_stripe_size"></a> [data\_format\_conversion\_orc\_stripe\_size](#input\_data\_format\_conversion\_orc\_stripe\_size) | he number of bytes in each strip. | `number` | `67108864` | no |
+| <a name="input_data_format_conversion_output_format"></a> [data\_format\_conversion\_output\_format](#input\_data\_format\_conversion\_output\_format) | Specifies which serializer to use. You can choose either the ORC SerDe or the Parquet SerDe | `string` | `"PARQUET"` | no |
 | <a name="input_data_format_conversion_parquet_compression"></a> [data\_format\_conversion\_parquet\_compression](#input\_data\_format\_conversion\_parquet\_compression) | The compression code to use over data blocks. | `string` | `"SNAPPY"` | no |
 | <a name="input_data_format_conversion_parquet_dict_compression"></a> [data\_format\_conversion\_parquet\_dict\_compression](#input\_data\_format\_conversion\_parquet\_dict\_compression) | Indicates whether to enable dictionary compression. | `bool` | `false` | no |
 | <a name="input_data_format_conversion_parquet_max_padding"></a> [data\_format\_conversion\_parquet\_max\_padding](#input\_data\_format\_conversion\_parquet\_max\_padding) | The maximum amount of padding to apply. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The value is in bytes | `number` | `0` | no |
 | <a name="input_data_format_conversion_parquet_page_size"></a> [data\_format\_conversion\_parquet\_page\_size](#input\_data\_format\_conversion\_parquet\_page\_size) | Column chunks are divided into pages. A page is conceptually an indivisible unit (in terms of compression and encoding). The value is in bytes | `number` | `1048576` | no |
 | <a name="input_data_format_conversion_parquet_writer_version"></a> [data\_format\_conversion\_parquet\_writer\_version](#input\_data\_format\_conversion\_parquet\_writer\_version) | Indicates the version of row format to output. | `string` | `"V1"` | no |
-| <a name="input_data_format_conversion_serializer"></a> [data\_format\_conversion\_serializer](#input\_data\_format\_conversion\_serializer) | Specifies which serializer to use. You can choose either the ORC SerDe or the Parquet SerDe | `string` | `"PARQUET"` | no |
 | <a name="input_destination"></a> [destination](#input\_destination) | This is the destination to where the data is delivered | `string` | n/a | yes |
 | <a name="input_destination_log_group_name"></a> [destination\_log\_group\_name](#input\_destination\_log\_group\_name) | The CloudWatch group name for destination logs | `string` | `null` | no |
 | <a name="input_destination_log_stream_name"></a> [destination\_log\_stream\_name](#input\_destination\_log\_stream\_name) | The CloudWatch log stream name for destination logs | `string` | `null` | no |
-| <a name="input_destination_s3_bucket_arn"></a> [destination\_s3\_bucket\_arn](#input\_destination\_s3\_bucket\_arn) | The ARN of the S3 destination bucket | `string` | `null` | no |
 | <a name="input_dynamic_partition_append_delimiter_to_record"></a> [dynamic\_partition\_append\_delimiter\_to\_record](#input\_dynamic\_partition\_append\_delimiter\_to\_record) | To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
 | <a name="input_dynamic_partition_enable_record_deaggregation"></a> [dynamic\_partition\_enable\_record\_deaggregation](#input\_dynamic\_partition\_enable\_record\_deaggregation) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `bool` | `false` | no |
 | <a name="input_dynamic_partition_metadata_extractor_query"></a> [dynamic\_partition\_metadata\_extractor\_query](#input\_dynamic\_partition\_metadata\_extractor\_query) | Dynamic Partition JQ query. | `string` | `null` | no |
@@ -201,6 +211,7 @@ No modules.
 | <a name="input_enable_kinesis_source"></a> [enable\_kinesis\_source](#input\_enable\_kinesis\_source) | Set it to true to use kinesis data stream as source | `bool` | `false` | no |
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
+| <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
 | <a name="input_firehose_role"></a> [firehose\_role](#input\_firehose\_role) | IAM role ARN attached to the Kinesis Firehose Stream. | `string` | `null` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |
 | <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records | `string` | `null` | no |
@@ -229,10 +240,11 @@ No modules.
 | <a name="input_s3_backup_prefix"></a> [s3\_backup\_prefix](#input\_s3\_backup\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
 | <a name="input_s3_backup_role_arn"></a> [s3\_backup\_role\_arn](#input\_s3\_backup\_role\_arn) | The role that Kinesis Data Firehose can use to access S3 Backup. | `string` | `null` | no |
 | <a name="input_s3_backup_use_existing_role"></a> [s3\_backup\_use\_existing\_role](#input\_s3\_backup\_use\_existing\_role) | Indicates if want use the kinesis firehose role to s3 backup bucket access. | `bool` | `true` | no |
+| <a name="input_s3_bucket_arn"></a> [s3\_bucket\_arn](#input\_s3\_bucket\_arn) | The ARN of the S3 destination bucket | `string` | `null` | no |
+| <a name="input_s3_compression_format"></a> [s3\_compression\_format](#input\_s3\_compression\_format) | The compression format | `string` | `"UNCOMPRESSED"` | no |
 | <a name="input_s3_error_output_prefix"></a> [s3\_error\_output\_prefix](#input\_s3\_error\_output\_prefix) | Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name. | `string` | `null` | no |
-| <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used. | `string` | `null` | no |
+| <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
-| <a name="input_sse_enabled"></a> [sse\_enabled](#input\_sse\_enabled) | Whether to enable encryption at rest | `bool` | `false` | no |
 | <a name="input_sse_kms_key_arn"></a> [sse\_kms\_key\_arn](#input\_sse\_kms\_key\_arn) | Amazon Resource Name (ARN) of the encryption key | `string` | `null` | no |
 | <a name="input_sse_kms_key_type"></a> [sse\_kms\_key\_type](#input\_sse\_kms\_key\_type) | Type of encryption key. | `string` | `"AWS_OWNED_CMK"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |

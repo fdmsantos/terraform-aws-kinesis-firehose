@@ -160,13 +160,13 @@ variable "data_format_conversion_hive_timestamps" {
   default     = []
 }
 
-variable "data_format_conversion_serializer" {
+variable "data_format_conversion_output_format" {
   description = "Specifies which serializer to use. You can choose either the ORC SerDe or the Parquet SerDe"
   type        = string
   default     = "PARQUET"
   validation {
     error_message = "Valid values are ORC and PARQUET."
-    condition     = contains(["ORC", "PARQUET"], var.data_format_conversion_serializer)
+    condition     = contains(["ORC", "PARQUET"], var.data_format_conversion_output_format)
   }
 }
 
@@ -442,7 +442,7 @@ variable "cw_tags" {
   default     = {}
 }
 
-variable "destination_s3_bucket_arn" {
+variable "s3_bucket_arn" {
   description = "The ARN of the S3 destination bucket"
   type        = string
   default     = null
@@ -455,23 +455,23 @@ variable "enable_s3_encryption" {
 }
 
 variable "s3_kms_key_arn" {
-  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used."
+  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used"
   type        = string
   default     = null
 }
 
-variable "compression_format" {
-  description = "The compression format."
+variable "s3_compression_format" {
+  description = "The compression format"
   type        = string
   default     = "UNCOMPRESSED"
   validation {
     error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
-    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.compression_format)
+    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.s3_compression_format)
   }
 }
 
-variable "sse_enabled" {
-  description = "Whether to enable encryption at rest"
+variable "enable_sse" {
+  description = "Whether to enable encryption at rest. Only makes sense when source is Direct Put"
   type        = bool
   default     = false
 }
