@@ -2,7 +2,7 @@ locals {
   role_name                 = var.create_role ? coalesce(var.role_name, var.name, "*") : null
   add_backup_policies       = var.enable_s3_backup && var.s3_backup_use_existing_role
   add_kinesis_source_policy = var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
-  add_lambda_policy         = var.create_role && local.enable_transformation
+  add_lambda_policy         = var.create_role && var.enable_lambda_transform
   add_s3_kms_policy         = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
   #  add_sse_kms_policy        = var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
   add_glue_policy = var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role

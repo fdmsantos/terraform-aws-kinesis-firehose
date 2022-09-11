@@ -33,13 +33,19 @@ variable "buffer_size" {
 }
 
 variable "buffer_interval" {
-  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
+  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination"
   type        = number
   default     = 300
   validation {
     error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
     condition     = var.buffer_interval >= 60 && var.buffer_interval <= 900
   }
+}
+
+variable "enable_lambda_transform" {
+  description = "Set it to true to enable data transformation with lambda"
+  type        = bool
+  default     = false
 }
 
 variable "transform_lambda_arn" {
@@ -126,13 +132,13 @@ variable "data_format_conversion_glue_version_id" {
   default     = "LATEST"
 }
 
-variable "data_format_conversion_deserializer" {
+variable "data_format_conversion_input_format" {
   description = "Specifies which deserializer to use. You can choose either the Apache Hive JSON SerDe or the OpenX JSON SerDe"
   type        = string
   default     = "OpenX"
   validation {
     error_message = "Valid values are HIVE and OPENX."
-    condition     = contains(["HIVE", "OpenX"], var.data_format_conversion_deserializer)
+    condition     = contains(["HIVE", "OpenX"], var.data_format_conversion_input_format)
   }
 }
 
@@ -385,7 +391,7 @@ variable "s3_backup_role_arn" {
 variable "s3_backup_enable_log" {
   description = "Enables or disables the logging"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "s3_backup_create_cw_log_group" {
@@ -409,7 +415,7 @@ variable "s3_backup_log_stream_name" {
 variable "enable_destination_log" {
   description = "The CloudWatch Logging Options for the delivery stream"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "create_destination_cw_log_group" {

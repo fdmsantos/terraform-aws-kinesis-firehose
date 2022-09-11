@@ -63,8 +63,9 @@ module "firehose" {
   enable_data_format_conversion                 = true
   data_format_conversion_glue_database          = var.glue_database_name
   data_format_conversion_glue_table_name        = var.glue_table_name
-  data_format_conversion_deserializer           = "HIVE"
+  data_format_conversion_input_format           = "HIVE"
   data_format_conversion_output_format          = "ORC"
+  enable_lambda_transform                       = true
   transform_lambda_arn                          = var.lambda_arn
   transform_lambda_buffer_size                  = 3
   transform_lambda_buffer_interval              = 60

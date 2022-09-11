@@ -55,6 +55,7 @@ module "firehose" {
   kinesis_source_stream_arn        = "<kinesis_stream_arn>"
   destination                      = "extended_s3"
   s3_bucket_arn                    = "<bucket_arn>"
+  enable_lambda_transform          = true
   transform_lambda_arn             = "<lambda_arn>"
   transform_lambda_buffer_size     = 3
   transform_lambda_buffer_interval = 60
@@ -76,7 +77,7 @@ module "firehose" {
   enable_data_format_conversion          = true
   data_format_conversion_glue_database   = "<glue_database_name>"
   data_format_conversion_glue_table_name = "<glue_table_name>"
-  data_format_conversion_deserializer    = "HIVE"
+  data_format_conversion_input_format    = "HIVE"
   data_format_conversion_output_format   = "ORC"
 }
 
@@ -162,14 +163,13 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. | `number` | `300` | no |
+| <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_create_destination_cw_log_group"></a> [create\_destination\_cw\_log\_group](#input\_create\_destination\_cw\_log\_group) | Enables or disables the cloudwatch log group creation to destination | `bool` | `true` | no |
 | <a name="input_create_role"></a> [create\_role](#input\_create\_role) | Controls whether IAM role for Kinesis Firehose Stream should be created | `bool` | `true` | no |
 | <a name="input_cw_log_retention_in_days"></a> [cw\_log\_retention\_in\_days](#input\_cw\_log\_retention\_in\_days) | Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | `number` | `null` | no |
 | <a name="input_cw_tags"></a> [cw\_tags](#input\_cw\_tags) | A map of tags to assign to the resource. | `map(string)` | `{}` | no |
 | <a name="input_data_format_conversion_block_size"></a> [data\_format\_conversion\_block\_size](#input\_data\_format\_conversion\_block\_size) | The Hadoop Distributed File System (HDFS) block size. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The Value is in Bytes. | `number` | `268435456` | no |
-| <a name="input_data_format_conversion_deserializer"></a> [data\_format\_conversion\_deserializer](#input\_data\_format\_conversion\_deserializer) | Specifies which deserializer to use. You can choose either the Apache Hive JSON SerDe or the OpenX JSON SerDe | `string` | `"OpenX"` | no |
 | <a name="input_data_format_conversion_glue_catalog_id"></a> [data\_format\_conversion\_glue\_catalog\_id](#input\_data\_format\_conversion\_glue\_catalog\_id) | The ID of the AWS Glue Data Catalog. If you don't supply this, the AWS account ID is used by default. | `string` | `null` | no |
 | <a name="input_data_format_conversion_glue_database"></a> [data\_format\_conversion\_glue\_database](#input\_data\_format\_conversion\_glue\_database) | Name of the AWS Glue database that contains the schema for the output data. | `string` | `null` | no |
 | <a name="input_data_format_conversion_glue_region"></a> [data\_format\_conversion\_glue\_region](#input\_data\_format\_conversion\_glue\_region) | If you don't specify an AWS Region, the default is the current region. | `string` | `null` | no |
@@ -178,6 +178,7 @@ No modules.
 | <a name="input_data_format_conversion_glue_use_existing_role"></a> [data\_format\_conversion\_glue\_use\_existing\_role](#input\_data\_format\_conversion\_glue\_use\_existing\_role) | Indicates if want use the kinesis firehose role to glue access. | `bool` | `true` | no |
 | <a name="input_data_format_conversion_glue_version_id"></a> [data\_format\_conversion\_glue\_version\_id](#input\_data\_format\_conversion\_glue\_version\_id) | Specifies the table version for the output data schema. | `string` | `"LATEST"` | no |
 | <a name="input_data_format_conversion_hive_timestamps"></a> [data\_format\_conversion\_hive\_timestamps](#input\_data\_format\_conversion\_hive\_timestamps) | A list of how you want Kinesis Data Firehose to parse the date and time stamps that may be present in your input data JSON. To specify these format strings, follow the pattern syntax of JodaTime's DateTimeFormat format strings. | `list(string)` | `[]` | no |
+| <a name="input_data_format_conversion_input_format"></a> [data\_format\_conversion\_input\_format](#input\_data\_format\_conversion\_input\_format) | Specifies which deserializer to use. You can choose either the Apache Hive JSON SerDe or the OpenX JSON SerDe | `string` | `"OpenX"` | no |
 | <a name="input_data_format_conversion_openx_case_insensitive"></a> [data\_format\_conversion\_openx\_case\_insensitive](#input\_data\_format\_conversion\_openx\_case\_insensitive) | When set to true, Kinesis Data Firehose converts JSON keys to lowercase before deserializing them. | `bool` | `true` | no |
 | <a name="input_data_format_conversion_openx_column_to_json_key_mappings"></a> [data\_format\_conversion\_openx\_column\_to\_json\_key\_mappings](#input\_data\_format\_conversion\_openx\_column\_to\_json\_key\_mappings) | A map of column names to JSON keys that aren't identical to the column names. This is useful when the JSON contains keys that are Hive keywords. | `map(string)` | `null` | no |
 | <a name="input_data_format_conversion_openx_convert_dots_to_underscores"></a> [data\_format\_conversion\_openx\_convert\_dots\_to\_underscores](#input\_data\_format\_conversion\_openx\_convert\_dots\_to\_underscores) | Specifies that the names of the keys include dots and that you want Kinesis Data Firehose to replace them with underscores. This is useful because Apache Hive does not allow dots in column names. | `bool` | `false` | no |
@@ -206,9 +207,10 @@ No modules.
 | <a name="input_dynamic_partition_record_deaggregation_type"></a> [dynamic\_partition\_record\_deaggregation\_type](#input\_dynamic\_partition\_record\_deaggregation\_type) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `string` | `"JSON"` | no |
 | <a name="input_dynamic_partitioning_retry_duration"></a> [dynamic\_partitioning\_retry\_duration](#input\_dynamic\_partitioning\_retry\_duration) | Total amount of seconds Firehose spends on retries | `number` | `300` | no |
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
-| <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `false` | no |
+| <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |
 | <a name="input_enable_kinesis_source"></a> [enable\_kinesis\_source](#input\_enable\_kinesis\_source) | Set it to true to use kinesis data stream as source | `bool` | `false` | no |
+| <a name="input_enable_lambda_transform"></a> [enable\_lambda\_transform](#input\_enable\_lambda\_transform) | Set it to true to enable data transformation with lambda | `bool` | `false` | no |
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
@@ -232,7 +234,7 @@ No modules.
 | <a name="input_s3_backup_compression"></a> [s3\_backup\_compression](#input\_s3\_backup\_compression) | The compression format | `string` | `"UNCOMPRESSED"` | no |
 | <a name="input_s3_backup_create_cw_log_group"></a> [s3\_backup\_create\_cw\_log\_group](#input\_s3\_backup\_create\_cw\_log\_group) | Enables or disables the cloudwatch log group creation | `bool` | `true` | no |
 | <a name="input_s3_backup_enable_encryption"></a> [s3\_backup\_enable\_encryption](#input\_s3\_backup\_enable\_encryption) | Indicates if want enable KMS Encryption in S3 Backup Bucket. | `bool` | `false` | no |
-| <a name="input_s3_backup_enable_log"></a> [s3\_backup\_enable\_log](#input\_s3\_backup\_enable\_log) | Enables or disables the logging | `bool` | `false` | no |
+| <a name="input_s3_backup_enable_log"></a> [s3\_backup\_enable\_log](#input\_s3\_backup\_enable\_log) | Enables or disables the logging | `bool` | `true` | no |
 | <a name="input_s3_backup_error_output_prefix"></a> [s3\_backup\_error\_output\_prefix](#input\_s3\_backup\_error\_output\_prefix) | Prefix added to failed records before writing them to S3 | `string` | `null` | no |
 | <a name="input_s3_backup_kms_key_arn"></a> [s3\_backup\_kms\_key\_arn](#input\_s3\_backup\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used. | `string` | `null` | no |
 | <a name="input_s3_backup_log_group_name"></a> [s3\_backup\_log\_group\_name](#input\_s3\_backup\_log\_group\_name) | he CloudWatch group name for logging | `string` | `null` | no |

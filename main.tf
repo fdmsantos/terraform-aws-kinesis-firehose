@@ -1,5 +1,3 @@
-# Lambda transformation with lambda created in terraform
-
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
@@ -12,9 +10,8 @@ locals {
   cw_log_backup_stream_name   = "BackupDelivery"
 
   # Data Transformation
-  enable_processing     = var.transform_lambda_arn != null || var.enable_dynamic_partitioning
-  enable_transformation = var.transform_lambda_arn != null
-  lambda_processor = local.enable_processing && local.enable_transformation ? {
+  enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning
+  lambda_processor = var.enable_lambda_transform ? {
     type = "Lambda"
     parameters = [
       {
@@ -113,6 +110,10 @@ locals {
   # Destination Log
   destination_cw_log_group_name  = var.create_destination_cw_log_group ? local.cw_log_group_name : var.destination_log_group_name
   destination_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_delivery_stream_name : var.destination_log_stream_name
+
+  # Cloudwatch
+  create_destination_logs = var.enable_destination_log && var.create_destination_cw_log_group
+  create_backup_logs      = var.enable_s3_backup && var.s3_backup_enable_log && var.s3_backup_create_cw_log_group
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
@@ -183,7 +184,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
           input_format_configuration {
             deserializer {
               dynamic "open_x_json_ser_de" {
-                for_each = var.data_format_conversion_deserializer == "OpenX" ? [1] : []
+                for_each = var.data_format_conversion_input_format == "OpenX" ? [1] : []
                 content {
                   case_insensitive                         = var.data_format_conversion_openx_case_insensitive
                   convert_dots_in_json_keys_to_underscores = var.data_format_conversion_openx_convert_dots_to_underscores
@@ -191,7 +192,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
                 }
               }
               dynamic "hive_json_ser_de" {
-                for_each = var.data_format_conversion_deserializer == "HIVE" ? [1] : []
+                for_each = var.data_format_conversion_input_format == "HIVE" ? [1] : []
                 content {
                   timestamp_formats = var.data_format_conversion_hive_timestamps
                 }
@@ -279,7 +280,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
 # Cloudwatch
 ##################
 resource "aws_cloudwatch_log_group" "log" {
-  count = (var.enable_destination_log && var.create_destination_cw_log_group) || (var.enable_s3_backup && var.s3_backup_create_cw_log_group) ? 1 : 0
+  count = local.create_destination_logs || local.create_backup_logs ? 1 : 0
 
   name              = local.cw_log_group_name
   retention_in_days = var.cw_log_retention_in_days
@@ -288,14 +289,14 @@ resource "aws_cloudwatch_log_group" "log" {
 }
 
 resource "aws_cloudwatch_log_stream" "backup" {
-  count = var.enable_s3_backup && var.s3_backup_create_cw_log_group ? 1 : 0
+  count = local.create_backup_logs ? 1 : 0
 
   name           = local.cw_log_backup_stream_name
   log_group_name = aws_cloudwatch_log_group.log[0].name
 }
 
 resource "aws_cloudwatch_log_stream" "destination" {
-  count = var.enable_destination_log && var.create_destination_cw_log_group ? 1 : 0
+  count = local.create_destination_logs ? 1 : 0
 
   name           = local.destination_cw_log_stream_name
   log_group_name = aws_cloudwatch_log_group.log[0].name
