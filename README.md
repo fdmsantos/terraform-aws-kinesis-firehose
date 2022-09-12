@@ -20,7 +20,7 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
 
 ```hcl
 module "firehose" {
-  source                    = "."
+  source                    = "fdmsantos/kinesis-firehose/aws"
   name                      = "firehose-delivery-stream"
   enable_kinesis_source     = true
   kinesis_source_stream_arn = "<kinesis_stream_arn>"
@@ -34,7 +34,7 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source           = "."
+  source           = "fdmsantos/kinesis-firehose/aws"
   name             = "firehose-delivery-stream"
   destination      = "extended_s3"
   s3_bucket_arn    = "<bucket_arn>"
@@ -49,7 +49,7 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                           = "."
+  source                           = "fdmsantos/kinesis-firehose/aws"
   name                             = "firehose-delivery-stream"
   enable_kinesis_source            = true
   kinesis_source_stream_arn        = "<kinesis_stream_arn>"
@@ -68,7 +68,7 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                                 = "."
+  source                                 = "fdmsantos/kinesis-firehose/aws"
   name                                   = "firehose-delivery-stream"
   enable_kinesis_source                  = true
   kinesis_source_stream_arn              = "<kinesis_stream_arn>"
@@ -87,7 +87,7 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                                        = "."
+  source                                        = "fdmsantos/kinesis-firehose/aws"
   name                                          = "firehose-delivery-stream"
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
