@@ -9,7 +9,7 @@ variable "destination" {
 
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["extended_s3"], var.destination)
+    condition     = contains(["extended_s3", "redshift"], var.destination)
   }
 }
 
@@ -19,6 +19,11 @@ variable "create_role" {
   default     = true
 }
 
+variable "tags" {
+  description = "A map of tags to assign to resources."
+  type        = map(string)
+  default     = {}
+}
 ######
 # All Destinations
 ######
@@ -82,6 +87,298 @@ variable "transform_lambda_number_retries" {
     error_message = "Number of retries for lambda must be between 0 and 300."
     condition     = var.transform_lambda_number_retries >= 0 && var.transform_lambda_number_retries <= 300
   }
+}
+
+variable "enable_s3_backup" {
+  description = "The Amazon S3 backup mode"
+  type        = bool
+  default     = false
+}
+
+variable "s3_backup_bucket_arn" {
+  description = "The ARN of the S3 backup bucket"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_prefix" {
+  description = "The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_buffer_size" {
+  description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
+  type        = number
+  default     = 5
+  validation {
+    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
+    condition     = var.s3_backup_buffer_size >= 1 && var.s3_backup_buffer_size <= 128
+  }
+}
+
+variable "s3_backup_buffer_interval" {
+  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
+    condition     = var.s3_backup_buffer_interval >= 60 && var.s3_backup_buffer_interval <= 900
+  }
+}
+
+variable "s3_backup_compression" {
+  description = "The compression format"
+  type        = string
+  default     = "UNCOMPRESSED"
+  validation {
+    error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
+    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.s3_backup_compression)
+  }
+}
+
+variable "s3_backup_error_output_prefix" {
+  description = "Prefix added to failed records before writing them to S3"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_enable_encryption" {
+  description = "Indicates if want enable KMS Encryption in S3 Backup Bucket."
+  type        = bool
+  default     = false
+}
+
+variable "s3_backup_kms_key_arn" {
+  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used."
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to s3 backup bucket access."
+  type        = bool
+  default     = true
+}
+
+variable "s3_backup_role_arn" {
+  description = "The role that Kinesis Data Firehose can use to access S3 Backup."
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_enable_log" {
+  description = "Enables or disables the logging"
+  type        = bool
+  default     = true
+}
+
+variable "s3_backup_create_cw_log_group" {
+  description = "Enables or disables the cloudwatch log group creation"
+  type        = bool
+  default     = true
+}
+
+variable "s3_backup_log_group_name" {
+  description = "he CloudWatch group name for logging"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_log_stream_name" {
+  description = "The CloudWatch log stream name for logging"
+  type        = string
+  default     = null
+}
+
+variable "enable_destination_log" {
+  description = "The CloudWatch Logging Options for the delivery stream"
+  type        = bool
+  default     = true
+}
+
+variable "create_destination_cw_log_group" {
+  description = "Enables or disables the cloudwatch log group creation to destination"
+  type        = bool
+  default     = true
+}
+
+variable "destination_log_group_name" {
+  description = "The CloudWatch group name for destination logs"
+  type        = string
+  default     = null
+}
+
+variable "destination_log_stream_name" {
+  description = "The CloudWatch log stream name for destination logs"
+  type        = string
+  default     = null
+}
+
+variable "cw_log_retention_in_days" {
+  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
+  type        = number
+  default     = null
+}
+
+variable "cw_tags" {
+  description = "A map of tags to assign to the resource."
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_bucket_arn" {
+  description = "The ARN of the S3 destination bucket"
+  type        = string
+  default     = null
+}
+
+variable "s3_prefix" {
+  description = "The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket"
+  type        = string
+  default     = null
+}
+
+variable "s3_error_output_prefix" {
+  description = "Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name."
+  type        = string
+  default     = null
+}
+
+variable "enable_s3_encryption" {
+  description = "Indicates if want use encryption in S3 bucket."
+  type        = bool
+  default     = false
+}
+
+variable "s3_kms_key_arn" {
+  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used"
+  type        = string
+  default     = null
+}
+
+variable "s3_compression_format" {
+  description = "The compression format"
+  type        = string
+  default     = "UNCOMPRESSED"
+  validation {
+    error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
+    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.s3_compression_format)
+  }
+}
+
+######
+# Kinesis Source
+######
+variable "enable_sse" {
+  description = "Whether to enable encryption at rest. Only makes sense when source is Direct Put"
+  type        = bool
+  default     = false
+}
+
+variable "sse_kms_key_type" {
+  description = "Type of encryption key."
+  type        = string
+  default     = "AWS_OWNED_CMK"
+  validation {
+    error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK."
+    condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.sse_kms_key_type)
+  }
+}
+
+variable "sse_kms_key_arn" {
+  description = "Amazon Resource Name (ARN) of the encryption key"
+  type        = string
+  default     = null
+}
+
+variable "enable_kinesis_source" {
+  description = "Set it to true to use kinesis data stream as source"
+  type        = bool
+  default     = false
+}
+
+variable "kinesis_source_stream_arn" {
+  description = "The kinesis stream used as the source of the firehose delivery stream"
+  type        = string
+  default     = null
+}
+
+variable "kinesis_source_role_arn" {
+  description = "The ARN of the role that provides access to the source Kinesis stream"
+  type        = string
+  default     = null
+}
+
+variable "kinesis_source_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to kinesis data stream access."
+  type        = bool
+  default     = true
+}
+
+variable "kinesis_source_is_encrypted" {
+  description = "Indicates if Kinesis data stream source is encrypted"
+  type        = bool
+  default     = false
+}
+
+variable "kinesis_source_kms_arn" {
+  description = "Kinesis Source KMS Key to add Firehose role to decrypt the records"
+  type        = string
+  default     = null
+}
+
+######
+# S3 Destination Configurations
+######
+variable "enable_dynamic_partitioning" {
+  description = "Enables or disables dynamic partitioning"
+  type        = bool
+  default     = false
+}
+
+variable "dynamic_partitioning_retry_duration" {
+  description = "Total amount of seconds Firehose spends on retries"
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid values between 0 and 7200."
+    condition     = var.dynamic_partitioning_retry_duration >= 0 && var.dynamic_partitioning_retry_duration <= 7200
+  }
+}
+
+variable "dynamic_partition_append_delimiter_to_record" {
+  description = "To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3."
+  type        = bool
+  default     = false
+}
+
+variable "dynamic_partition_metadata_extractor_query" {
+  description = "Dynamic Partition JQ query."
+  type        = string
+  default     = null
+}
+
+variable "dynamic_partition_enable_record_deaggregation" {
+  description = "Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter"
+  type        = bool
+  default     = false
+}
+
+variable "dynamic_partition_record_deaggregation_type" {
+  description = "Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter"
+  type        = string
+  default     = "JSON"
+  validation {
+    error_message = "Valid values are JSON and DELIMITED."
+    condition     = contains(["JSON", "DELIMITED"], var.dynamic_partition_record_deaggregation_type)
+  }
+}
+
+variable "dynamic_partition_record_deaggregation_delimiter" {
+  description = "Specifies the delimiter to be used for parsing through the records in the delivery stream and deaggregating them"
+  type        = string
+  default     = null
 }
 
 variable "enable_data_format_conversion" {
@@ -310,301 +607,74 @@ variable "data_format_conversion_orc_stripe_size" {
   }
 }
 
-variable "enable_s3_backup" {
-  description = "The Amazon S3 backup mode"
-  type        = bool
-  default     = false
-}
-
-variable "s3_backup_bucket_arn" {
-  description = "The ARN of the S3 backup bucket"
-  type        = string
-  default     = null
-}
-
-variable "s3_backup_prefix" {
-  description = "The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket"
-  type        = string
-  default     = null
-}
-
-variable "s3_backup_buffer_size" {
-  description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
-  type        = number
-  default     = 5
-  validation {
-    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
-    condition     = var.s3_backup_buffer_size >= 1 && var.s3_backup_buffer_size <= 128
-  }
-}
-
-variable "s3_backup_buffer_interval" {
-  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
-  type        = number
-  default     = 300
-  validation {
-    error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
-    condition     = var.s3_backup_buffer_interval >= 60 && var.s3_backup_buffer_interval <= 900
-  }
-}
-
-variable "s3_backup_compression" {
-  description = "The compression format"
-  type        = string
-  default     = "UNCOMPRESSED"
-  validation {
-    error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
-    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.s3_backup_compression)
-  }
-}
-
-variable "s3_backup_error_output_prefix" {
-  description = "Prefix added to failed records before writing them to S3"
-  type        = string
-  default     = null
-}
-
-variable "s3_backup_enable_encryption" {
-  description = "Indicates if want enable KMS Encryption in S3 Backup Bucket."
-  type        = bool
-  default     = false
-}
-
-variable "s3_backup_kms_key_arn" {
-  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used."
-  type        = string
-  default     = null
-}
-
-variable "s3_backup_use_existing_role" {
-  description = "Indicates if want use the kinesis firehose role to s3 backup bucket access."
-  type        = bool
-  default     = true
-}
-
-variable "s3_backup_role_arn" {
-  description = "The role that Kinesis Data Firehose can use to access S3 Backup."
-  type        = string
-  default     = null
-}
-
-variable "s3_backup_enable_log" {
-  description = "Enables or disables the logging"
-  type        = bool
-  default     = true
-}
-
-variable "s3_backup_create_cw_log_group" {
-  description = "Enables or disables the cloudwatch log group creation"
-  type        = bool
-  default     = true
-}
-
-variable "s3_backup_log_group_name" {
-  description = "he CloudWatch group name for logging"
-  type        = string
-  default     = null
-}
-
-variable "s3_backup_log_stream_name" {
-  description = "The CloudWatch log stream name for logging"
-  type        = string
-  default     = null
-}
-
-variable "enable_destination_log" {
-  description = "The CloudWatch Logging Options for the delivery stream"
-  type        = bool
-  default     = true
-}
-
-variable "create_destination_cw_log_group" {
-  description = "Enables or disables the cloudwatch log group creation to destination"
-  type        = bool
-  default     = true
-}
-
-variable "destination_log_group_name" {
-  description = "The CloudWatch group name for destination logs"
-  type        = string
-  default     = null
-}
-
-variable "destination_log_stream_name" {
-  description = "The CloudWatch log stream name for destination logs"
-  type        = string
-  default     = null
-}
-
-variable "cw_log_retention_in_days" {
-  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
-  type        = number
-  default     = null
-}
-
-variable "cw_tags" {
-  description = "A map of tags to assign to the resource."
-  type        = map(string)
-  default     = {}
-}
-
-variable "s3_bucket_arn" {
-  description = "The ARN of the S3 destination bucket"
-  type        = string
-  default     = null
-}
-
-variable "enable_s3_encryption" {
-  description = "Indicates if want use encryption in S3 bucket."
-  type        = bool
-  default     = false
-}
-
-variable "s3_kms_key_arn" {
-  description = "Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used"
-  type        = string
-  default     = null
-}
-
-variable "s3_compression_format" {
-  description = "The compression format"
-  type        = string
-  default     = "UNCOMPRESSED"
-  validation {
-    error_message = "Valid values are UNCOMPRESSED, GZIP, ZIP, Snappy and HADOOP_SNAPPY."
-    condition     = contains(["UNCOMPRESSED", "GZIP", "ZIP", "Snappy", "HADOOP_SNAPPY"], var.s3_compression_format)
-  }
-}
-
-variable "enable_sse" {
-  description = "Whether to enable encryption at rest. Only makes sense when source is Direct Put"
-  type        = bool
-  default     = false
-}
-
-variable "sse_kms_key_type" {
-  description = "Type of encryption key."
-  type        = string
-  default     = "AWS_OWNED_CMK"
-  validation {
-    error_message = "Valid values are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK."
-    condition     = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.sse_kms_key_type)
-  }
-}
-
-variable "sse_kms_key_arn" {
-  description = "Amazon Resource Name (ARN) of the encryption key"
-  type        = string
-  default     = null
-}
-
-variable "enable_kinesis_source" {
-  description = "Set it to true to use kinesis data stream as source"
-  type        = bool
-  default     = false
-}
-
-variable "kinesis_source_stream_arn" {
-  description = "The kinesis stream used as the source of the firehose delivery stream"
-  type        = string
-  default     = null
-}
-
-variable "kinesis_source_role_arn" {
-  description = "The ARN of the role that provides access to the source Kinesis stream"
-  type        = string
-  default     = null
-}
-
-variable "kinesis_source_use_existing_role" {
-  description = "Indicates if want use the kinesis firehose role to kinesis data stream access."
-  type        = bool
-  default     = true
-}
-
-variable "kinesis_source_is_encrypted" {
-  description = "Indicates if Kinesis data stream source is encrypted"
-  type        = bool
-  default     = false
-}
-
-variable "kinesis_source_kms_arn" {
-  description = "Kinesis Source KMS Key to add Firehose role to decrypt the records"
-  type        = string
-  default     = null
-}
-
-variable "tags" {
-  description = "A map of tags to assign to resources."
-  type        = map(string)
-  default     = {}
-}
-
 ######
-# S3 Destination Configurations
+# Redshift Destination Variables
 ######
-variable "s3_prefix" {
-  description = "The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket"
+variable "redshift_cluster_endpoint" {
+  description = "The redshift endpoint"
   type        = string
   default     = null
 }
 
-variable "s3_error_output_prefix" {
-  description = "Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name."
+variable "redshift_username" {
+  description = "The username that the firehose delivery stream will assume. It is strongly recommended that the username and password provided is used exclusively for Amazon Kinesis Firehose purposes, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "redshift_password" {
+  description = "The password for the redshift username above"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "redshift_database_name" {
+  description = "The redshift database name"
   type        = string
   default     = null
 }
 
-variable "enable_dynamic_partitioning" {
-  description = "Enables or disables dynamic partitioning"
-  type        = bool
-  default     = false
+variable "redshift_table_name" {
+  description = "The name of the table in the redshift cluster that the s3 bucket will copy to"
+  type        = string
+  default     = null
 }
 
-variable "dynamic_partitioning_retry_duration" {
-  description = "Total amount of seconds Firehose spends on retries"
-  type        = number
-  default     = 300
+variable "redshift_copy_options" {
+  description = "Copy options for copying the data from the s3 intermediate bucket into redshift, for example to change the default delimiter"
+  type        = string
+  default     = null
+}
+
+variable "redshift_data_table_columns" {
+  description = "The data table columns that will be targeted by the copy command"
+  type        = string
+  default     = null
+}
+
+variable "redshift_retry_duration" {
+  description = "The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt"
+  type        = string
+  default     = 3600
   validation {
-    error_message = "Valid values between 0 and 7200."
-    condition     = var.dynamic_partitioning_retry_duration >= 0 && var.dynamic_partitioning_retry_duration <= 7200
+    error_message = "Minimum: 0 second, maximum: 7200 seconds."
+    condition     = var.redshift_retry_duration >= 0 && var.redshift_retry_duration <= 7200
   }
 }
 
-variable "dynamic_partition_append_delimiter_to_record" {
-  description = "To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3."
-  type        = bool
-  default     = false
-}
-
-variable "dynamic_partition_metadata_extractor_query" {
-  description = "Dynamic Partition JQ query."
+variable "redshift_cluster_identifier" {
+  description = "Redshift Cluster identifier. Necessary to associate the iam role to cluster"
   type        = string
   default     = null
 }
 
-variable "dynamic_partition_enable_record_deaggregation" {
-  description = "Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter"
+variable "associate_role_to_redshift_cluster" {
+  description = "Set it to false if don't want the module associate the role to redshift cluster"
   type        = bool
-  default     = false
+  default     = true
 }
-
-variable "dynamic_partition_record_deaggregation_type" {
-  description = "Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter"
-  type        = string
-  default     = "JSON"
-  validation {
-    error_message = "Valid values are JSON and DELIMITED."
-    condition     = contains(["JSON", "DELIMITED"], var.dynamic_partition_record_deaggregation_type)
-  }
-}
-
-variable "dynamic_partition_record_deaggregation_delimiter" {
-  description = "Specifies the delimiter to be used for parsing through the records in the delivery stream and deaggregating them."
-  type        = string
-  default     = null
-}
-
 ######
 # IAM
 ######

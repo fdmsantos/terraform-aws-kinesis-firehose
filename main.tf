@@ -96,7 +96,7 @@ locals {
 
   # S3 Backup
   s3_backup_mode = var.enable_s3_backup ? "Enabled" : "Disabled"
-  s3_backup_mode_role_arn = (var.enable_s3_backup ? (
+  s3_backup_role_arn = (var.enable_s3_backup ? (
     var.s3_backup_use_existing_role ? local.firehose_role_arn : var.s3_backup_role_arn
   ) : null)
   s3_backup_cw_log_group_name  = var.create_destination_cw_log_group ? local.cw_log_group_name : var.s3_backup_log_group_name
@@ -129,7 +129,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 
   dynamic "server_side_encryption" {
-    for_each = var.enable_sse ? [1] : []
+    for_each = !var.enable_kinesis_source && var.enable_sse ? [1] : []
     content {
       enabled  = var.enable_sse
       key_arn  = var.sse_kms_key_arn
@@ -246,7 +246,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
         for_each = var.enable_s3_backup ? [1] : []
         content {
           bucket_arn          = var.s3_backup_bucket_arn
-          role_arn            = local.s3_backup_mode_role_arn
+          role_arn            = local.s3_backup_role_arn
           prefix              = var.s3_backup_prefix
           buffer_size         = var.s3_backup_buffer_size
           buffer_interval     = var.s3_backup_buffer_interval
@@ -270,6 +270,86 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
         }
       }
     }
+  }
+
+  dynamic "s3_configuration" {
+    for_each = !local.s3_destination ? [1] : []
+    content {
+      role_arn            = local.firehose_role_arn
+      bucket_arn          = var.s3_bucket_arn
+      buffer_size         = var.buffer_size
+      buffer_interval     = var.buffer_interval
+      compression_format  = var.s3_compression_format
+      prefix              = var.s3_prefix
+      error_output_prefix = var.s3_error_output_prefix
+      kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
+    }
+
+  }
+
+  dynamic "redshift_configuration" {
+    for_each = var.destination == "redshift" ? [1] : []
+    content {
+      role_arn           = local.firehose_role_arn
+      cluster_jdbcurl    = "jdbc:redshift://${var.redshift_cluster_endpoint}/${var.redshift_database_name}"
+      username           = var.redshift_username
+      password           = var.redshift_password
+      data_table_name    = var.redshift_table_name
+      copy_options       = var.redshift_copy_options
+      data_table_columns = var.redshift_data_table_columns
+      s3_backup_mode     = local.s3_backup_mode
+      retry_duration     = var.redshift_retry_duration
+
+      dynamic "s3_backup_configuration" {
+        for_each = var.enable_s3_backup ? [1] : []
+        content {
+          bucket_arn          = var.s3_backup_bucket_arn
+          role_arn            = local.s3_backup_role_arn
+          prefix              = var.s3_backup_prefix
+          buffer_size         = var.s3_backup_buffer_size
+          buffer_interval     = var.s3_backup_buffer_interval
+          compression_format  = var.s3_backup_compression
+          error_output_prefix = var.s3_backup_error_output_prefix
+          kms_key_arn         = var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null
+          cloudwatch_logging_options {
+            enabled         = var.s3_backup_enable_log
+            log_group_name  = local.s3_backup_cw_log_group_name
+            log_stream_name = local.s3_backup_cw_log_stream_name
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+    }
+
   }
 
   tags = var.tags

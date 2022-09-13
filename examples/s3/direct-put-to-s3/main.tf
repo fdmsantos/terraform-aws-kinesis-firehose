@@ -57,7 +57,6 @@ module "firehose" {
   enable_sse                    = true
   sse_kms_key_type              = "CUSTOMER_MANAGED_CMK"
   sse_kms_key_arn               = aws_kms_key.this.arn
-  enable_destination_log        = true
   enable_s3_backup              = true
   s3_backup_bucket_arn          = aws_s3_bucket.s3.arn
   s3_backup_prefix              = "backup/"
@@ -65,7 +64,7 @@ module "firehose" {
   s3_backup_buffer_interval     = 100
   s3_backup_buffer_size         = 100
   s3_backup_compression         = "GZIP"
-  s3_backup_use_existing_role   = true
+  s3_backup_use_existing_role   = false
   s3_backup_role_arn            = aws_iam_role.this.arn
   s3_backup_enable_encryption   = true
   s3_backup_kms_key_arn         = aws_kms_key.this.arn

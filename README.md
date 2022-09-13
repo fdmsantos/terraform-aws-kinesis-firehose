@@ -1,14 +1,18 @@
 # AWS Kinesis Firehose Terraform module
 
-Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch and IAM Role  that integrate with Kinesis Firehose.
+Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch and IAM Role that integrate with Kinesis Firehose.
 
 ## Features
 
-- Kinesis Data Stream or Direct Put as source.
-- S3 Destination.
+- Sources 
+  - Kinesis Data Stream
+  - Direct Put
+- Destinations
+  - S3 Destination
+    - Data Format Conversion
+    - Dynamic Partition
+  - Redshift
 - Data Transformation With Lambda
-- Data Format Conversion
-- Dynamic Partition
 - S3 Backup
 - Logging and Encryption
 
@@ -45,7 +49,27 @@ module "firehose" {
 
 ```
 
-### Lambda Transformation
+### Redshift Destination
+
+```hcl
+module "firehose" {
+  source                        = "fdmsantos/kinesis-firehose/aws"
+  name                          = "firehose-delivery-stream"
+  destination                   = "redshift"
+  s3_bucket_arn                 = "<bucket_arn>"
+  redshift_cluster_identifier   = "<redshift_cluster_identifier>"
+  redshift_cluster_endpoint     = "<redshift_cluster_endpoint>"
+  redshift_database_name        = "<redshift_cluster_database>"
+  redshift_username             = "<redshift_cluster_username>"
+  redshift_password             = "<redshift_cluster_password>"
+  redshift_table_name           = "<redshift_cluster_table>"
+  redshift_copy_options         = "json 'auto ignorecase'"
+}
+```
+
+### Data Transformation with Lambda
+
+**Note:** All data transformation with lambda variables starts with transform `transform_lambda`.
 
 ```hcl
 module "firehose" {
@@ -66,6 +90,8 @@ module "firehose" {
 
 ### Data Format Conversion
 
+**Note:** All data format conversion variables starts with transform `data_format_conversion`.
+
 ```hcl
 module "firehose" {
   source                                 = "fdmsantos/kinesis-firehose/aws"
@@ -84,6 +110,8 @@ module "firehose" {
 ```
 
 ### Dynamic Partition
+
+**Note:** All dynamic partition variables starts with transform `dynamic_partitioning`.
 
 ```hcl
 module "firehose" {
@@ -108,7 +136,7 @@ module "firehose" {
 - [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
 - [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination .
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
-
+- [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -149,6 +177,7 @@ No modules.
 | [aws_iam_role_policy_attachment.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kinesis_firehose_delivery_stream.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
+| [aws_redshift_cluster_iam_roles.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/redshift_cluster_iam_roles) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -163,6 +192,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
 | <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_create_destination_cw_log_group"></a> [create\_destination\_cw\_log\_group](#input\_create\_destination\_cw\_log\_group) | Enables or disables the cloudwatch log group creation to destination | `bool` | `true` | no |
@@ -203,7 +233,7 @@ No modules.
 | <a name="input_dynamic_partition_append_delimiter_to_record"></a> [dynamic\_partition\_append\_delimiter\_to\_record](#input\_dynamic\_partition\_append\_delimiter\_to\_record) | To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
 | <a name="input_dynamic_partition_enable_record_deaggregation"></a> [dynamic\_partition\_enable\_record\_deaggregation](#input\_dynamic\_partition\_enable\_record\_deaggregation) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `bool` | `false` | no |
 | <a name="input_dynamic_partition_metadata_extractor_query"></a> [dynamic\_partition\_metadata\_extractor\_query](#input\_dynamic\_partition\_metadata\_extractor\_query) | Dynamic Partition JQ query. | `string` | `null` | no |
-| <a name="input_dynamic_partition_record_deaggregation_delimiter"></a> [dynamic\_partition\_record\_deaggregation\_delimiter](#input\_dynamic\_partition\_record\_deaggregation\_delimiter) | Specifies the delimiter to be used for parsing through the records in the delivery stream and deaggregating them. | `string` | `null` | no |
+| <a name="input_dynamic_partition_record_deaggregation_delimiter"></a> [dynamic\_partition\_record\_deaggregation\_delimiter](#input\_dynamic\_partition\_record\_deaggregation\_delimiter) | Specifies the delimiter to be used for parsing through the records in the delivery stream and deaggregating them | `string` | `null` | no |
 | <a name="input_dynamic_partition_record_deaggregation_type"></a> [dynamic\_partition\_record\_deaggregation\_type](#input\_dynamic\_partition\_record\_deaggregation\_type) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `string` | `"JSON"` | no |
 | <a name="input_dynamic_partitioning_retry_duration"></a> [dynamic\_partitioning\_retry\_duration](#input\_dynamic\_partitioning\_retry\_duration) | Total amount of seconds Firehose spends on retries | `number` | `300` | no |
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
@@ -222,6 +252,15 @@ No modules.
 | <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
 | <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in | `string` | n/a | yes |
 | <a name="input_policy_path"></a> [policy\_path](#input\_policy\_path) | Path of policies to that should be added to IAM role for Kinesis Firehose Stream | `string` | `null` | no |
+| <a name="input_redshift_cluster_endpoint"></a> [redshift\_cluster\_endpoint](#input\_redshift\_cluster\_endpoint) | The redshift endpoint | `string` | `null` | no |
+| <a name="input_redshift_cluster_identifier"></a> [redshift\_cluster\_identifier](#input\_redshift\_cluster\_identifier) | Redshift Cluster identifier. Necessary to associate the iam role to cluster | `string` | `null` | no |
+| <a name="input_redshift_copy_options"></a> [redshift\_copy\_options](#input\_redshift\_copy\_options) | Copy options for copying the data from the s3 intermediate bucket into redshift, for example to change the default delimiter | `string` | `null` | no |
+| <a name="input_redshift_data_table_columns"></a> [redshift\_data\_table\_columns](#input\_redshift\_data\_table\_columns) | The data table columns that will be targeted by the copy command | `string` | `null` | no |
+| <a name="input_redshift_database_name"></a> [redshift\_database\_name](#input\_redshift\_database\_name) | The redshift database name | `string` | `null` | no |
+| <a name="input_redshift_password"></a> [redshift\_password](#input\_redshift\_password) | The password for the redshift username above | `string` | `null` | no |
+| <a name="input_redshift_retry_duration"></a> [redshift\_retry\_duration](#input\_redshift\_retry\_duration) | The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt | `string` | `3600` | no |
+| <a name="input_redshift_table_name"></a> [redshift\_table\_name](#input\_redshift\_table\_name) | The name of the table in the redshift cluster that the s3 bucket will copy to | `string` | `null` | no |
+| <a name="input_redshift_username"></a> [redshift\_username](#input\_redshift\_username) | The username that the firehose delivery stream will assume. It is strongly recommended that the username and password provided is used exclusively for Amazon Kinesis Firehose purposes, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions | `string` | `null` | no |
 | <a name="input_role_description"></a> [role\_description](#input\_role\_description) | Description of IAM role to use for Kinesis Firehose Stream | `string` | `null` | no |
 | <a name="input_role_force_detach_policies"></a> [role\_force\_detach\_policies](#input\_role\_force\_detach\_policies) | Specifies to force detaching any policies the IAM role has before destroying it | `bool` | `true` | no |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | Name of IAM role to use for Kinesis Firehose Stream | `string` | `null` | no |
@@ -271,6 +310,12 @@ No modules.
 | <a name="output_kinesis_firehose_role_arn"></a> [kinesis\_firehose\_role\_arn](#output\_kinesis\_firehose\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_version_id"></a> [kinesis\_firehose\_version\_id](#output\_kinesis\_firehose\_version\_id) | The Version id of the Kinesis Firehose Stream |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+## Work in Progress
+
+- ElasticSearch / OpenSearch Destination
+- Http Endpoint Destination
+- Other supported destinations
 
 ## License
 

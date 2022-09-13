@@ -4,10 +4,10 @@ locals {
   add_kinesis_source_policy = var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
   add_lambda_policy         = var.create_role && var.enable_lambda_transform
   add_s3_kms_policy         = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
+  add_glue_policy           = var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
+  add_s3_policy             = var.create_role
+  add_cw_policy             = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
   #  add_sse_kms_policy        = var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
-  add_glue_policy = var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
-  add_s3_policy   = var.create_role && (local.s3_destination || local.add_backup_policies)
-  add_cw_policy   = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -18,8 +18,11 @@ data "aws_iam_policy_document" "assume_role" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "Service"
-      identifiers = ["firehose.amazonaws.com"]
+      type = "Service"
+      identifiers = compact([
+        "firehose.amazonaws.com",
+        var.destination == "redshift" ? "redshift.amazonaws.com" : "",
+      ])
     }
   }
 }
@@ -315,4 +318,13 @@ resource "aws_iam_role_policy_attachment" "cw" {
 
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.cw[0].arn
+}
+
+##################
+# Redshift
+##################
+resource "aws_redshift_cluster_iam_roles" "this" {
+  count              = var.create_role && var.destination == "redshift" && var.associate_role_to_redshift_cluster ? 1 : 0
+  cluster_identifier = var.redshift_cluster_identifier
+  iam_role_arns      = [aws_iam_role.firehose[0].arn]
 }
