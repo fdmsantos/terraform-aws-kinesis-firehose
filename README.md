@@ -8,12 +8,12 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
   - Kinesis Data Stream
   - Direct Put
 - Destinations
-  - S3 Destination
+  - Redshift
+  - S3
     - Data Format Conversion
     - Dynamic Partition
-  - Redshift
 - Data Transformation With Lambda
-- S3 Backup
+- Original Data Backup in S3
 - Logging and Encryption
 
 ## Usage
@@ -69,7 +69,7 @@ module "firehose" {
 
 ### Data Transformation with Lambda
 
-**Note:** All data transformation with lambda variables starts with transform `transform_lambda`.
+**Note:** All data transformation with lambda variables starts with `transform_lambda`.
 
 ```hcl
 module "firehose" {
@@ -90,7 +90,7 @@ module "firehose" {
 
 ### Data Format Conversion
 
-**Note:** All data format conversion variables starts with transform `data_format_conversion`.
+**Note:** All data format conversion variables starts with `data_format_conversion`.
 
 ```hcl
 module "firehose" {
@@ -111,7 +111,7 @@ module "firehose" {
 
 ### Dynamic Partition
 
-**Note:** All dynamic partition variables starts with transform `dynamic_partitioning`.
+**Note:** All dynamic partition variables starts with `dynamic_partitioning`.
 
 ```hcl
 module "firehose" {
