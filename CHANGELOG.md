@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.1.0...v1.2.0) (2022-09-23)
+
+
+### Features
+
+* add support to elasticsearch destination ([915a1d6](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/915a1d69a15a7f559120bca2a7636e96135ddb13))
+
 ## [1.1.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.0.0...v1.1.0) (2022-09-13)
 
 
