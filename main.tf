@@ -95,12 +95,20 @@ locals {
   ) : null)
 
   # S3 Backup
-  s3_backup_mode = var.enable_s3_backup ? "Enabled" : "Disabled"
-  s3_backup_role_arn = (var.enable_s3_backup ? (
+  s3_backup        = var.enable_s3_backup ? "Enabled" : "Disabled"
+  enable_s3_backup = var.enable_s3_backup || var.destination == "elasticsearch"
+  s3_backup_role_arn = (local.enable_s3_backup ? (
     var.s3_backup_use_existing_role ? local.firehose_role_arn : var.s3_backup_role_arn
   ) : null)
   s3_backup_cw_log_group_name  = var.create_destination_cw_log_group ? local.cw_log_group_name : var.s3_backup_log_group_name
   s3_backup_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_backup_stream_name : var.s3_backup_log_stream_name
+
+  backup_modes = {
+    elasticsearch : {
+      FailedOnly : "FailedDocumentsOnly",
+      All : "AllDocuments"
+    }
+  }
 
   # Kinesis source Stream
   kinesis_source_stream_role = (var.enable_kinesis_source ? (
@@ -114,6 +122,12 @@ locals {
   # Cloudwatch
   create_destination_logs = var.enable_destination_log && var.create_destination_cw_log_group
   create_backup_logs      = var.enable_s3_backup && var.s3_backup_enable_log && var.s3_backup_create_cw_log_group
+
+  # Elasticsearch Destination
+  #  elasticsearch_in_vpc = var.elasticsearch_vpc_subnet_ids != null || var.elasticsearch_vpc_security_group_ids != null ? true : false
+  #  elasticsearch_vpc_role_arn = (var.destination == "elasticsearch" ? (
+  #    var.elasticsearch_vpc_use_existing_role ? local.firehose_role_arn : var.elasticsearch_vpc_role_arn
+  #  ) : null)
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
@@ -146,7 +160,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       error_output_prefix = var.s3_error_output_prefix
       buffer_size         = var.buffer_size
       buffer_interval     = var.buffer_interval
-      s3_backup_mode      = local.s3_backup_mode
+      s3_backup_mode      = local.s3_backup
       kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
       compression_format  = var.s3_compression_format
 
@@ -275,16 +289,15 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   dynamic "s3_configuration" {
     for_each = !local.s3_destination ? [1] : []
     content {
-      role_arn            = local.firehose_role_arn
-      bucket_arn          = var.s3_bucket_arn
-      buffer_size         = var.buffer_size
-      buffer_interval     = var.buffer_interval
-      compression_format  = var.s3_compression_format
-      prefix              = var.s3_prefix
-      error_output_prefix = var.s3_error_output_prefix
-      kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
+      role_arn            = var.destination != "elasticsearch" ? local.firehose_role_arn : local.s3_backup_role_arn
+      bucket_arn          = var.destination != "elasticsearch" ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+      buffer_size         = var.destination != "elasticsearch" ? var.buffer_size : var.s3_backup_buffer_size
+      buffer_interval     = var.destination != "elasticsearch" ? var.buffer_interval : var.s3_backup_buffer_interval
+      compression_format  = var.destination != "elasticsearch" ? var.s3_compression_format : var.s3_backup_compression
+      prefix              = var.destination != "elasticsearch" ? var.s3_prefix : var.s3_backup_prefix
+      error_output_prefix = var.destination != "elasticsearch" ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+      kms_key_arn         = (var.destination != "elasticsearch" && var.enable_s3_encryption ? var.s3_kms_key_arn : (var.destination == "elasticsearch" && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
     }
-
   }
 
   dynamic "redshift_configuration" {
@@ -297,7 +310,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       data_table_name    = var.redshift_table_name
       copy_options       = var.redshift_copy_options
       data_table_columns = var.redshift_data_table_columns
-      s3_backup_mode     = local.s3_backup_mode
+      s3_backup_mode     = local.s3_backup
       retry_duration     = var.redshift_retry_duration
 
       dynamic "s3_backup_configuration" {
@@ -350,6 +363,60 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
 
     }
 
+  }
+
+  dynamic "elasticsearch_configuration" {
+    for_each = var.destination == "elasticsearch" ? [1] : []
+    content {
+      domain_arn            = var.elasticsearch_domain_arn
+      role_arn              = local.firehose_role_arn
+      index_name            = var.elasticsearch_index_name
+      index_rotation_period = var.elasticsearch_index_rotation_period
+      retry_duration        = var.elasticsearch_retry_duration
+      type_name             = var.elasticsearch_type_name
+      buffering_interval    = var.buffer_interval
+      buffering_size        = var.buffer_size
+      s3_backup_mode        = local.backup_modes[var.destination][var.s3_backup_mode]
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      #      dynamic "vpc_config" {
+      #        for_each = local.elasticsearch_in_vpc ? [1] : []
+      #        content {
+      #          role_arn           = local.elasticsearch_vpc_role_arn
+      #          subnet_ids         = var.elasticsearch_vpc_subnet_ids
+      #          security_group_ids = var.elasticsearch_vpc_security_group_ids
+      #        }
+      #      }
+
+    }
   }
 
   tags = var.tags

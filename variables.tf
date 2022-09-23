@@ -9,7 +9,7 @@ variable "destination" {
 
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["extended_s3", "redshift"], var.destination)
+    condition     = contains(["extended_s3", "redshift", "elasticsearch"], var.destination)
   }
 }
 
@@ -189,6 +189,16 @@ variable "s3_backup_log_stream_name" {
   description = "The CloudWatch log stream name for logging"
   type        = string
   default     = null
+}
+
+variable "s3_backup_mode" {
+  description = "Defines how documents should be delivered to Amazon S3. Used to elasticsearch, splunk, http configurations. For S3 and Redshift use enable_s3_backup"
+  type        = string
+  default     = "FailedOnly"
+  validation {
+    error_message = "Valid values are FailedOnly and All."
+    condition     = contains(["FailedOnly", "All"], var.s3_backup_mode)
+  }
 }
 
 variable "enable_destination_log" {
@@ -675,6 +685,72 @@ variable "associate_role_to_redshift_cluster" {
   type        = bool
   default     = true
 }
+
+######
+# Elasticsearch Destination Variables
+######
+variable "elasticsearch_domain_arn" {
+  description = "The ARN of the Amazon ES domain. The pattern needs to be arn:.*"
+  type        = string
+  default     = null
+}
+
+variable "elasticsearch_index_name" {
+  description = "The Elasticsearch index name"
+  type        = string
+  default     = null
+}
+
+variable "elasticsearch_index_rotation_period" {
+  description = "The Elasticsearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate expiration of old data"
+  type        = string
+  default     = "OneDay"
+  validation {
+    error_message = "Valid values are NoRotation, OneHour, OneDay, OneWeek, and OneMonth."
+    condition     = contains(["NoRotation", "OneHour", "OneDay", "OneWeek", "OneMonth"], var.elasticsearch_index_rotation_period)
+  }
+}
+
+variable "elasticsearch_type_name" {
+  description = "The Elasticsearch type name with maximum length of 100 characters"
+  type        = string
+  default     = null
+}
+
+#variable "elasticsearch_vpc_use_existing_role" {
+#  description = "Indicates if want use the kinesis firehose role to elastic search VPC access."
+#  type        = bool
+#  default     = true
+#}
+#
+#variable "elasticsearch_vpc_role_arn" {
+#  description = "The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces"
+#  type        = string
+#  default     = null
+#}
+#
+#variable "elasticsearch_vpc_subnet_ids" {
+#  description = "A list of security group IDs to associate with Kinesis Firehose"
+#  type        = list(string)
+#  default     = null
+#}
+#
+#variable "elasticsearch_vpc_security_group_ids" {
+#  description = "A list of security group IDs to associate with Kinesis Firehose"
+#  type        = list(string)
+#  default     = null
+#}
+
+variable "elasticsearch_retry_duration" {
+  description = "The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt"
+  type        = string
+  default     = 3600
+  validation {
+    error_message = "Minimum: 0 seconds."
+    condition     = var.elasticsearch_retry_duration >= 0
+  }
+}
+
 ######
 # IAM
 ######

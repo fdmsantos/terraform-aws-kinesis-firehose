@@ -1,12 +1,13 @@
 locals {
   role_name                 = var.create_role ? coalesce(var.role_name, var.name, "*") : null
-  add_backup_policies       = var.enable_s3_backup && var.s3_backup_use_existing_role
+  add_backup_policies       = local.enable_s3_backup && var.s3_backup_use_existing_role
   add_kinesis_source_policy = var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
   add_lambda_policy         = var.create_role && var.enable_lambda_transform
   add_s3_kms_policy         = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
   add_glue_policy           = var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
   add_s3_policy             = var.create_role
   add_cw_policy             = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
+  add_elasticsearch_policy  = var.create_role && var.destination == "elasticsearch"
   #  add_sse_kms_policy        = var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
 }
 
@@ -146,7 +147,7 @@ data "aws_iam_policy_document" "s3_kms" {
     condition {
       test = "StringLike"
       values = distinct(compact([
-        var.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : "",
+        local.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : "",
         var.enable_s3_encryption ? "${var.s3_bucket_arn}/*" : ""
       ]))
       variable = "kms:EncryptionContext:aws:s3:arn"
@@ -263,10 +264,10 @@ data "aws_iam_policy_document" "s3" {
       "s3:PutObject"
     ]
     resources = distinct(compact([
-      var.s3_bucket_arn,
-      "${var.s3_bucket_arn}/*",
-      var.enable_s3_backup ? var.s3_backup_bucket_arn : "",
-      var.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : ""
+      var.s3_bucket_arn != null ? var.s3_bucket_arn : "",
+      var.s3_bucket_arn != null ? "${var.s3_bucket_arn}/*" : "",
+      local.enable_s3_backup ? var.s3_backup_bucket_arn : "",
+      local.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : ""
     ]))
   }
 }
@@ -327,4 +328,79 @@ resource "aws_redshift_cluster_iam_roles" "this" {
   count              = var.create_role && var.destination == "redshift" && var.associate_role_to_redshift_cluster ? 1 : 0
   cluster_identifier = var.redshift_cluster_identifier
   iam_role_arns      = [aws_iam_role.firehose[0].arn]
+}
+
+
+##################
+# Elasticsearch
+##################
+data "aws_iam_policy_document" "elasticsearch" {
+  count = local.add_elasticsearch_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "es:DescribeDomain",
+      "es:DescribeDomains",
+      "es:DescribeDomainConfig",
+      "es:ESHttpPost",
+      "es:ESHttpPut"
+    ]
+    resources = [
+      var.elasticsearch_domain_arn, # E quando for cluster endpoint?
+      "${var.elasticsearch_domain_arn}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "es:ESHttpGet"
+    ]
+    resources = [
+      "${var.elasticsearch_domain_arn}/_all/_settings",
+      "${var.elasticsearch_domain_arn}/_cluster/stats",
+      "${var.elasticsearch_domain_arn}/${var.elasticsearch_index_name}*/_mapping/${var.elasticsearch_type_name != null ? var.elasticsearch_type_name : "*"}",
+      "${var.elasticsearch_domain_arn}/_nodes",
+      "${var.elasticsearch_domain_arn}/_nodes/stats",
+      "${var.elasticsearch_domain_arn}/_nodes/*/stats",
+      "${var.elasticsearch_domain_arn}/_stats",
+      "${var.elasticsearch_domain_arn}/${var.elasticsearch_index_name}*/_stats"
+    ]
+  }
+
+  #  dynamic "statement" {
+  #    for_each = local.elasticsearch_in_vpc ? [1] : []
+  #    content {
+  #      effect = "Allow"
+  #      actions = [
+  #        "ec2:DescribeVpcs",
+  #        "ec2:DescribeVpcAttribute",
+  #        "ec2:DescribeSubnets",
+  #        "ec2:DescribeSecurityGroups",
+  #        "ec2:DescribeNetworkInterfaces",
+  #        "ec2:CreateNetworkInterface",
+  #        "ec2:CreateNetworkInterfacePermission",
+  #        "ec2:DeleteNetworkInterface"
+  #      ]
+  #      resources = [
+  #        "*"
+  #      ]
+  #    }
+  #  }
+}
+
+resource "aws_iam_policy" "elasticsearch" {
+  count = local.add_elasticsearch_policy ? 1 : 0
+
+  name   = "${local.role_name}-elasticsearch"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.elasticsearch[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "elasticsearch" {
+  count = local.add_elasticsearch_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.elasticsearch[0].arn
 }
