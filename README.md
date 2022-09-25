@@ -19,42 +19,72 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
 
 ## Usage
 
-### Kinesis Firehose with Kinesis Data Stream as Source
+### Kinesis Data Stream as Source
 
-**Note:** If Kinesis Data Stream is encrypted, it's necessary pass this info to module, putting the `kinesis_source_is_encrypted` variable to true and indicate the KMS Key through `kinesis_source_kms_arn` for module add policy with permissions to decrypt to Kinesis Firehose Role.
+**To Enabled it:** `enable_kinesis_source = true`
 
 ```hcl
 module "firehose" {
   source                    = "fdmsantos/kinesis-firehose/aws"
+  version                   = "x.x.x"
   name                      = "firehose-delivery-stream"
   enable_kinesis_source     = true
   kinesis_source_stream_arn = "<kinesis_stream_arn>"
   destination               = "extended_s3"
   s3_bucket_arn             = "<bucket_arn>"
 }
-
 ```
 
-### Kinesis Firehose with Direct Put as Source
+#### Kinesis Data Stream Encrypted
+
+If Kinesis Data Stream is encrypted, it's necessary pass this info to module .
+
+**To Enabled It:**  `kinesis_source_is_encrypted = true`
+
+**KMS Key:** use `kinesis_source_kms_arn` variable to indicate the KMS Key to module add permissions to policy to decrypt the Kinesis Data Stream.
+
+### Direct Put as Source
 
 ```hcl
 module "firehose" {
   source           = "fdmsantos/kinesis-firehose/aws"
+  version          = "x.x.x"
   name             = "firehose-delivery-stream"
   destination      = "extended_s3"
   s3_bucket_arn    = "<bucket_arn>"
-  enable_sse       = true
-  sse_kms_key_type = "CUSTOMER_MANAGED_CMK"
-  sse_kms_key_arn  = aws_kms_key.this.arn
 }
+```
 
+### S3 destination
+
+**To Enabled It:** `destination = "extended_s3"`
+
+**Variables Prefix:** `s3_`
+
+**To Enable Encryption:** `enable_s3_encryption = true`
+
+**Note:** For other destinations, the `s3_` variables are used to configure the required intermediary bucket before delivery data to destination
+
+```hcl
+module "firehose" {
+  source                    = "fdmsantos/kinesis-firehose/aws"
+  version                   = "x.x.x"
+  name                      = "firehose-delivery-stream"
+  destination               = "extended_s3"
+  s3_bucket_arn             = "<bucket_arn>"
+}
 ```
 
 ### Redshift Destination
 
+**To Enabled It:** `destination = "redshift"`
+
+**Variables Prefix:** `redshift_`
+
 ```hcl
 module "firehose" {
   source                        = "fdmsantos/kinesis-firehose/aws"
+  version                       = "x.x.x"
   name                          = "firehose-delivery-stream"
   destination                   = "redshift"
   s3_bucket_arn                 = "<bucket_arn>"
@@ -68,11 +98,16 @@ module "firehose" {
 }
 ```
 
-### Opensearch Destination
+### Elasticsearch / Opensearch Destination
+
+**To Enabled It:** `destination = "elasticsearch"`
+
+**Variables Prefix:** `elasticsearch_`
 
 ```hcl
 module "firehose" {
   source                   = "fdmsantos/kinesis-firehose/aws"
+  version                  = "x.x.x"
   name                     = "firehose-delivery-stream"
   destination              = "elasticsearch"
   elasticsearch_domain_arn = "<elasticsearch_domain_arn>"
@@ -80,13 +115,39 @@ module "firehose" {
 }
 ```
 
+### Server Side Encryption
+
+**Supported By:** Only Direct Put source
+
+**To Enabled It:** `variable "enable_sse" = true`
+
+**Variables Prefix:** `sse_`
+
+```hcl
+module "firehose" {
+  source           = "fdmsantos/kinesis-firehose/aws"
+  version          = "x.x.x"
+  name             = "firehose-delivery-stream"
+  destination      = "extended_s3"
+  s3_bucket_arn    = "<bucket_arn>"
+  enable_sse       = true
+  sse_kms_key_type = "CUSTOMER_MANAGED_CMK"
+  sse_kms_key_arn  = aws_kms_key.this.arn
+}
+```
+
 ### Data Transformation with Lambda
 
-**Note:** All data transformation with lambda variables starts with `transform_lambda`.
+**Supported By:** All destinations and Sources
+
+**To Enabled It:** `enable_lambda_transform = true`
+
+**Variables Prefix:** `transform_lambda_`
 
 ```hcl
 module "firehose" {
   source                           = "fdmsantos/kinesis-firehose/aws"
+  version                          = "x.x.x"
   name                             = "firehose-delivery-stream"
   enable_kinesis_source            = true
   kinesis_source_stream_arn        = "<kinesis_stream_arn>"
@@ -102,11 +163,16 @@ module "firehose" {
 
 ### Data Format Conversion
 
-**Note:** All data format conversion variables starts with `data_format_conversion`.
+**Supported By:** Only S3 Destination
+
+**To Enabled It:** `enable_data_format_conversion = true`
+
+**Variables Prefix:** `data_format_conversion_`
 
 ```hcl
 module "firehose" {
   source                                 = "fdmsantos/kinesis-firehose/aws"
+  version                                = "x.x.x"
   name                                   = "firehose-delivery-stream"
   enable_kinesis_source                  = true
   kinesis_source_stream_arn              = "<kinesis_stream_arn>"
@@ -123,11 +189,16 @@ module "firehose" {
 
 ### Dynamic Partition
 
-**Note:** All dynamic partition variables starts with `dynamic_partitioning`.
+**Supported By:** Only S3 Destination
+
+**To Enabled It:** `enable_dynamic_partitioning = true`
+
+**Variables Prefix:** `dynamic_partitioning_`
 
 ```hcl
 module "firehose" {
   source                                        = "fdmsantos/kinesis-firehose/aws"
+  version                                       = "x.x.x"
   name                                          = "firehose-delivery-stream"
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
@@ -141,6 +212,59 @@ module "firehose" {
   dynamic_partition_enable_record_deaggregation = true
 }
 
+```
+
+### S3 Backup Data
+
+**Supported By:** All Destinations
+
+**To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch destination.
+
+**To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch destination. It's possible add existing cloudwatch group or create new
+
+**Variables Prefix:** `s3_backup_`
+
+```hcl
+module "firehose" {
+  source                        = "fdmsantos/kinesis-firehose/aws"
+  version                       = "x.x.x"
+  name                          = "${var.name_prefix}-delivery-stream"
+  destination                   = "extended_s3"
+  s3_bucket_arn                 = aws_s3_bucket.s3.arn
+  enable_s3_backup              = true
+  s3_backup_bucket_arn          = aws_s3_bucket.s3.arn
+  s3_backup_prefix              = "backup/"
+  s3_backup_error_output_prefix = "error/"
+  s3_backup_buffer_interval     = 100
+  s3_backup_buffer_size         = 100
+  s3_backup_compression         = "GZIP"
+  s3_backup_use_existing_role   = false
+  s3_backup_role_arn            = aws_iam_role.this.arn
+  s3_backup_enable_encryption   = true
+  s3_backup_kms_key_arn         = aws_kms_key.this.arn
+  s3_backup_enable_log          = true
+}
+```
+
+### Destination Delivery Logging
+
+**Supported By:** All Destinations
+
+**To Enabled It:** `enable_destination_log = true`. It's enabled by default. It's possible add existing cloudwatch group or create new
+
+**Variables Prefix:** `destination_cw_log_`
+
+```hcl
+module "firehose" {
+  source                      = "fdmsantos/kinesis-firehose/aws"
+  version                     = "x.x.x"
+  name                        = "firehose-delivery-stream"
+  destination                 = "extended_s3"
+  s3_bucket_arn               = "<bucket_arn>"
+  enable_destination_log      = true
+  destination_log_group_name  = "<cw_log_group_arn>"
+  destination_log_stream_name = "<cw_log_stream_name>"
+}
 ```
 
 ## Examples
@@ -335,8 +459,9 @@ No modules.
 
 ## Work in Progress
 
-- ElasticSearch / OpenSearch Destination
-- Http Endpoint Destination
+- Splunk Destination ( Expected in Version 1.3.0)
+- Http Endpoint Destination (Expected in Version 1.4.0)
+- VPC Support (Expected in Version 1.5.6)
 - Other supported destinations
 
 ## License
