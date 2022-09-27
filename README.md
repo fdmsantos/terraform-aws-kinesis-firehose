@@ -2,6 +2,32 @@
 
 Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch and IAM Role that integrate with Kinesis Firehose.
 
+## Table of Contents
+
+* [Features](#features)
+* [RoadMap](#roadmap)
+* [How to Use](#how-to-use)
+  * [Kinesis Data Stream as Source](#kinesis-data-stream-as-source)
+    * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
+  * [Direct Put as Source](#direct-put-as-source)
+  * [S3 destination](#s3-destination)
+  * [Redshift Destination](#redshift-destination)
+  * [Elasticsearch / Opensearch Destination](#elasticsearch--opensearch-destination)
+  * [Server Side Encryption](#server-side-encryption)
+  * [Data Transformation with Lambda](#data-transformation-with-lambda)
+  * [Data Format Conversion](#data-format-conversion)
+  * [Dynamic Partition](#dynamic-partition)
+  * [S3 Backup Data](#s3-backup-data)
+  * [Destination Delivery Logging](#destination-delivery-logging)
+* [Examples](#examples)
+* [Requirements](#requirements)
+* [Providers](#providers)
+* [Modules](#modules)
+* [Resources](#resources)
+* [Inputs](#inputs)
+* [Outputs](#outputs)
+* [License](#license)
+
 ## Features
 
 - Sources 
@@ -17,7 +43,13 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
 - Original Data Backup in S3
 - Logging and Encryption
 
-## Usage
+## RoadMap
+
+- Splunk Destination ( Expected in Version 1.3.0)
+- Http Endpoint Destination (Expected in Version 1.4.0)
+- VPC Support (Expected in Version 1.5.0)
+
+## How to Use
 
 ### Kinesis Data Stream as Source
 
@@ -119,7 +151,7 @@ module "firehose" {
 
 **Supported By:** Only Direct Put source
 
-**To Enabled It:** `variable "enable_sse" = true`
+**To Enabled It:** `enable_sse = true`
 
 **Variables Prefix:** `sse_`
 
@@ -219,6 +251,8 @@ module "firehose" {
 **Supported By:** All Destinations
 
 **To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch destination.
+
+**To Enable Backup Encruption:** `s3_backup_enable_encryption = true`
 
 **To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch destination. It's possible add existing cloudwatch group or create new
 
@@ -456,13 +490,6 @@ No modules.
 | <a name="output_kinesis_firehose_role_arn"></a> [kinesis\_firehose\_role\_arn](#output\_kinesis\_firehose\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_version_id"></a> [kinesis\_firehose\_version\_id](#output\_kinesis\_firehose\_version\_id) | The Version id of the Kinesis Firehose Stream |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-## Work in Progress
-
-- Splunk Destination ( Expected in Version 1.3.0)
-- Http Endpoint Destination (Expected in Version 1.4.0)
-- VPC Support (Expected in Version 1.5.6)
-- Other supported destinations
 
 ## License
 
