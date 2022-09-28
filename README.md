@@ -40,6 +40,7 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
     - Dynamic Partition
   - Redshift
   - ElasticSearch / Opensearch
+  - Splunk
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
