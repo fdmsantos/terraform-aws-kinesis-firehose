@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.2.0...v1.3.0) (2022-09-28)
+
+
+### Features
+
+* Add support to Splunk destination ([0b329fc](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/0b329fc4df7a38c2cfc00ea66f0d2ae6a4a048e4))
+
 ## [1.2.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.1.0...v1.2.0) (2022-09-23)
 
 
