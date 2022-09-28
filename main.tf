@@ -3,11 +3,12 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  firehose_role_arn           = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
-  s3_destination              = var.destination == "extended_s3" ? true : false
-  cw_log_group_name           = "/aws/kinesisfirehose/${var.name}"
-  cw_log_delivery_stream_name = "DestinationDelivery"
-  cw_log_backup_stream_name   = "BackupDelivery"
+  firehose_role_arn                   = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
+  s3_destination                      = var.destination == "extended_s3" ? true : false
+  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "splunk"], var.destination) ? true : false
+  cw_log_group_name                   = "/aws/kinesisfirehose/${var.name}"
+  cw_log_delivery_stream_name         = "DestinationDelivery"
+  cw_log_backup_stream_name           = "BackupDelivery"
 
   # Data Transformation
   enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning
@@ -96,7 +97,7 @@ locals {
 
   # S3 Backup
   s3_backup        = var.enable_s3_backup ? "Enabled" : "Disabled"
-  enable_s3_backup = var.enable_s3_backup || var.destination == "elasticsearch"
+  enable_s3_backup = var.enable_s3_backup || local.use_backup_vars_in_s3_configuration
   s3_backup_role_arn = (local.enable_s3_backup ? (
     var.s3_backup_use_existing_role ? local.firehose_role_arn : var.s3_backup_role_arn
   ) : null)
@@ -107,6 +108,10 @@ locals {
     elasticsearch : {
       FailedOnly : "FailedDocumentsOnly",
       All : "AllDocuments"
+    }
+    splunk : {
+      FailedOnly : "FailedEventsOnly",
+      All : "AllEvents"
     }
   }
 
@@ -289,14 +294,14 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   dynamic "s3_configuration" {
     for_each = !local.s3_destination ? [1] : []
     content {
-      role_arn            = var.destination != "elasticsearch" ? local.firehose_role_arn : local.s3_backup_role_arn
-      bucket_arn          = var.destination != "elasticsearch" ? var.s3_bucket_arn : var.s3_backup_bucket_arn
-      buffer_size         = var.destination != "elasticsearch" ? var.buffer_size : var.s3_backup_buffer_size
-      buffer_interval     = var.destination != "elasticsearch" ? var.buffer_interval : var.s3_backup_buffer_interval
-      compression_format  = var.destination != "elasticsearch" ? var.s3_compression_format : var.s3_backup_compression
-      prefix              = var.destination != "elasticsearch" ? var.s3_prefix : var.s3_backup_prefix
-      error_output_prefix = var.destination != "elasticsearch" ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
-      kms_key_arn         = (var.destination != "elasticsearch" && var.enable_s3_encryption ? var.s3_kms_key_arn : (var.destination == "elasticsearch" && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+      bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+      buffer_size         = !local.use_backup_vars_in_s3_configuration ? var.buffer_size : var.s3_backup_buffer_size
+      buffer_interval     = !local.use_backup_vars_in_s3_configuration ? var.buffer_interval : var.s3_backup_buffer_interval
+      compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+      prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+      error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+      kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
     }
   }
 
@@ -416,6 +421,47 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       #        }
       #      }
 
+    }
+  }
+
+  dynamic "splunk_configuration" {
+    for_each = var.destination == "splunk" ? [1] : []
+    content {
+      hec_endpoint               = var.splunk_hec_endpoint
+      hec_token                  = var.splunk_hec_token
+      hec_acknowledgment_timeout = var.splunk_hec_acknowledgment_timeout
+      hec_endpoint_type          = var.splunk_hec_endpoint_type
+      retry_duration             = var.splunk_retry_duration
+      s3_backup_mode             = local.backup_modes[var.destination][var.s3_backup_mode]
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
     }
   }
 

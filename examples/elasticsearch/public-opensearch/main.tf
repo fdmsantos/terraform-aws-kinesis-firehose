@@ -68,13 +68,12 @@ POLICIES
 }
 
 module "firehose" {
-  source                   = "../../../"
-  name                     = "${var.name_prefix}-delivery-stream"
-  destination              = "elasticsearch"
-  buffer_interval          = 60
-  elasticsearch_domain_arn = aws_opensearch_domain.this.arn
-  elasticsearch_index_name = "test"
-  #  elasticsearch_type_name = ""
+  source                      = "../../../"
+  name                        = "${var.name_prefix}-delivery-stream"
+  destination                 = "elasticsearch"
+  buffer_interval             = 60
+  elasticsearch_domain_arn    = aws_opensearch_domain.this.arn
+  elasticsearch_index_name    = "test"
   s3_backup_mode              = "All"
   s3_backup_prefix            = "backup/"
   s3_backup_bucket_arn        = aws_s3_bucket.s3.arn

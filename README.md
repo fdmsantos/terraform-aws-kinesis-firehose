@@ -13,6 +13,7 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
   * [S3 destination](#s3-destination)
   * [Redshift Destination](#redshift-destination)
   * [Elasticsearch / Opensearch Destination](#elasticsearch--opensearch-destination)
+  * [Splunk Destination](#splunk-destination)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -45,9 +46,8 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
 
 ## RoadMap
 
-- Splunk Destination ( Expected in Version 1.3.0)
 - Http Endpoint Destination (Expected in Version 1.4.0)
-- VPC Support (Expected in Version 1.5.0)
+- VPC Support (ElasticSearch, Redshift, Splunk) (Expected in Version 1.5.0)
 
 ## How to Use
 
@@ -95,7 +95,7 @@ module "firehose" {
 
 **To Enable Encryption:** `enable_s3_encryption = true`
 
-**Note:** For other destinations, the `s3_` variables are used to configure the required intermediary bucket before delivery data to destination
+**Note:** For other destinations, the `s3_` variables are used to configure the required intermediary bucket before delivery data to destination. Not Supported to Elasticsearch and Splunk destinations
 
 ```hcl
 module "firehose" {
@@ -144,6 +144,26 @@ module "firehose" {
   destination              = "elasticsearch"
   elasticsearch_domain_arn = "<elasticsearch_domain_arn>"
   elasticsearch_index_name = "<elasticsearch_index_name"
+}
+```
+
+### Splunk Destination
+
+**To Enabled It:** `destination = "splunk"`
+
+**Variables Prefix:** `splunk_`
+
+```hcl
+module "firehose" {
+  source                            = "fdmsantos/kinesis-firehose/aws"
+  version                           = "x.x.x"
+  name                              = "firehose-delivery-stream"
+  destination                       = "splunk"
+  splunk_hec_endpoint               = "<splunk_hec_endpoint>"
+  splunk_hec_endpoint_type          = "<splunk_hec_endpoint_type>"
+  splunk_hec_token                  =  "<splunk_hec_token>"
+  splunk_hec_acknowledgment_timeout = 450
+  splunk_retry_duration             = 450
 }
 ```
 
@@ -250,11 +270,11 @@ module "firehose" {
 
 **Supported By:** All Destinations
 
-**To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch destination.
+**To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch and splunk destinations.
 
 **To Enable Backup Encruption:** `s3_backup_enable_encryption = true`
 
-**To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch destination. It's possible add existing cloudwatch group or create new
+**To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch and splunk destinations. It's possible add existing cloudwatch group or create new
 
 **Variables Prefix:** `s3_backup_`
 
@@ -308,6 +328,7 @@ module "firehose" {
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
 - [Public Opensearch](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/elasticsearch/public-opensearch) - Creates a Kinesis Firehose Stream with public opensearch as destination.
+- [Public Splunk](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/public-splunk) - Creates a Kinesis Firehose Stream with public splunk as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -466,6 +487,11 @@ No modules.
 | <a name="input_s3_error_output_prefix"></a> [s3\_error\_output\_prefix](#input\_s3\_error\_output\_prefix) | Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name. | `string` | `null` | no |
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
+| <a name="input_splunk_hec_acknowledgment_timeout"></a> [splunk\_hec\_acknowledgment\_timeout](#input\_splunk\_hec\_acknowledgment\_timeout) | The amount of time, that Kinesis Firehose waits to receive an acknowledgment from Splunk after it sends it data | `number` | `600` | no |
+| <a name="input_splunk_hec_endpoint"></a> [splunk\_hec\_endpoint](#input\_splunk\_hec\_endpoint) | The HTTP Event Collector (HEC) endpoint to which Kinesis Firehose sends your data | `string` | `null` | no |
+| <a name="input_splunk_hec_endpoint_type"></a> [splunk\_hec\_endpoint\_type](#input\_splunk\_hec\_endpoint\_type) | The HEC endpoint type | `string` | `"Raw"` | no |
+| <a name="input_splunk_hec_token"></a> [splunk\_hec\_token](#input\_splunk\_hec\_token) | The GUID that you obtain from your Splunk cluster when you create a new HEC endpoint | `string` | `null` | no |
+| <a name="input_splunk_retry_duration"></a> [splunk\_retry\_duration](#input\_splunk\_retry\_duration) | After an initial failure to deliver to Splunk, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt) | `number` | `300` | no |
 | <a name="input_sse_kms_key_arn"></a> [sse\_kms\_key\_arn](#input\_sse\_kms\_key\_arn) | Amazon Resource Name (ARN) of the encryption key | `string` | `null` | no |
 | <a name="input_sse_kms_key_type"></a> [sse\_kms\_key\_type](#input\_sse\_kms\_key\_type) | Type of encryption key. | `string` | `"AWS_OWNED_CMK"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |

@@ -6,10 +6,9 @@ variable "name" {
 variable "destination" {
   description = "This is the destination to where the data is delivered"
   type        = string
-
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["extended_s3", "redshift", "elasticsearch"], var.destination)
+    condition     = contains(["extended_s3", "redshift", "elasticsearch", "splunk"], var.destination)
   }
 }
 
@@ -748,6 +747,52 @@ variable "elasticsearch_retry_duration" {
   validation {
     error_message = "Minimum: 0 seconds."
     condition     = var.elasticsearch_retry_duration >= 0
+  }
+}
+
+######
+# Splunk Destination Variables
+######
+variable "splunk_hec_endpoint" {
+  description = "The HTTP Event Collector (HEC) endpoint to which Kinesis Firehose sends your data"
+  type        = string
+  default     = null
+}
+
+variable "splunk_hec_token" {
+  description = "The GUID that you obtain from your Splunk cluster when you create a new HEC endpoint"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "splunk_hec_acknowledgment_timeout" {
+  description = "The amount of time, that Kinesis Firehose waits to receive an acknowledgment from Splunk after it sends it data"
+  type        = number
+  default     = 600
+  validation {
+    error_message = "Minimum: 180 seconds. maximum: 600 seconds."
+    condition     = var.splunk_hec_acknowledgment_timeout >= 180 && var.splunk_hec_acknowledgment_timeout <= 600
+  }
+}
+
+variable "splunk_hec_endpoint_type" {
+  description = " The HEC endpoint type"
+  type        = string
+  default     = "Raw"
+  validation {
+    error_message = "Valid values are Raw and Event."
+    condition     = contains(["Raw", "Event"], var.splunk_hec_endpoint_type)
+  }
+}
+
+variable "splunk_retry_duration" {
+  description = " After an initial failure to deliver to Splunk, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt)"
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Minimum: 0 seconds. Maximum: 7200 seconds"
+    condition     = var.splunk_retry_duration >= 0 && var.splunk_retry_duration <= 7200
   }
 }
 
