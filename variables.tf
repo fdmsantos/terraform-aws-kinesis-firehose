@@ -8,7 +8,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["extended_s3", "redshift", "elasticsearch", "splunk"], var.destination)
+    condition     = contains(["extended_s3", "redshift", "elasticsearch", "splunk", "http_endpoint"], var.destination)
   }
 }
 
@@ -787,13 +787,67 @@ variable "splunk_hec_endpoint_type" {
 }
 
 variable "splunk_retry_duration" {
-  description = " After an initial failure to deliver to Splunk, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt)"
+  description = "After an initial failure to deliver to Splunk, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt)"
   type        = number
   default     = 300
   validation {
     error_message = "Minimum: 0 seconds. Maximum: 7200 seconds"
     condition     = var.splunk_retry_duration >= 0 && var.splunk_retry_duration <= 7200
   }
+}
+
+######
+# Http Endpoint Destination Variables
+######
+variable "http_endpoint_url" {
+  description = "The HTTP endpoint URL to which Kinesis Firehose sends your data"
+  type        = string
+  default     = null
+}
+
+variable "http_endpoint_name" {
+  description = "The HTTP endpoint name"
+  type        = string
+  default     = null
+}
+
+variable "http_endpoint_access_key" {
+  description = "The access key required for Kinesis Firehose to authenticate with the HTTP endpoint selected as the destination"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "http_endpoint_retry_duration" {
+  description = "Total amount of seconds Firehose spends on retries. This duration starts after the initial attempt fails, It does not include the time periods during which Firehose waits for acknowledgment from the specified destination after each attempt"
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Minimum: 0 seconds. Maximum: 7200 seconds"
+    condition     = var.http_endpoint_retry_duration >= 0 && var.http_endpoint_retry_duration <= 7200
+  }
+}
+
+variable "http_endpoint_enable_request_configuration" {
+  description = "The request configuration"
+  type        = bool
+  default     = false
+}
+
+variable "http_endpoint_request_configuration_content_encoding" {
+  description = "Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination"
+  type        = string
+  default     = "NONE"
+  validation {
+    error_message = "Valid values are GZIP and NONE."
+    condition     = contains(["GZIP", "NONE"], var.http_endpoint_request_configuration_content_encoding)
+  }
+}
+
+variable "http_endpoint_request_configuration_common_attributes" {
+  description = "Describes the metadata sent to the HTTP endpoint destination. The variable is list. Each element is map with two keys , name and value, that corresponds to common attribute name and value"
+  type        = list(map(string))
+  default     = []
 }
 
 ######

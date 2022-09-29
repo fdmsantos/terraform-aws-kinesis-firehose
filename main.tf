@@ -4,11 +4,18 @@ data "aws_region" "current" {}
 
 locals {
   firehose_role_arn                   = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
-  s3_destination                      = var.destination == "extended_s3" ? true : false
-  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "splunk"], var.destination) ? true : false
   cw_log_group_name                   = "/aws/kinesisfirehose/${var.name}"
   cw_log_delivery_stream_name         = "DestinationDelivery"
   cw_log_backup_stream_name           = "BackupDelivery"
+  destinations = {
+    extended_s3 : "extended_s3",
+    redshift : "redshift",
+    elasticsearch : "elasticsearch",
+    splunk : "splunk",
+    http_endpoint : "http_endpoint"
+  }
+  destination    = local.destinations[var.destination]
+  s3_destination = local.destination == "extended_s3" ? true : false
 
   # Data Transformation
   enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning
@@ -96,6 +103,7 @@ locals {
   ) : null)
 
   # S3 Backup
+  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "splunk", "http_endpoint"], local.destination) ? true : false
   s3_backup        = var.enable_s3_backup ? "Enabled" : "Disabled"
   enable_s3_backup = var.enable_s3_backup || local.use_backup_vars_in_s3_configuration
   s3_backup_role_arn = (local.enable_s3_backup ? (
@@ -103,7 +111,6 @@ locals {
   ) : null)
   s3_backup_cw_log_group_name  = var.create_destination_cw_log_group ? local.cw_log_group_name : var.s3_backup_log_group_name
   s3_backup_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_backup_stream_name : var.s3_backup_log_stream_name
-
   backup_modes = {
     elasticsearch : {
       FailedOnly : "FailedDocumentsOnly",
@@ -113,7 +120,12 @@ locals {
       FailedOnly : "FailedEventsOnly",
       All : "AllEvents"
     }
+    http_endpoint : {
+      FailedOnly : "FailedDataOnly",
+      All : "AllData"
+    }
   }
+  s3_backup_mode = local.use_backup_vars_in_s3_configuration ? local.backup_modes[local.destination][var.s3_backup_mode] : null
 
   # Kinesis source Stream
   kinesis_source_stream_role = (var.enable_kinesis_source ? (
@@ -137,7 +149,7 @@ locals {
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
   name        = var.name
-  destination = var.destination
+  destination = local.destination
 
   dynamic "kinesis_source_configuration" {
     for_each = var.enable_kinesis_source ? [1] : []
@@ -306,7 +318,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 
   dynamic "redshift_configuration" {
-    for_each = var.destination == "redshift" ? [1] : []
+    for_each = local.destination == "redshift" ? [1] : []
     content {
       role_arn           = local.firehose_role_arn
       cluster_jdbcurl    = "jdbc:redshift://${var.redshift_cluster_endpoint}/${var.redshift_database_name}"
@@ -371,7 +383,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 
   dynamic "elasticsearch_configuration" {
-    for_each = var.destination == "elasticsearch" ? [1] : []
+    for_each = local.destination == "elasticsearch" ? [1] : []
     content {
       domain_arn            = var.elasticsearch_domain_arn
       role_arn              = local.firehose_role_arn
@@ -381,7 +393,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       type_name             = var.elasticsearch_type_name
       buffering_interval    = var.buffer_interval
       buffering_size        = var.buffer_size
-      s3_backup_mode        = local.backup_modes[var.destination][var.s3_backup_mode]
+      s3_backup_mode        = local.s3_backup_mode
 
       dynamic "processing_configuration" {
         for_each = local.enable_processing ? [1] : []
@@ -425,14 +437,14 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 
   dynamic "splunk_configuration" {
-    for_each = var.destination == "splunk" ? [1] : []
+    for_each = local.destination == "splunk" ? [1] : []
     content {
       hec_endpoint               = var.splunk_hec_endpoint
       hec_token                  = var.splunk_hec_token
       hec_acknowledgment_timeout = var.splunk_hec_acknowledgment_timeout
       hec_endpoint_type          = var.splunk_hec_endpoint_type
       retry_duration             = var.splunk_retry_duration
-      s3_backup_mode             = local.backup_modes[var.destination][var.s3_backup_mode]
+      s3_backup_mode             = local.s3_backup_mode
 
       dynamic "processing_configuration" {
         for_each = local.enable_processing ? [1] : []
@@ -462,6 +474,66 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
           log_stream_name = local.destination_cw_log_stream_name
         }
       }
+    }
+  }
+
+  dynamic "http_endpoint_configuration" {
+    for_each = local.destination == "http_endpoint" ? [1] : []
+    content {
+      url                = var.http_endpoint_url
+      name               = var.http_endpoint_name
+      access_key         = var.http_endpoint_access_key
+      buffering_size     = var.buffer_size
+      buffering_interval = var.buffer_interval
+      role_arn           = local.firehose_role_arn
+      s3_backup_mode     = local.s3_backup_mode
+      retry_duration     = var.http_endpoint_retry_duration
+
+      dynamic "request_configuration" {
+        for_each = var.http_endpoint_enable_request_configuration ? [1] : [0]
+        content {
+          content_encoding = var.http_endpoint_request_configuration_content_encoding
+
+          dynamic "common_attributes" {
+            for_each = var.http_endpoint_request_configuration_common_attributes
+            content {
+              name  = common_attributes.value.name
+              value = common_attributes.value.value
+            }
+          }
+
+        }
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
     }
   }
 

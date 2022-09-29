@@ -1,6 +1,7 @@
 # AWS Kinesis Firehose Terraform module
 
-Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch and IAM Role that integrate with Kinesis Firehose.
+Dynamic Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch and IAM Roles that integrate with Kinesis Firehose.
+Supports all destinations and all Kinesis Firehose Features.
 
 ## Table of Contents
 
@@ -14,6 +15,7 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
   * [Redshift Destination](#redshift-destination)
   * [Elasticsearch / Opensearch Destination](#elasticsearch--opensearch-destination)
   * [Splunk Destination](#splunk-destination)
+  * [HTTP Endpoint Destination](#http-endpoint-destination)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -41,13 +43,13 @@ Terraform module, which creates a Kinesis Firehose Stream and others resources l
   - Redshift
   - ElasticSearch / Opensearch
   - Splunk
+  - Http Endpoint
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
 
 ## RoadMap
 
-- Http Endpoint Destination (Expected in Version 1.4.0)
 - VPC Support (ElasticSearch, Redshift, Splunk) (Expected in Version 1.5.0)
 
 ## How to Use
@@ -162,11 +164,48 @@ module "firehose" {
   destination                       = "splunk"
   splunk_hec_endpoint               = "<splunk_hec_endpoint>"
   splunk_hec_endpoint_type          = "<splunk_hec_endpoint_type>"
-  splunk_hec_token                  =  "<splunk_hec_token>"
+  splunk_hec_token                  = "<splunk_hec_token>"
   splunk_hec_acknowledgment_timeout = 450
   splunk_retry_duration             = 450
 }
 ```
+
+### HTTP Endpoint Destination
+
+**To Enabled It:** `destination = "http_endpoint"`
+
+**Variables Prefix:** `http_endpoint_`
+
+**To enable Request Configuration:** `http_endpoint_enable_request_configuration = true`
+
+**Request Configuration Variables Prefix:** `http_endpoint_request_configuration_`
+
+```hcl
+module "firehose" {
+  source                                                = "fdmsantos/kinesis-firehose/aws"
+  version                                               = "x.x.x"
+  name                                                  = "firehose-delivery-stream"
+  destination                                           = "http_endpoint"
+  buffer_interval                                       = 60
+  http_endpoint_name                                    = "<http_endpoint_name>"
+  http_endpoint_url                                     = "<http_endpoint_url>"
+  http_endpoint_access_key                              = "<http_endpoint_access_key>"
+  http_endpoint_retry_duration                          = 400
+  http_endpoint_enable_request_configuration            = true
+  http_endpoint_request_configuration_content_encoding  = "GZIP"
+  http_endpoint_request_configuration_common_attributes = [
+    {
+      name  = "testname"
+      value = "testvalue"
+    },
+    {
+      name  = "testname2"
+      value = "testvalue2"
+    }
+  ]
+}
+```
+
 
 ### Server Side Encryption
 
@@ -330,6 +369,8 @@ module "firehose" {
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
 - [Public Opensearch](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/elasticsearch/public-opensearch) - Creates a Kinesis Firehose Stream with public opensearch as destination.
 - [Public Splunk](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/public-splunk) - Creates a Kinesis Firehose Stream with public splunk as destination.
+- [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
