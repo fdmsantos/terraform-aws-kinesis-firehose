@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.3.0...v1.4.0) (2022-09-29)
+
+
+### Features
+
+* Add support to http endpoint destination ([a4823e8](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/a4823e8c3c94367b6673223e6ea68e0aa7a443cd))
+
 ## [1.3.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.2.0...v1.3.0) (2022-09-28)
 
 
