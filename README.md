@@ -98,7 +98,7 @@ module "firehose" {
 
 **To Enable Encryption:** `enable_s3_encryption = true`
 
-**Note:** For other destinations, the `s3_` variables are used to configure the required intermediary bucket before delivery data to destination. Not Supported to Elasticsearch and Splunk destinations
+**Note:** For other destinations, the `s3_` variables are used to configure the required intermediary bucket before delivery data to destination. Not Supported to Elasticsearch, Splunk and http destinations
 
 ```hcl
 module "firehose" {
@@ -310,11 +310,11 @@ module "firehose" {
 
 **Supported By:** All Destinations
 
-**To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch and splunk destinations.
+**To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch, splunk and http destinations
 
 **To Enable Backup Encruption:** `s3_backup_enable_encryption = true`
 
-**To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch and splunk destinations. It's possible add existing cloudwatch group or create new
+**To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch, splunk and http destinations. It's possible add existing cloudwatch group or create new
 
 **Variables Prefix:** `s3_backup_`
 
@@ -487,6 +487,13 @@ No modules.
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
 | <a name="input_firehose_role"></a> [firehose\_role](#input\_firehose\_role) | IAM role ARN attached to the Kinesis Firehose Stream. | `string` | `null` | no |
+| <a name="input_http_endpoint_access_key"></a> [http\_endpoint\_access\_key](#input\_http\_endpoint\_access\_key) | The access key required for Kinesis Firehose to authenticate with the HTTP endpoint selected as the destination | `string` | `null` | no |
+| <a name="input_http_endpoint_enable_request_configuration"></a> [http\_endpoint\_enable\_request\_configuration](#input\_http\_endpoint\_enable\_request\_configuration) | The request configuration | `bool` | `false` | no |
+| <a name="input_http_endpoint_name"></a> [http\_endpoint\_name](#input\_http\_endpoint\_name) | The HTTP endpoint name | `string` | `null` | no |
+| <a name="input_http_endpoint_request_configuration_common_attributes"></a> [http\_endpoint\_request\_configuration\_common\_attributes](#input\_http\_endpoint\_request\_configuration\_common\_attributes) | Describes the metadata sent to the HTTP endpoint destination. The variable is list. Each element is map with two keys , name and value, that corresponds to common attribute name and value | `list(map(string))` | `[]` | no |
+| <a name="input_http_endpoint_request_configuration_content_encoding"></a> [http\_endpoint\_request\_configuration\_content\_encoding](#input\_http\_endpoint\_request\_configuration\_content\_encoding) | Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination | `string` | `"NONE"` | no |
+| <a name="input_http_endpoint_retry_duration"></a> [http\_endpoint\_retry\_duration](#input\_http\_endpoint\_retry\_duration) | Total amount of seconds Firehose spends on retries. This duration starts after the initial attempt fails, It does not include the time periods during which Firehose waits for acknowledgment from the specified destination after each attempt | `number` | `300` | no |
+| <a name="input_http_endpoint_url"></a> [http\_endpoint\_url](#input\_http\_endpoint\_url) | The HTTP endpoint URL to which Kinesis Firehose sends your data | `string` | `null` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |
 | <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records | `string` | `null` | no |
 | <a name="input_kinesis_source_role_arn"></a> [kinesis\_source\_role\_arn](#input\_kinesis\_source\_role\_arn) | The ARN of the role that provides access to the source Kinesis stream | `string` | `null` | no |

@@ -3,10 +3,10 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  firehose_role_arn                   = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
-  cw_log_group_name                   = "/aws/kinesisfirehose/${var.name}"
-  cw_log_delivery_stream_name         = "DestinationDelivery"
-  cw_log_backup_stream_name           = "BackupDelivery"
+  firehose_role_arn           = var.create_role ? aws_iam_role.firehose[0].arn : var.firehose_role
+  cw_log_group_name           = "/aws/kinesisfirehose/${var.name}"
+  cw_log_delivery_stream_name = "DestinationDelivery"
+  cw_log_backup_stream_name   = "BackupDelivery"
   destinations = {
     extended_s3 : "extended_s3",
     redshift : "redshift",
@@ -104,8 +104,8 @@ locals {
 
   # S3 Backup
   use_backup_vars_in_s3_configuration = contains(["elasticsearch", "splunk", "http_endpoint"], local.destination) ? true : false
-  s3_backup        = var.enable_s3_backup ? "Enabled" : "Disabled"
-  enable_s3_backup = var.enable_s3_backup || local.use_backup_vars_in_s3_configuration
+  s3_backup                           = var.enable_s3_backup ? "Enabled" : "Disabled"
+  enable_s3_backup                    = var.enable_s3_backup || local.use_backup_vars_in_s3_configuration
   s3_backup_role_arn = (local.enable_s3_backup ? (
     var.s3_backup_use_existing_role ? local.firehose_role_arn : var.s3_backup_role_arn
   ) : null)
