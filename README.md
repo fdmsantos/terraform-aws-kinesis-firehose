@@ -1,12 +1,11 @@
 # AWS Kinesis Firehose Terraform module
 
-Dynamic Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch and IAM Roles that integrate with Kinesis Firehose.
+Dynamic Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch, IAM Roles and Security Groups that integrate with Kinesis Firehose.
 Supports all destinations and all Kinesis Firehose Features.
 
 ## Table of Contents
 
 * [Features](#features)
-* [RoadMap](#roadmap)
 * [How to Use](#how-to-use)
   * [Kinesis Data Stream as Source](#kinesis-data-stream-as-source)
     * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
@@ -22,6 +21,9 @@ Supports all destinations and all Kinesis Firehose Features.
   * [Dynamic Partition](#dynamic-partition)
   * [S3 Backup Data](#s3-backup-data)
   * [Destination Delivery Logging](#destination-delivery-logging)
+  * [VPC Support](#vpc-support)
+    * [ElasticSearch / Opensearch](#elasticsearch--opensearch)
+    * [Redshift / Splunk](#redshift--splunk)
 * [Examples](#examples)
 * [Requirements](#requirements)
 * [Providers](#providers)
@@ -47,10 +49,6 @@ Supports all destinations and all Kinesis Firehose Features.
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
-
-## RoadMap
-
-- VPC Support (ElasticSearch, Redshift, Splunk) (Expected in Version 1.5.0)
 
 ## How to Use
 
@@ -361,14 +359,114 @@ module "firehose" {
 }
 ```
 
+### VPC Support
+
+It's possible use module only to create security groups.
+
+Use variable `create = false` for this feature.
+
+#### ElasticSearch / Opensearch
+
+**Supported By:** ElasticSearch / Opensearch destination
+
+**To Enabled It:** `elasticsearch_enable_vpc = true`
+
+**To Create Opensearch IAM Service Linked Role:** `elasticsearch_vpc_create_service_linked_role = true` 
+
+**If you want to have separate security groups for firehose and destination:** `elasticsearch_vpc_security_group_same_as_destination = false`
+
+**Examples**
+
+```hcl
+# Creates the Security Groups (For firehose and Destination)
+module "firehose" {
+  source                                               = "fdmsantos/kinesis-firehose/aws"
+  version                                              = "x.x.x"
+  name                                                 = "firehose-delivery-stream"
+  destination                                          = "elasticsearch"
+  elasticsearch_domain_arn                             = "<elasticsearch_domain_arn>"
+  elasticsearch_index_name                             = "<elasticsearch_index_name>"
+  elasticsearch_enable_vpc                             = true
+  elasticsearch_vpc_subnet_ids                         = "<list(subnets_ids)>"
+  vpc_create_security_group                            = true
+  vpc_create_destination_security_group                = true
+  elasticsearch_vpc_security_group_same_as_destination = false
+}
+```
+
+```hcl
+# Use Existing Security Group
+module "firehose" {
+  source                          = "fdmsantos/kinesis-firehose/aws"
+  version                         = "x.x.x"
+  name                            = "firehose-delivery-stream"
+  destination                     = "elasticsearch"
+  elasticsearch_domain_arn        = "<elasticsearch_domain_arn>"
+  elasticsearch_index_name        = "<elasticsearch_index_name>"
+  elasticsearch_enable_vpc        = true
+  elasticsearch_vpc_subnet_ids    = "<list(subnets_ids)>"
+  vpc_security_group_firehose_ids = "<list(security_group_ids)>"
+}
+```
+
+```hcl
+# Configure Existing Security Groups
+module "firehose" {
+  source                                                       = "fdmsantos/kinesis-firehose/aws"
+  version                                                      = "x.x.x"
+  name                                                         = "firehose-delivery-stream"
+  destination                                                  = "elasticsearch"
+  elasticsearch_domain_arn                                     = "<elasticsearch_domain_arn>"
+  elasticsearch_index_name                                     = "<elasticsearch_index_name>"
+  elasticsearch_enable_vpc                                     = true
+  elasticsearch_vpc_subnet_ids                                 = "<list(subnets_ids)>"
+  elasticsearch_vpc_security_group_firehose_configure_existing = true
+  vpc_security_group_firehose_ids                              = "<list(security_group_ids)>"
+  vpc_security_group_destination_configure_existing            = true
+  vpc_security_group_destination_ids                           = "<list(security_group_ids)>"
+}
+```
+
+#### Redshift / Splunk
+
+**Supported By:** Redshift and Splunk destination
+
+To Get Firehose CIDR Blocks to allow in destination security groups, use the following output: `firehose_cidr_blocks`
+
+```hcl
+# Create the Security Group (For Destination)
+module "firehose" {
+  source                                = "fdmsantos/kinesis-firehose/aws"
+  version                               = "x.x.x"
+  name                                  = "firehose-delivery-stream"
+  destination                           = "<redshift|splunk>"
+  vpc_create_destination_security_group = true
+}
+```
+
+```hcl
+# Configure Existing Security Groups
+module "firehose" {
+  source                                            = "fdmsantos/kinesis-firehose/aws"
+  version                                           = "x.x.x"
+  name                                              = "firehose-delivery-stream"
+  destination                                       = "<redshift|splunk>"
+  vpc_security_group_destination_configure_existing = true
+  vpc_security_group_destination_ids                = "<list(security_group_ids)>"
+}
+```
+
 ## Examples
 
 - [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
 - [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination .
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
+- [Redshift In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/redshift-in-vpc) - Creates a Kinesis Firehose Stream with redshift in VPC as destination.
 - [Public Opensearch](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/elasticsearch/public-opensearch) - Creates a Kinesis Firehose Stream with public opensearch as destination.
+- [Opensearch In Vpc](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/elasticsearch/opensearch-in-vpc) - Creates a Kinesis Firehose Stream with public opensearch in VPC as destination.
 - [Public Splunk](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/public-splunk) - Creates a Kinesis Firehose Stream with public splunk as destination.
+- [Splunk In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/splunk-in-vpc) - Creates a Kinesis Firehose Stream with splunk in VPC as destination.
 - [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
 
 
@@ -404,6 +502,7 @@ No modules.
 | [aws_iam_policy.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -412,8 +511,15 @@ No modules.
 | [aws_iam_role_policy_attachment.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_service_linked_role.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
 | [aws_kinesis_firehose_delivery_stream.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
 | [aws_redshift_cluster_iam_roles.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/redshift_cluster_iam_roles) | resource |
+| [aws_security_group.destination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.destination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.firehose_es_egress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -423,7 +529,9 @@ No modules.
 | [aws_iam_policy_document.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_subnet.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
 
@@ -432,6 +540,7 @@ No modules.
 | <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
 | <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
+| <a name="input_create"></a> [create](#input\_create) | Controls if kinesis firehose should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_create_destination_cw_log_group"></a> [create\_destination\_cw\_log\_group](#input\_create\_destination\_cw\_log\_group) | Enables or disables the cloudwatch log group creation to destination | `bool` | `true` | no |
 | <a name="input_create_role"></a> [create\_role](#input\_create\_role) | Controls whether IAM role for Kinesis Firehose Stream should be created | `bool` | `true` | no |
 | <a name="input_cw_log_retention_in_days"></a> [cw\_log\_retention\_in\_days](#input\_cw\_log\_retention\_in\_days) | Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | `number` | `null` | no |
@@ -474,10 +583,16 @@ No modules.
 | <a name="input_dynamic_partition_record_deaggregation_type"></a> [dynamic\_partition\_record\_deaggregation\_type](#input\_dynamic\_partition\_record\_deaggregation\_type) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `string` | `"JSON"` | no |
 | <a name="input_dynamic_partitioning_retry_duration"></a> [dynamic\_partitioning\_retry\_duration](#input\_dynamic\_partitioning\_retry\_duration) | Total amount of seconds Firehose spends on retries | `number` | `300` | no |
 | <a name="input_elasticsearch_domain_arn"></a> [elasticsearch\_domain\_arn](#input\_elasticsearch\_domain\_arn) | The ARN of the Amazon ES domain. The pattern needs to be arn:.* | `string` | `null` | no |
+| <a name="input_elasticsearch_enable_vpc"></a> [elasticsearch\_enable\_vpc](#input\_elasticsearch\_enable\_vpc) | Indicates if destination is configured in VPC. Supported only to Elasticsearch destinations | `bool` | `false` | no |
 | <a name="input_elasticsearch_index_name"></a> [elasticsearch\_index\_name](#input\_elasticsearch\_index\_name) | The Elasticsearch index name | `string` | `null` | no |
 | <a name="input_elasticsearch_index_rotation_period"></a> [elasticsearch\_index\_rotation\_period](#input\_elasticsearch\_index\_rotation\_period) | The Elasticsearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate expiration of old data | `string` | `"OneDay"` | no |
 | <a name="input_elasticsearch_retry_duration"></a> [elasticsearch\_retry\_duration](#input\_elasticsearch\_retry\_duration) | The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt | `string` | `3600` | no |
 | <a name="input_elasticsearch_type_name"></a> [elasticsearch\_type\_name](#input\_elasticsearch\_type\_name) | The Elasticsearch type name with maximum length of 100 characters | `string` | `null` | no |
+| <a name="input_elasticsearch_vpc_create_service_linked_role"></a> [elasticsearch\_vpc\_create\_service\_linked\_role](#input\_elasticsearch\_vpc\_create\_service\_linked\_role) | Set it to True if want create Opensearch Service Linked Role to Access VPC | `bool` | `false` | no |
+| <a name="input_elasticsearch_vpc_role_arn"></a> [elasticsearch\_vpc\_role\_arn](#input\_elasticsearch\_vpc\_role\_arn) | The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces | `string` | `null` | no |
+| <a name="input_elasticsearch_vpc_security_group_same_as_destination"></a> [elasticsearch\_vpc\_security\_group\_same\_as\_destination](#input\_elasticsearch\_vpc\_security\_group\_same\_as\_destination) | Indicates if the firehose security group is the same as destination | `bool` | `true` | no |
+| <a name="input_elasticsearch_vpc_subnet_ids"></a> [elasticsearch\_vpc\_subnet\_ids](#input\_elasticsearch\_vpc\_subnet\_ids) | A list of subnet IDs to associate with Kinesis Firehose | `list(string)` | `null` | no |
+| <a name="input_elasticsearch_vpc_use_existing_role"></a> [elasticsearch\_vpc\_use\_existing\_role](#input\_elasticsearch\_vpc\_use\_existing\_role) | Indicates if want use the kinesis firehose role to VPC access. | `bool` | `true` | no |
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
 | <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |
@@ -548,11 +663,26 @@ No modules.
 | <a name="input_transform_lambda_buffer_interval"></a> [transform\_lambda\_buffer\_interval](#input\_transform\_lambda\_buffer\_interval) | The period of time during which Kinesis Data Firehose buffers incoming data before invoking the AWS Lambda function. The AWS Lambda function is invoked once the value of the buffer size or the buffer interval is reached. | `number` | `60` | no |
 | <a name="input_transform_lambda_buffer_size"></a> [transform\_lambda\_buffer\_size](#input\_transform\_lambda\_buffer\_size) | The AWS Lambda function has a 6 MB invocation payload quota. Your data can expand in size after it's processed by the AWS Lambda function. A smaller buffer size allows for more room should the data expand after processing. | `number` | `3` | no |
 | <a name="input_transform_lambda_number_retries"></a> [transform\_lambda\_number\_retries](#input\_transform\_lambda\_number\_retries) | Number of retries for AWS Transformation lambda | `number` | `3` | no |
+| <a name="input_vpc_create_destination_security_group"></a> [vpc\_create\_destination\_security\_group](#input\_vpc\_create\_destination\_security\_group) | Indicates if want create destination security group to associate to firehose destinations | `bool` | `false` | no |
+| <a name="input_vpc_create_security_group"></a> [vpc\_create\_security\_group](#input\_vpc\_create\_security\_group) | Indicates if want create security group to associate to kinesis firehose | `bool` | `false` | no |
+| <a name="input_vpc_security_group_destination_configure_existing"></a> [vpc\_security\_group\_destination\_configure\_existing](#input\_vpc\_security\_group\_destination\_configure\_existing) | Indicates if want configure an existing destination security group with the necessary rules | `bool` | `false` | no |
+| <a name="input_vpc_security_group_destination_ids"></a> [vpc\_security\_group\_destination\_ids](#input\_vpc\_security\_group\_destination\_ids) | A list of security group IDs associated to destinations to allow firehose traffic | `list(string)` | `null` | no |
+| <a name="input_vpc_security_group_destination_vpc_id"></a> [vpc\_security\_group\_destination\_vpc\_id](#input\_vpc\_security\_group\_destination\_vpc\_id) | VPC ID to create the destination security group. Only supported to Redshift and splunk destinations | `string` | `null` | no |
+| <a name="input_vpc_security_group_firehose_configure_existing"></a> [vpc\_security\_group\_firehose\_configure\_existing](#input\_vpc\_security\_group\_firehose\_configure\_existing) | Indicates if want configure an existing firehose security group with the necessary rules | `bool` | `false` | no |
+| <a name="input_vpc_security_group_firehose_ids"></a> [vpc\_security\_group\_firehose\_ids](#input\_vpc\_security\_group\_firehose\_ids) | A list of security group IDs to associate with Kinesis Firehose | `list(string)` | `null` | no |
+| <a name="input_vpc_security_group_tags"></a> [vpc\_security\_group\_tags](#input\_vpc\_security\_group\_tags) | A map of tags to assign to security group | `map(string)` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| <a name="output_destination_security_group_id"></a> [destination\_security\_group\_id](#output\_destination\_security\_group\_id) | Security Group ID associated to destination |
+| <a name="output_destination_security_group_name"></a> [destination\_security\_group\_name](#output\_destination\_security\_group\_name) | Security Group Name associated to destination |
+| <a name="output_destination_security_group_rule_ids"></a> [destination\_security\_group\_rule\_ids](#output\_destination\_security\_group\_rule\_ids) | Security Group Rules ID created in Destination Security group |
+| <a name="output_firehose_cidr_blocks"></a> [firehose\_cidr\_blocks](#output\_firehose\_cidr\_blocks) | Firehose stream cidr blocks to unblock on destination security group |
+| <a name="output_firehose_security_group_id"></a> [firehose\_security\_group\_id](#output\_firehose\_security\_group\_id) | Security Group ID associated to Firehose Stream. Only Supported for elasticsearch destination |
+| <a name="output_firehose_security_group_name"></a> [firehose\_security\_group\_name](#output\_firehose\_security\_group\_name) | Security Group Name associated to Firehose Stream. Only Supported for elasticsearch destination |
+| <a name="output_firehose_security_group_rule_ids"></a> [firehose\_security\_group\_rule\_ids](#output\_firehose\_security\_group\_rule\_ids) | Security Group Rules ID created in Firehose Stream Security group. Only Supported for elasticsearch destination |
 | <a name="output_kinesis_firehose_arn"></a> [kinesis\_firehose\_arn](#output\_kinesis\_firehose\_arn) | The ARN of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_cloudwatch_log_backup_stream_arn"></a> [kinesis\_firehose\_cloudwatch\_log\_backup\_stream\_arn](#output\_kinesis\_firehose\_cloudwatch\_log\_backup\_stream\_arn) | The ARN of the created Cloudwatch Log Group Stream to backup |
 | <a name="output_kinesis_firehose_cloudwatch_log_backup_stream_name"></a> [kinesis\_firehose\_cloudwatch\_log\_backup\_stream\_name](#output\_kinesis\_firehose\_cloudwatch\_log\_backup\_stream\_name) | The name of the created Cloudwatch Log Group Stream to backup |
@@ -564,6 +694,7 @@ No modules.
 | <a name="output_kinesis_firehose_name"></a> [kinesis\_firehose\_name](#output\_kinesis\_firehose\_name) | The name of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_role_arn"></a> [kinesis\_firehose\_role\_arn](#output\_kinesis\_firehose\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_version_id"></a> [kinesis\_firehose\_version\_id](#output\_kinesis\_firehose\_version\_id) | The Version id of the Kinesis Firehose Stream |
+| <a name="output_opensearch_iam_service_linked_role_arn"></a> [opensearch\_iam\_service\_linked\_role\_arn](#output\_opensearch\_iam\_service\_linked\_role\_arn) | The ARN of the Opensearch IAM Service linked role |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## License

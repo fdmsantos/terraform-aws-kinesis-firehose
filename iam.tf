@@ -1,18 +1,19 @@
 locals {
-  role_name                 = var.create_role ? coalesce(var.role_name, var.name, "*") : null
+  role_name                 = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
   add_backup_policies       = local.enable_s3_backup && var.s3_backup_use_existing_role
-  add_kinesis_source_policy = var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
-  add_lambda_policy         = var.create_role && var.enable_lambda_transform
-  add_s3_kms_policy         = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
-  add_glue_policy           = var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
-  add_s3_policy             = var.create_role
-  add_cw_policy             = var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
-  add_elasticsearch_policy  = var.create_role && var.destination == "elasticsearch"
-  #  add_sse_kms_policy        = var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
+  add_kinesis_source_policy = var.create && var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
+  add_lambda_policy         = var.create && var.create_role && var.enable_lambda_transform
+  add_s3_kms_policy         = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
+  add_glue_policy           = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
+  add_s3_policy             = var.create && var.create_role # TODO Fix this. It's not necessary in all situations
+  add_cw_policy             = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
+  add_elasticsearch_policy  = var.create && var.create_role && local.destination == "elasticsearch"
+  add_vpc_policy            = var.create && var.create_role && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_use_existing_role && local.destination == "elasticsearch"
+  #  add_sse_kms_policy        = var.create && var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
 }
 
 data "aws_iam_policy_document" "assume_role" {
-  count = var.create_role ? 1 : 0
+  count = var.create && var.create_role ? 1 : 0
 
   statement {
     effect  = "Allow"
@@ -29,7 +30,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "firehose" {
-  count                 = var.create_role ? 1 : 0
+  count                 = var.create && var.create_role ? 1 : 0
   name                  = local.role_name
   description           = var.role_description
   path                  = var.role_path
@@ -325,7 +326,7 @@ resource "aws_iam_role_policy_attachment" "cw" {
 # Redshift
 ##################
 resource "aws_redshift_cluster_iam_roles" "this" {
-  count              = var.create_role && var.destination == "redshift" && var.associate_role_to_redshift_cluster ? 1 : 0
+  count              = var.create && var.create_role && var.destination == "redshift" && var.associate_role_to_redshift_cluster ? 1 : 0
   cluster_identifier = var.redshift_cluster_identifier
   iam_role_arns      = [aws_iam_role.firehose[0].arn]
 }
@@ -367,26 +368,6 @@ data "aws_iam_policy_document" "elasticsearch" {
       "${var.elasticsearch_domain_arn}/${var.elasticsearch_index_name}*/_stats"
     ]
   }
-
-  #  dynamic "statement" {
-  #    for_each = local.elasticsearch_in_vpc ? [1] : []
-  #    content {
-  #      effect = "Allow"
-  #      actions = [
-  #        "ec2:DescribeVpcs",
-  #        "ec2:DescribeVpcAttribute",
-  #        "ec2:DescribeSubnets",
-  #        "ec2:DescribeSecurityGroups",
-  #        "ec2:DescribeNetworkInterfaces",
-  #        "ec2:CreateNetworkInterface",
-  #        "ec2:CreateNetworkInterfacePermission",
-  #        "ec2:DeleteNetworkInterface"
-  #      ]
-  #      resources = [
-  #        "*"
-  #      ]
-  #    }
-  #  }
 }
 
 resource "aws_iam_policy" "elasticsearch" {
@@ -403,4 +384,52 @@ resource "aws_iam_role_policy_attachment" "elasticsearch" {
 
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.elasticsearch[0].arn
+}
+
+
+##################
+# VPC
+##################
+data "aws_iam_policy_document" "vpc" {
+  count = local.add_vpc_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "ec2:DescribeVpcs",
+      "ec2:DescribeVpcAttribute",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:CreateNetworkInterface",
+      "ec2:CreateNetworkInterfacePermission",
+      "ec2:DeleteNetworkInterface"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "vpc" {
+  count = local.add_vpc_policy ? 1 : 0
+
+  name   = "${local.role_name}-vpc"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.vpc[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "vpc" {
+  count = local.add_vpc_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.vpc[0].arn
+}
+
+
+resource "aws_iam_service_linked_role" "opensearch" {
+  count            = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_create_service_linked_role ? 1 : 0
+  aws_service_name = "opensearchservice.amazonaws.com"
+  description      = "OpenSearch Service Linked Role to access VPC"
+  tags             = merge(var.tags, var.role_tags)
 }

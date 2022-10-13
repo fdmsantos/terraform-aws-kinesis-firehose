@@ -1,3 +1,9 @@
+variable "create" {
+  description = "Controls if kinesis firehose should be created (it affects almost all resources)"
+  type        = bool
+  default     = true
+}
+
 variable "name" {
   description = "A name to identify the stream. This is unique to the AWS account and region the Stream is created in"
   type        = string
@@ -716,30 +722,6 @@ variable "elasticsearch_type_name" {
   default     = null
 }
 
-#variable "elasticsearch_vpc_use_existing_role" {
-#  description = "Indicates if want use the kinesis firehose role to elastic search VPC access."
-#  type        = bool
-#  default     = true
-#}
-#
-#variable "elasticsearch_vpc_role_arn" {
-#  description = "The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces"
-#  type        = string
-#  default     = null
-#}
-#
-#variable "elasticsearch_vpc_subnet_ids" {
-#  description = "A list of security group IDs to associate with Kinesis Firehose"
-#  type        = list(string)
-#  default     = null
-#}
-#
-#variable "elasticsearch_vpc_security_group_ids" {
-#  description = "A list of security group IDs to associate with Kinesis Firehose"
-#  type        = list(string)
-#  default     = null
-#}
-
 variable "elasticsearch_retry_duration" {
   description = "The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt"
   type        = string
@@ -750,6 +732,89 @@ variable "elasticsearch_retry_duration" {
   }
 }
 
+variable "elasticsearch_enable_vpc" {
+  description = "Indicates if destination is configured in VPC. Supported only to Elasticsearch destinations"
+  type        = bool
+  default     = false
+}
+
+variable "elasticsearch_vpc_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to VPC access."
+  type        = bool
+  default     = true
+}
+
+variable "elasticsearch_vpc_role_arn" {
+  description = "The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces"
+  type        = string
+  default     = null
+}
+
+variable "elasticsearch_vpc_subnet_ids" {
+  description = "A list of subnet IDs to associate with Kinesis Firehose"
+  type        = list(string)
+  default     = null
+}
+
+variable "vpc_security_group_firehose_ids" {
+  description = "A list of security group IDs to associate with Kinesis Firehose"
+  type        = list(string)
+  default     = null
+}
+
+variable "vpc_create_security_group" {
+  description = "Indicates if want create security group to associate to kinesis firehose"
+  type        = bool
+  default     = false
+}
+
+variable "vpc_security_group_firehose_configure_existing" {
+  description = "Indicates if want configure an existing firehose security group with the necessary rules"
+  type        = bool
+  default     = false
+}
+
+variable "elasticsearch_vpc_security_group_same_as_destination" {
+  description = "Indicates if the firehose security group is the same as destination"
+  type        = bool
+  default     = true
+}
+
+variable "elasticsearch_vpc_create_service_linked_role" {
+  description = "Set it to True if want create Opensearch Service Linked Role to Access VPC"
+  type        = bool
+  default     = false
+}
+
+variable "vpc_security_group_tags" {
+  description = "A map of tags to assign to security group"
+  type        = map(string)
+  default     = {}
+}
+
+variable "vpc_security_group_destination_ids" {
+  description = "A list of security group IDs associated to destinations to allow firehose traffic"
+  type        = list(string)
+  default     = null
+}
+
+variable "vpc_create_destination_security_group" {
+  description = "Indicates if want create destination security group to associate to firehose destinations"
+  type        = bool
+  default     = false
+}
+
+variable "vpc_security_group_destination_configure_existing" {
+  description = "Indicates if want configure an existing destination security group with the necessary rules"
+  type        = bool
+  default     = false
+}
+
+variable "vpc_security_group_destination_vpc_id" {
+  description = "VPC ID to create the destination security group. Only supported to Redshift and splunk destinations"
+  type        = string
+  default     = null
+}
 ######
 # Splunk Destination Variables
 ######
