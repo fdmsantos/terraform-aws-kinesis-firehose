@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.4.0...v1.5.0) (2022-10-13)
+
+
+### Features
+
+* add vpc support to elasticsearch, redshift and splunk destinations ([dfc051b](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/dfc051b0562129f5b6579eb6e7ac083c7e2980c7))
+
 ## [1.4.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.3.0...v1.4.0) (2022-09-29)
 
 
