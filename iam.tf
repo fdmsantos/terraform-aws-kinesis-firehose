@@ -7,7 +7,7 @@ locals {
   add_lambda_policy              = var.create && var.create_role && var.enable_lambda_transform
   add_s3_kms_policy              = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
   add_glue_policy                = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
-  add_s3_policy                  = var.create && var.create_role # TODO Fix this. It's not necessary in all situations
+  add_s3_policy                  = var.create && var.create_role
   add_cw_policy                  = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
   add_elasticsearch_policy       = var.create && var.create_role && local.destination == "elasticsearch"
   add_vpc_policy                 = var.create && var.create_role && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_use_existing_role && local.destination == "elasticsearch"
@@ -27,6 +27,11 @@ data "aws_iam_policy_document" "assume_role" {
         "firehose.amazonaws.com",
         var.destination == "redshift" ? "redshift.amazonaws.com" : "",
       ])
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [ data.aws_caller_identity.current.account_id ]
+      variable = "sts:ExternalId"
     }
   }
 }
