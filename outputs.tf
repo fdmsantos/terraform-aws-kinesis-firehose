@@ -61,6 +61,26 @@ output "opensearch_iam_service_linked_role_arn" {
   value       = try(aws_iam_service_linked_role.opensearch[0].arn, "")
 }
 
+output "application_role_arn" {
+  description = "The ARN of the IAM role created for Kinesis Firehose Stream Source"
+  value       = try(aws_iam_role.application[0].arn, "")
+}
+
+output "application_role_name" {
+  description = "The Name of the IAM role created for Kinesis Firehose Stream Source Source"
+  value       = try(aws_iam_role.application[0].name, "")
+}
+
+output "application_role_policy_arn" {
+  description = "The ARN of the IAM policy created for Kinesis Firehose Stream Source"
+  value       = try(aws_iam_policy.application[0].arn, "")
+}
+
+output "application_role_policy_name" {
+  description = "The Name of the IAM policy created for Kinesis Firehose Stream Source Source"
+  value       = try(aws_iam_policy.application[0].name, "")
+}
+
 # Security Group
 output "firehose_security_group_id" {
   description = "Security Group ID associated to Firehose Stream. Only Supported for elasticsearch destination"

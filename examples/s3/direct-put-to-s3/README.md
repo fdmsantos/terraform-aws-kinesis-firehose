@@ -59,6 +59,10 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Description |
 |------|-------------|
+| <a name="output_application_role_arn"></a> [application\_role\_arn](#output\_application\_role\_arn) | The ARN of the IAM application role created for Kinesis Firehose Stream Source |
+| <a name="output_application_role_name"></a> [application\_role\_name](#output\_application\_role\_name) | The Name of the IAM application role created for Kinesis Firehose Stream Source |
+| <a name="output_application_role_policy_arn"></a> [application\_role\_policy\_arn](#output\_application\_role\_policy\_arn) | The ARN of the IAM application role created for Kinesis Firehose Stream Source |
+| <a name="output_application_role_policy_name"></a> [application\_role\_policy\_name](#output\_application\_role\_policy\_name) | The Name of the IAM application role created for Kinesis Firehose Stream Source |
 | <a name="output_kinesis_firehose_arn"></a> [kinesis\_firehose\_arn](#output\_kinesis\_firehose\_arn) | The ARN of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_destination_id"></a> [kinesis\_firehose\_destination\_id](#output\_kinesis\_firehose\_destination\_id) | The Destination id of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_role_arn"></a> [kinesis\_firehose\_role\_arn](#output\_kinesis\_firehose\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream |

@@ -24,6 +24,7 @@ Supports all destinations and all Kinesis Firehose Features.
   * [VPC Support](#vpc-support)
     * [ElasticSearch / Opensearch](#elasticsearch--opensearch)
     * [Redshift / Splunk](#redshift--splunk)
+  * [Application Role](#application-role)
 * [Examples](#examples)
 * [Requirements](#requirements)
 * [Providers](#providers)
@@ -203,7 +204,6 @@ module "firehose" {
   ]
 }
 ```
-
 
 ### Server Side Encryption
 
@@ -420,7 +420,7 @@ module "firehose" {
   elasticsearch_index_name                                     = "<elasticsearch_index_name>"
   elasticsearch_enable_vpc                                     = true
   elasticsearch_vpc_subnet_ids                                 = "<list(subnets_ids)>"
-  elasticsearch_vpc_security_group_firehose_configure_existing = true
+  vpc_security_group_firehose_configure_existing = true
   vpc_security_group_firehose_ids                              = "<list(security_group_ids)>"
   vpc_security_group_destination_configure_existing            = true
   vpc_security_group_destination_ids                           = "<list(security_group_ids)>"
@@ -453,6 +453,48 @@ module "firehose" {
   destination                                       = "<redshift|splunk>"
   vpc_security_group_destination_configure_existing = true
   vpc_security_group_destination_ids                = "<list(security_group_ids)>"
+}
+```
+
+### Application Role
+
+**Supported By:** Direct Put Source
+
+**To Create:** `create_application_role = true`
+
+**To Create Policy:** `create_application_role_policy = true`
+
+**Variables Prefix:** `application_role_`
+
+```hcl
+# Create Application Role to an application that runs in EC2 Instance
+module "firehose" {
+  source                             = "fdmsantos/kinesis-firehose/aws"
+  version                            = "x.x.x"
+  name                               = "firehose-delivery-stream"
+  destination                        = "extended_s3"
+  create_application_role            = true
+  create_application_role_policy     = true
+  application_role_service_principal = "ec2.amazonaws.com"
+}
+```
+
+```hcl
+# Configure existing Application Role to an application that runs in EC2 Instance with a policy with provided actions
+module "firehose" {
+  source                              = "fdmsantos/kinesis-firehose/aws"
+  version                             = "x.x.x"
+  name                                = "firehose-delivery-stream"
+  destination                         = "extended_s3"
+  configure_existing_application_role = true
+  application_role_name               = "application-role"
+  create_application_role_policy      = true
+  application_role_policy_actions     = [
+    "firehose:PutRecord",
+    "firehose:PutRecordBatch",
+    "firehose:CreateDeliveryStream",
+    "firehose:UpdateDestination"
+  ]
 }
 ```
 
@@ -495,6 +537,7 @@ No modules.
 | [aws_cloudwatch_log_group.log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_stream.backup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_stream) | resource |
 | [aws_cloudwatch_log_stream.destination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_stream) | resource |
+| [aws_iam_policy.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -503,7 +546,9 @@ No modules.
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -521,6 +566,8 @@ No modules.
 | [aws_security_group_rule.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.firehose_es_egress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.application_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -537,10 +584,21 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_application_role_description"></a> [application\_role\_description](#input\_application\_role\_description) | Description of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
+| <a name="input_application_role_force_detach_policies"></a> [application\_role\_force\_detach\_policies](#input\_application\_role\_force\_detach\_policies) | Specifies to force detaching any policies the IAM Application role has before destroying it | `bool` | `true` | no |
+| <a name="input_application_role_name"></a> [application\_role\_name](#input\_application\_role\_name) | Name of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
+| <a name="input_application_role_path"></a> [application\_role\_path](#input\_application\_role\_path) | Path of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
+| <a name="input_application_role_permissions_boundary"></a> [application\_role\_permissions\_boundary](#input\_application\_role\_permissions\_boundary) | The ARN of the policy that is used to set the permissions boundary for the IAM Application role used by Kinesis Firehose Stream Source | `string` | `null` | no |
+| <a name="input_application_role_policy_actions"></a> [application\_role\_policy\_actions](#input\_application\_role\_policy\_actions) | List of Actions to Application Role Policy | `list(string)` | <pre>[<br>  "firehose:PutRecord",<br>  "firehose:PutRecordBatch"<br>]</pre> | no |
+| <a name="input_application_role_service_principal"></a> [application\_role\_service\_principal](#input\_application\_role\_service\_principal) | AWS Service Principal to assume application role | `string` | `null` | no |
+| <a name="input_application_role_tags"></a> [application\_role\_tags](#input\_application\_role\_tags) | A map of tags to assign to IAM Application role | `map(string)` | `{}` | no |
 | <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
 | <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
+| <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
 | <a name="input_create"></a> [create](#input\_create) | Controls if kinesis firehose should be created (it affects almost all resources) | `bool` | `true` | no |
+| <a name="input_create_application_role"></a> [create\_application\_role](#input\_create\_application\_role) | Set it to true to create role to be used by the source | `bool` | `false` | no |
+| <a name="input_create_application_role_policy"></a> [create\_application\_role\_policy](#input\_create\_application\_role\_policy) | Set it to true to create policy to the role used by the source | `bool` | `false` | no |
 | <a name="input_create_destination_cw_log_group"></a> [create\_destination\_cw\_log\_group](#input\_create\_destination\_cw\_log\_group) | Enables or disables the cloudwatch log group creation to destination | `bool` | `true` | no |
 | <a name="input_create_role"></a> [create\_role](#input\_create\_role) | Controls whether IAM role for Kinesis Firehose Stream should be created | `bool` | `true` | no |
 | <a name="input_cw_log_retention_in_days"></a> [cw\_log\_retention\_in\_days](#input\_cw\_log\_retention\_in\_days) | Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | `number` | `null` | no |
@@ -676,6 +734,10 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_application_role_arn"></a> [application\_role\_arn](#output\_application\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream Source |
+| <a name="output_application_role_name"></a> [application\_role\_name](#output\_application\_role\_name) | The Name of the IAM role created for Kinesis Firehose Stream Source Source |
+| <a name="output_application_role_policy_arn"></a> [application\_role\_policy\_arn](#output\_application\_role\_policy\_arn) | The ARN of the IAM policy created for Kinesis Firehose Stream Source |
+| <a name="output_application_role_policy_name"></a> [application\_role\_policy\_name](#output\_application\_role\_policy\_name) | The Name of the IAM policy created for Kinesis Firehose Stream Source Source |
 | <a name="output_destination_security_group_id"></a> [destination\_security\_group\_id](#output\_destination\_security\_group\_id) | Security Group ID associated to destination |
 | <a name="output_destination_security_group_name"></a> [destination\_security\_group\_name](#output\_destination\_security\_group\_name) | Security Group Name associated to destination |
 | <a name="output_destination_security_group_rule_ids"></a> [destination\_security\_group\_rule\_ids](#output\_destination\_security\_group\_rule\_ids) | Security Group Rules ID created in Destination Security group |

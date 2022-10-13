@@ -965,3 +965,72 @@ variable "policy_path" {
   type        = string
   default     = null
 }
+
+variable "create_application_role" {
+  description = "Set it to true to create role to be used by the source"
+  default     = false
+  type        = bool
+}
+
+variable "application_role_name" {
+  description = "Name of IAM Application role to use for Kinesis Firehose Stream Source"
+  type        = string
+  default     = null
+}
+
+variable "application_role_description" {
+  description = "Description of IAM Application role to use for Kinesis Firehose Stream Source"
+  type        = string
+  default     = null
+}
+
+variable "application_role_path" {
+  description = "Path of IAM Application role to use for Kinesis Firehose Stream Source"
+  type        = string
+  default     = null
+}
+
+variable "application_role_force_detach_policies" {
+  description = "Specifies to force detaching any policies the IAM Application role has before destroying it"
+  type        = bool
+  default     = true
+}
+
+variable "application_role_permissions_boundary" {
+  description = "The ARN of the policy that is used to set the permissions boundary for the IAM Application role used by Kinesis Firehose Stream Source"
+  type        = string
+  default     = null
+}
+
+variable "application_role_tags" {
+  description = "A map of tags to assign to IAM Application role"
+  type        = map(string)
+  default     = {}
+}
+
+variable "configure_existing_application_role" {
+  description = "Set it to True if want use existing application role to add the firehose Policy"
+  default     = false
+  type        = bool
+}
+
+variable "create_application_role_policy" {
+  description = "Set it to true to create policy to the role used by the source"
+  default     = false
+  type        = bool
+}
+
+variable "application_role_service_principal" {
+  description = "AWS Service Principal to assume application role"
+  type        = string
+  default     = null
+}
+
+variable "application_role_policy_actions" {
+  description = "List of Actions to Application Role Policy"
+  type        = list(string)
+  default = [
+    "firehose:PutRecord",
+    "firehose:PutRecordBatch"
+  ]
+}

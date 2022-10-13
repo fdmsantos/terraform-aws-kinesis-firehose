@@ -1,14 +1,16 @@
 locals {
-  role_name                 = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
-  add_backup_policies       = local.enable_s3_backup && var.s3_backup_use_existing_role
-  add_kinesis_source_policy = var.create && var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
-  add_lambda_policy         = var.create && var.create_role && var.enable_lambda_transform
-  add_s3_kms_policy         = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
-  add_glue_policy           = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
-  add_s3_policy             = var.create && var.create_role # TODO Fix this. It's not necessary in all situations
-  add_cw_policy             = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
-  add_elasticsearch_policy  = var.create && var.create_role && local.destination == "elasticsearch"
-  add_vpc_policy            = var.create && var.create_role && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_use_existing_role && local.destination == "elasticsearch"
+  role_name                      = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
+  application_role_name          = var.create_application_role ? coalesce(var.application_role_name, "${var.name}-application-role", "*") : null
+  create_application_role_policy = var.create && var.create_application_role_policy
+  add_backup_policies            = local.enable_s3_backup && var.s3_backup_use_existing_role
+  add_kinesis_source_policy      = var.create && var.create_role && var.enable_kinesis_source && var.kinesis_source_use_existing_role
+  add_lambda_policy              = var.create && var.create_role && var.enable_lambda_transform
+  add_s3_kms_policy              = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
+  add_glue_policy                = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
+  add_s3_policy                  = var.create && var.create_role # TODO Fix this. It's not necessary in all situations
+  add_cw_policy                  = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
+  add_elasticsearch_policy       = var.create && var.create_role && local.destination == "elasticsearch"
+  add_vpc_policy                 = var.create && var.create_role && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_use_existing_role && local.destination == "elasticsearch"
   #  add_sse_kms_policy        = var.create && var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
 }
 
@@ -386,7 +388,6 @@ resource "aws_iam_role_policy_attachment" "elasticsearch" {
   policy_arn = aws_iam_policy.elasticsearch[0].arn
 }
 
-
 ##################
 # VPC
 ##################
@@ -432,4 +433,55 @@ resource "aws_iam_service_linked_role" "opensearch" {
   aws_service_name = "opensearchservice.amazonaws.com"
   description      = "OpenSearch Service Linked Role to access VPC"
   tags             = merge(var.tags, var.role_tags)
+}
+
+##################
+# Application Role
+##################
+data "aws_iam_policy_document" "application_assume_role" {
+  count = var.create_application_role ? 1 : 0
+
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = [var.application_role_service_principal]
+    }
+  }
+}
+
+resource "aws_iam_role" "application" {
+  count                 = var.create_application_role ? 1 : 0
+  name                  = local.application_role_name
+  description           = var.application_role_description
+  path                  = var.application_role_path
+  force_detach_policies = var.application_role_force_detach_policies
+  permissions_boundary  = var.application_role_permissions_boundary
+  assume_role_policy    = data.aws_iam_policy_document.application_assume_role[0].json
+  tags                  = merge(var.tags, var.application_role_tags)
+}
+
+data "aws_iam_policy_document" "application" {
+  count = local.create_application_role_policy ? 1 : 0
+  statement {
+    effect    = "Allow"
+    actions   = var.application_role_policy_actions
+    resources = [aws_kinesis_firehose_delivery_stream.this[0].arn]
+  }
+}
+
+resource "aws_iam_policy" "application" {
+  count  = local.create_application_role_policy ? 1 : 0
+  name   = "${local.application_role_name}-policy"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.application[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "application" {
+  count      = (var.create_application_role || var.configure_existing_application_role) && local.create_application_role_policy ? 1 : 0
+  role       = var.create_application_role ? aws_iam_role.application[0].name : var.application_role_name
+  policy_arn = aws_iam_policy.application[0].arn
 }
