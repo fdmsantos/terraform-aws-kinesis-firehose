@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog"], var.destination)
   }
 }
 
@@ -908,7 +908,7 @@ variable "http_endpoint_enable_request_configuration" {
 variable "http_endpoint_request_configuration_content_encoding" {
   description = "Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination"
   type        = string
-  default     = "NONE"
+  default     = "GZIP"
   validation {
     error_message = "Valid values are GZIP and NONE."
     condition     = contains(["GZIP", "NONE"], var.http_endpoint_request_configuration_content_encoding)
@@ -919,6 +919,19 @@ variable "http_endpoint_request_configuration_common_attributes" {
   description = "Describes the metadata sent to the HTTP endpoint destination. The variable is list. Each element is map with two keys , name and value, that corresponds to common attribute name and value"
   type        = list(map(string))
   default     = []
+}
+
+######
+# Datadog Destination Variables
+######
+variable "datadog_endpoint_type" {
+  description = "Endpoint type to datadog destination"
+  type        = string
+  default     = "logs_eu"
+  validation {
+    error_message = "Please use a valid endpoint type!"
+    condition     = contains(["logs_us", "logs_eu", "logs_gov", "metrics_us", "metrics_eu"], var.datadog_endpoint_type)
+  }
 }
 
 ######

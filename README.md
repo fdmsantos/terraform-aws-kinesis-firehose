@@ -7,14 +7,17 @@ Supports all destinations and all Kinesis Firehose Features.
 
 * [Features](#features)
 * [How to Use](#how-to-use)
-  * [Kinesis Data Stream as Source](#kinesis-data-stream-as-source)
-    * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
-  * [Direct Put as Source](#direct-put-as-source)
-  * [S3 destination](#s3-destination)
-  * [Redshift Destination](#redshift-destination)
-  * [Elasticsearch / Opensearch Destination](#elasticsearch--opensearch-destination)
-  * [Splunk Destination](#splunk-destination)
-  * [HTTP Endpoint Destination](#http-endpoint-destination)
+  * [Sources](#sources)
+    * [Kinesis Data Stream](#kinesis-data-stream)
+      * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
+    * [Direct Put](#direct-put)
+  * [Destinations](#destinations)
+    * [S3](#s3)
+    * [Redshift](#redshift)
+    * [Elasticsearch / Opensearch](#elasticsearch--opensearch)
+    * [Splunk](#splunk)
+    * [HTTP Endpoint](#http-endpoint)
+    * [Datadog](#datadog)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -54,7 +57,9 @@ Supports all destinations and all Kinesis Firehose Features.
 
 ## How to Use
 
-### Kinesis Data Stream as Source
+### Sources
+
+#### Kinesis Data Stream
 
 **To Enabled it:** `enable_kinesis_source = true`
 
@@ -70,7 +75,7 @@ module "firehose" {
 }
 ```
 
-#### Kinesis Data Stream Encrypted
+##### Kinesis Data Stream Encrypted
 
 If Kinesis Data Stream is encrypted, it's necessary pass this info to module .
 
@@ -78,7 +83,7 @@ If Kinesis Data Stream is encrypted, it's necessary pass this info to module .
 
 **KMS Key:** use `kinesis_source_kms_arn` variable to indicate the KMS Key to module add permissions to policy to decrypt the Kinesis Data Stream.
 
-### Direct Put as Source
+#### Direct Put
 
 ```hcl
 module "firehose" {
@@ -90,7 +95,9 @@ module "firehose" {
 }
 ```
 
-### S3 destination
+### Destinations
+
+#### S3
 
 **To Enabled It:** `destination = "s3" or destination = "extended_s3"`
 
@@ -110,7 +117,7 @@ module "firehose" {
 }
 ```
 
-### Redshift Destination
+#### Redshift
 
 **To Enabled It:** `destination = "redshift"`
 
@@ -133,7 +140,7 @@ module "firehose" {
 }
 ```
 
-### Elasticsearch / Opensearch Destination
+#### Elasticsearch / Opensearch
 
 **To Enabled It:** `destination = "elasticsearch" or destination = "opensearch"`
 
@@ -150,7 +157,7 @@ module "firehose" {
 }
 ```
 
-### Splunk Destination
+#### Splunk
 
 **To Enabled It:** `destination = "splunk"`
 
@@ -170,7 +177,7 @@ module "firehose" {
 }
 ```
 
-### HTTP Endpoint Destination
+#### HTTP Endpoint
 
 **To Enabled It:** `destination = "http_endpoint"`
 
@@ -203,6 +210,25 @@ module "firehose" {
       value = "testvalue2"
     }
   ]
+}
+```
+
+#### Datadog
+
+**To Enabled It:** `destination = "datadog"`
+
+**Variables Prefix:** `http_endpoint_` and `datadog_endpoint_type`
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and datadog destinations**
+
+```hcl
+module "firehose" {
+  source                   = "fdmsantos/kinesis-firehose/aws"
+  version                  = "x.x.x"
+  name                     = "firehose-delivery-stream"
+  destination              = "datadog"
+  datadog_endpoint_type    = "metrics_eu"
+  http_endpoint_access_key = "<datadog_access_key>"
 }
 ```
 
@@ -503,13 +529,14 @@ module "firehose" {
 
 The destination variable configured in module is mapped to firehose valid destination.
 
-| Module Destination           | Firehose Destination | Differences                                                             |
-|------------------------------|----------------------|-------------------------------------------------------------------------|
-| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations           |
-| redshift                     | redshift             |                                                                         |
-| splunk                       | splunk               |                                                                         |
-| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations |
-| http_endpoint                | http_endpoint        |                                                                         |
+| Module Destination           | Firehose Destination | Differences                                                                                                                                                                  |
+|------------------------------|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                |
+| redshift                     | redshift             |                                                                                                                                                                              |
+| splunk                       | splunk               |                                                                                                                                                                              |
+| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                      |
+| http_endpoint                | http_endpoint        |                                                                                                                                                                              |
+| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable |
 
 ## Examples
 
@@ -523,6 +550,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Public Splunk](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/public-splunk) - Creates a Kinesis Firehose Stream with public splunk as destination.
 - [Splunk In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/splunk-in-vpc) - Creates a Kinesis Firehose Stream with splunk in VPC as destination.
 - [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
+- [Datadog](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/datadog) - Creates a Kinesis Firehose Stream with datadog europe metrics as destination.
 
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -644,6 +672,7 @@ No modules.
 | <a name="input_data_format_conversion_parquet_max_padding"></a> [data\_format\_conversion\_parquet\_max\_padding](#input\_data\_format\_conversion\_parquet\_max\_padding) | The maximum amount of padding to apply. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The value is in bytes | `number` | `0` | no |
 | <a name="input_data_format_conversion_parquet_page_size"></a> [data\_format\_conversion\_parquet\_page\_size](#input\_data\_format\_conversion\_parquet\_page\_size) | Column chunks are divided into pages. A page is conceptually an indivisible unit (in terms of compression and encoding). The value is in bytes | `number` | `1048576` | no |
 | <a name="input_data_format_conversion_parquet_writer_version"></a> [data\_format\_conversion\_parquet\_writer\_version](#input\_data\_format\_conversion\_parquet\_writer\_version) | Indicates the version of row format to output. | `string` | `"V1"` | no |
+| <a name="input_datadog_endpoint_type"></a> [datadog\_endpoint\_type](#input\_datadog\_endpoint\_type) | Endpoint type to datadog destination | `string` | `"logs_eu"` | no |
 | <a name="input_destination"></a> [destination](#input\_destination) | This is the destination to where the data is delivered | `string` | n/a | yes |
 | <a name="input_destination_log_group_name"></a> [destination\_log\_group\_name](#input\_destination\_log\_group\_name) | The CloudWatch group name for destination logs | `string` | `null` | no |
 | <a name="input_destination_log_stream_name"></a> [destination\_log\_stream\_name](#input\_destination\_log\_stream\_name) | The CloudWatch log stream name for destination logs | `string` | `null` | no |
@@ -677,7 +706,7 @@ No modules.
 | <a name="input_http_endpoint_enable_request_configuration"></a> [http\_endpoint\_enable\_request\_configuration](#input\_http\_endpoint\_enable\_request\_configuration) | The request configuration | `bool` | `false` | no |
 | <a name="input_http_endpoint_name"></a> [http\_endpoint\_name](#input\_http\_endpoint\_name) | The HTTP endpoint name | `string` | `null` | no |
 | <a name="input_http_endpoint_request_configuration_common_attributes"></a> [http\_endpoint\_request\_configuration\_common\_attributes](#input\_http\_endpoint\_request\_configuration\_common\_attributes) | Describes the metadata sent to the HTTP endpoint destination. The variable is list. Each element is map with two keys , name and value, that corresponds to common attribute name and value | `list(map(string))` | `[]` | no |
-| <a name="input_http_endpoint_request_configuration_content_encoding"></a> [http\_endpoint\_request\_configuration\_content\_encoding](#input\_http\_endpoint\_request\_configuration\_content\_encoding) | Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination | `string` | `"NONE"` | no |
+| <a name="input_http_endpoint_request_configuration_content_encoding"></a> [http\_endpoint\_request\_configuration\_content\_encoding](#input\_http\_endpoint\_request\_configuration\_content\_encoding) | Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination | `string` | `"GZIP"` | no |
 | <a name="input_http_endpoint_retry_duration"></a> [http\_endpoint\_retry\_duration](#input\_http\_endpoint\_retry\_duration) | Total amount of seconds Firehose spends on retries. This duration starts after the initial attempt fails, It does not include the time periods during which Firehose waits for acknowledgment from the specified destination after each attempt | `number` | `300` | no |
 | <a name="input_http_endpoint_url"></a> [http\_endpoint\_url](#input\_http\_endpoint\_url) | The HTTP endpoint URL to which Kinesis Firehose sends your data | `string` | `null` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |

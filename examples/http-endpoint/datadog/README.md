@@ -1,6 +1,6 @@
-# Http Endpoint
+# Datadpg
 
-Configuration in this directory creates kinesis firehose stream with Direct Put as source and custom http endpoint as destination.
+Configuration in this directory creates kinesis firehose stream with Direct Put as source and datadog as destination to Europe Metrics URL.
 
 This example can be tested with Demo Data in Kinesis Firehose Console.
 
@@ -17,8 +17,6 @@ $ terraform apply
 It's necessary configure the following variables:
 
 ```hcl
-http_endpoint_name       = "<http_endpoint_name>"
-http_endpoint_url        = "<http_endpoint_url>"
 http_endpoint_access_key = "<http_endpoint_access_key>"
 ```
 
@@ -56,10 +54,8 @@ http_endpoint_access_key = "<http_endpoint_access_key>"
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_http_endpoint_access_key"></a> [http\_endpoint\_access\_key](#input\_http\_endpoint\_access\_key) | Http Endpoint Access Key | `string` | n/a | yes |
-| <a name="input_http_endpoint_name"></a> [http\_endpoint\_name](#input\_http\_endpoint\_name) | Http Endpoint Name | `string` | n/a | yes |
-| <a name="input_http_endpoint_url"></a> [http\_endpoint\_url](#input\_http\_endpoint\_url) | Http Endpoint URL | `string` | n/a | yes |
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose"` | no |
+| <a name="input_http_endpoint_access_key"></a> [http\_endpoint\_access\_key](#input\_http\_endpoint\_access\_key) | Datadog Access Key | `string` | n/a | yes |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-datadog"` | no |
 
 ## Outputs
 

@@ -341,8 +341,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   dynamic "http_endpoint_configuration" {
     for_each = local.destination == "http_endpoint" ? [1] : []
     content {
-      url                = var.http_endpoint_url
-      name               = var.http_endpoint_name
+      url                = local.http_endpoint_url[var.destination]
+      name               = local.http_endpoint_name[var.destination]
       access_key         = var.http_endpoint_access_key
       buffering_size     = var.buffer_size
       buffering_interval = var.buffer_interval

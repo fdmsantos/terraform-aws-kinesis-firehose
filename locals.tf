@@ -10,7 +10,8 @@ locals {
     elasticsearch : "elasticsearch",
     opensearch : "elasticsearch",
     splunk : "splunk",
-    http_endpoint : "http_endpoint"
+    http_endpoint : "http_endpoint",
+    datadog : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -158,6 +159,25 @@ locals {
   elasticsearch_vpc_configure_existing_destination_sg     = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc && var.vpc_security_group_destination_configure_existing && !local.elasticsearch_vpc_create_destination_group && !var.elasticsearch_vpc_security_group_same_as_destination
   not_elasticsearch_vpc_configure_existing_destination_sg = contains(["splunk", "redshift"], local.destination) && var.vpc_security_group_destination_configure_existing
   vpc_configure_destination_group                         = local.elasticsearch_vpc_configure_existing_destination_sg || local.not_elasticsearch_vpc_configure_existing_destination_sg
+
+  http_endpoint_url = {
+    http_endpoint : var.http_endpoint_url
+    datadog : local.datadog_endpoint_url[var.datadog_endpoint_type]
+  }
+
+  http_endpoint_name = {
+    http_endpoint : var.http_endpoint_name
+    datadog : "Datadog"
+  }
+
+  # Data Dog
+  datadog_endpoint_url = {
+    logs_us : "https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input"
+    logs_eu : "https://aws-kinesis-http-intake.logs.datadoghq.eu/v1/input"
+    logs_gov : "https://aws-kinesis-http-intake.logs.ddog-gov.com/v1/input"
+    metrics_us : "https://awsmetrics-intake.datadoghq.com/v1/input"
+    metrics_eu : "https://awsmetrics-intake.datadoghq.eu/v1/input"
+  }
 
   # Networking
   firehose_cidr_blocks = {
