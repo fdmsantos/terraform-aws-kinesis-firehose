@@ -25,6 +25,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [ElasticSearch / Opensearch](#elasticsearch--opensearch)
     * [Redshift / Splunk](#redshift--splunk)
   * [Application Role](#application-role)
+* [Destinations Mapping](#destinations-mapping)
 * [Examples](#examples)
 * [Requirements](#requirements)
 * [Providers](#providers)
@@ -64,7 +65,7 @@ module "firehose" {
   name                      = "firehose-delivery-stream"
   enable_kinesis_source     = true
   kinesis_source_stream_arn = "<kinesis_stream_arn>"
-  destination               = "extended_s3"
+  destination               = "s3" # or destination = "extended_s3"
   s3_bucket_arn             = "<bucket_arn>"
 }
 ```
@@ -84,14 +85,14 @@ module "firehose" {
   source           = "fdmsantos/kinesis-firehose/aws"
   version          = "x.x.x"
   name             = "firehose-delivery-stream"
-  destination      = "extended_s3"
+  destination      = "s3" # or destination = "extended_s3"
   s3_bucket_arn    = "<bucket_arn>"
 }
 ```
 
 ### S3 destination
 
-**To Enabled It:** `destination = "extended_s3"`
+**To Enabled It:** `destination = "s3" or destination = "extended_s3"`
 
 **Variables Prefix:** `s3_`
 
@@ -104,7 +105,7 @@ module "firehose" {
   source                    = "fdmsantos/kinesis-firehose/aws"
   version                   = "x.x.x"
   name                      = "firehose-delivery-stream"
-  destination               = "extended_s3"
+  destination               = "s3" # or destination = "extended_s3"
   s3_bucket_arn             = "<bucket_arn>"
 }
 ```
@@ -218,7 +219,7 @@ module "firehose" {
   source           = "fdmsantos/kinesis-firehose/aws"
   version          = "x.x.x"
   name             = "firehose-delivery-stream"
-  destination      = "extended_s3"
+  destination      = "s3" # or destination = "extended_s3"
   s3_bucket_arn    = "<bucket_arn>"
   enable_sse       = true
   sse_kms_key_type = "CUSTOMER_MANAGED_CMK"
@@ -241,7 +242,7 @@ module "firehose" {
   name                             = "firehose-delivery-stream"
   enable_kinesis_source            = true
   kinesis_source_stream_arn        = "<kinesis_stream_arn>"
-  destination                      = "extended_s3"
+  destination                      = "s3" # or destination = "extended_s3"
   s3_bucket_arn                    = "<bucket_arn>"
   enable_lambda_transform          = true
   transform_lambda_arn             = "<lambda_arn>"
@@ -266,7 +267,7 @@ module "firehose" {
   name                                   = "firehose-delivery-stream"
   enable_kinesis_source                  = true
   kinesis_source_stream_arn              = "<kinesis_stream_arn>"
-  destination                            = "extended_s3"
+  destination                            = "s3" # or destination = "extended_s3"
   s3_bucket_arn                          = "<bucket_arn>"
   enable_data_format_conversion          = true
   data_format_conversion_glue_database   = "<glue_database_name>"
@@ -292,7 +293,7 @@ module "firehose" {
   name                                          = "firehose-delivery-stream"
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
-  destination                                   = "extended_s3"
+  destination                                   = "s3" # or destination = "extended_s3"
   s3_bucket_arn                                 = "<bucket_arn>"
   s3_prefix                                     = "prod/user_id=!{partitionKeyFromQuery:user_id}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
   enable_dynamic_partitioning                   = true
@@ -321,7 +322,7 @@ module "firehose" {
   source                        = "fdmsantos/kinesis-firehose/aws"
   version                       = "x.x.x"
   name                          = "${var.name_prefix}-delivery-stream"
-  destination                   = "extended_s3"
+  destination                   = "s3" # or destination = "extended_s3"
   s3_bucket_arn                 = aws_s3_bucket.s3.arn
   enable_s3_backup              = true
   s3_backup_bucket_arn          = aws_s3_bucket.s3.arn
@@ -351,7 +352,7 @@ module "firehose" {
   source                      = "fdmsantos/kinesis-firehose/aws"
   version                     = "x.x.x"
   name                        = "firehose-delivery-stream"
-  destination                 = "extended_s3"
+  destination                 = "s3" # or destination = "extended_s3"
   s3_bucket_arn               = "<bucket_arn>"
   enable_destination_log      = true
   destination_log_group_name  = "<cw_log_group_arn>"
@@ -472,7 +473,7 @@ module "firehose" {
   source                             = "fdmsantos/kinesis-firehose/aws"
   version                            = "x.x.x"
   name                               = "firehose-delivery-stream"
-  destination                        = "extended_s3"
+  destination                        = "s3" # or destination = "extended_s3"
   create_application_role            = true
   create_application_role_policy     = true
   application_role_service_principal = "ec2.amazonaws.com"
@@ -485,7 +486,7 @@ module "firehose" {
   source                              = "fdmsantos/kinesis-firehose/aws"
   version                             = "x.x.x"
   name                                = "firehose-delivery-stream"
-  destination                         = "extended_s3"
+  destination                         = "s3" # or destination = "extended_s3"
   configure_existing_application_role = true
   application_role_name               = "application-role"
   create_application_role_policy      = true
@@ -497,6 +498,17 @@ module "firehose" {
   ]
 }
 ```
+
+## Destinations Mapping
+
+The destination variable configured in module is mapped to firehose valid destination.
+
+| Module Destination | Firehose Destination | Differences                                                   |
+|--------------------|----------------------|---------------------------------------------------------------|
+| s3 and extended_s3 | extended_s3          | There is no difference between s3 or extended_s3 destinations |
+| redshift           | redshift             |                                                               |
+| splunk             | splunk               |                                                               |
+| http_endpoint      | http_endpoint        |                                                               |
 
 ## Examples
 

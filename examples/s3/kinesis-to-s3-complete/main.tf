@@ -43,7 +43,7 @@ module "firehose" {
   buffer_interval                               = 100
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = aws_kinesis_stream.this.arn
-  destination                                   = "extended_s3"
+  destination                                   = "s3"
   s3_bucket_arn                                 = aws_s3_bucket.s3.arn
   s3_prefix                                     = "prod/user_id=!{partitionKeyFromQuery:user_id}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
   s3_error_output_prefix                        = "error/"

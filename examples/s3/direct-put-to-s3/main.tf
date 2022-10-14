@@ -52,7 +52,7 @@ resource "aws_iam_role" "this" {
 module "firehose" {
   source                             = "../../../"
   name                               = "${var.name_prefix}-delivery-stream"
-  destination                        = "extended_s3"
+  destination                        = "s3"
   s3_bucket_arn                      = aws_s3_bucket.s3.arn
   enable_sse                         = true
   sse_kms_key_type                   = "CUSTOMER_MANAGED_CMK"

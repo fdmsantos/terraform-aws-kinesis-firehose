@@ -4,6 +4,7 @@ locals {
   cw_log_delivery_stream_name = "DestinationDelivery"
   cw_log_backup_stream_name   = "BackupDelivery"
   destinations = {
+    s3 : "extended_s3",
     extended_s3 : "extended_s3",
     redshift : "redshift",
     elasticsearch : "elasticsearch",
