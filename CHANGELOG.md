@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.5.0...v1.6.0) (2022-10-14)
+
+
+### Features
+
+* Add application Role ([42d947e](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/42d947e9c9f078e72abcf634e2df6042cef5f06e))
+* Add datadog destination ([73e6604](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/73e6604885d07689e6c870ce61549f2b6a7c3a83))
+* Add external id in firehose role trusted policy to prevent confused deputy problem ([ade4133](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/ade4133e921460639ef2558096fd97453f50547c))
+* Add Lambda ARN Feature to transform Lambda ([c74f31f](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/c74f31f14468717318b48d4a2a3970c6c5b5fe0b))
+* Add Opensearch destination alias ([9511cc3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/9511cc393e1feb607c9711c34419456d6acc5115))
+* Add S3 destination alias ([ef88def](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/ef88defabea30ef7298ca25273374e9cfbaa64f2))
+
 ## [1.5.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.4.0...v1.5.0) (2022-10-13)
 
 
