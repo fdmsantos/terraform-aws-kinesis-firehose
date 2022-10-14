@@ -34,6 +34,10 @@ locals {
         name  = "NumberOfRetries"
         value = var.transform_lambda_number_retries
       },
+      {
+        name  = "RoleArn"
+        value = var.transform_lambda_role_arn != null ? var.transform_lambda_role_arn : local.firehose_role_arn
+      },
     ]
   } : null
   metadata_extractor_processor = var.enable_dynamic_partitioning && var.dynamic_partition_metadata_extractor_query != null ? {

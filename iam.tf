@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "assume_role" {
     }
     condition {
       test     = "StringEquals"
-      values   = [ data.aws_caller_identity.current.account_id ]
+      values   = [data.aws_caller_identity.current.account_id]
       variable = "sts:ExternalId"
     }
   }

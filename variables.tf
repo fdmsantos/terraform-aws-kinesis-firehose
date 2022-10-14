@@ -59,7 +59,13 @@ variable "enable_lambda_transform" {
 }
 
 variable "transform_lambda_arn" {
-  description = "Lambda ARN to Transform source records."
+  description = "Lambda ARN to Transform source records"
+  type        = string
+  default     = null
+}
+
+variable "transform_lambda_role_arn" {
+  description = "The ARN of the role to execute the transform lambda. If null use the Firehose Stream role"
   type        = string
   default     = null
 }
