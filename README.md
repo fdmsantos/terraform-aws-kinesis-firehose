@@ -135,7 +135,7 @@ module "firehose" {
 
 ### Elasticsearch / Opensearch Destination
 
-**To Enabled It:** `destination = "elasticsearch"`
+**To Enabled It:** `destination = "elasticsearch" or destination = "opensearch"`
 
 **Variables Prefix:** `elasticsearch_`
 
@@ -144,7 +144,7 @@ module "firehose" {
   source                   = "fdmsantos/kinesis-firehose/aws"
   version                  = "x.x.x"
   name                     = "firehose-delivery-stream"
-  destination              = "elasticsearch"
+  destination              = "opensearch" # or destination = "elasticsearch"
   elasticsearch_domain_arn = "<elasticsearch_domain_arn>"
   elasticsearch_index_name = "<elasticsearch_index_name"
 }
@@ -311,7 +311,7 @@ module "firehose" {
 
 **To Enabled It:** `enable_s3_backup = true`. It's always enable to Elasticsearch, splunk and http destinations
 
-**To Enable Backup Encruption:** `s3_backup_enable_encryption = true`
+**To Enable Backup Encryption:** `s3_backup_enable_encryption = true`
 
 **To Enable Backup Logging** `s3_backup_enable_log = true`. Not supported to Elasticsearch, splunk and http destinations. It's possible add existing cloudwatch group or create new
 
@@ -384,7 +384,7 @@ module "firehose" {
   source                                               = "fdmsantos/kinesis-firehose/aws"
   version                                              = "x.x.x"
   name                                                 = "firehose-delivery-stream"
-  destination                                          = "elasticsearch"
+  destination                                          = "opensearch" # or destination = "elasticsearch"
   elasticsearch_domain_arn                             = "<elasticsearch_domain_arn>"
   elasticsearch_index_name                             = "<elasticsearch_index_name>"
   elasticsearch_enable_vpc                             = true
@@ -401,7 +401,7 @@ module "firehose" {
   source                          = "fdmsantos/kinesis-firehose/aws"
   version                         = "x.x.x"
   name                            = "firehose-delivery-stream"
-  destination                     = "elasticsearch"
+  destination                     = "opensearch" # or destination = "elasticsearch"
   elasticsearch_domain_arn        = "<elasticsearch_domain_arn>"
   elasticsearch_index_name        = "<elasticsearch_index_name>"
   elasticsearch_enable_vpc        = true
@@ -416,7 +416,7 @@ module "firehose" {
   source                                                       = "fdmsantos/kinesis-firehose/aws"
   version                                                      = "x.x.x"
   name                                                         = "firehose-delivery-stream"
-  destination                                                  = "elasticsearch"
+  destination                                                  = "opensearch" # or destination = "elasticsearch"
   elasticsearch_domain_arn                                     = "<elasticsearch_domain_arn>"
   elasticsearch_index_name                                     = "<elasticsearch_index_name>"
   elasticsearch_enable_vpc                                     = true
@@ -503,12 +503,13 @@ module "firehose" {
 
 The destination variable configured in module is mapped to firehose valid destination.
 
-| Module Destination | Firehose Destination | Differences                                                   |
-|--------------------|----------------------|---------------------------------------------------------------|
-| s3 and extended_s3 | extended_s3          | There is no difference between s3 or extended_s3 destinations |
-| redshift           | redshift             |                                                               |
-| splunk             | splunk               |                                                               |
-| http_endpoint      | http_endpoint        |                                                               |
+| Module Destination           | Firehose Destination | Differences                                                             |
+|------------------------------|----------------------|-------------------------------------------------------------------------|
+| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations           |
+| redshift                     | redshift             |                                                                         |
+| splunk                       | splunk               |                                                                         |
+| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations |
+| http_endpoint                | http_endpoint        |                                                                         |
 
 ## Examples
 

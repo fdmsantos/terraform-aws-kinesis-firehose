@@ -8,6 +8,7 @@ locals {
     extended_s3 : "extended_s3",
     redshift : "redshift",
     elasticsearch : "elasticsearch",
+    opensearch : "elasticsearch",
     splunk : "splunk",
     http_endpoint : "http_endpoint"
   }

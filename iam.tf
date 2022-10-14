@@ -436,7 +436,7 @@ resource "aws_iam_role_policy_attachment" "vpc" {
 resource "aws_iam_service_linked_role" "opensearch" {
   count            = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_create_service_linked_role ? 1 : 0
   aws_service_name = "opensearchservice.amazonaws.com"
-  description      = "OpenSearch Service Linked Role to access VPC"
+  description      = "Allows Amazon OpenSearch to manage AWS resources for a domain on your behalf."
   tags             = merge(var.tags, var.role_tags)
 }
 

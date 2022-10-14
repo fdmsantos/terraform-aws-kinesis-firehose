@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "elasticsearch", "splunk", "http_endpoint"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint"], var.destination)
   }
 }
 

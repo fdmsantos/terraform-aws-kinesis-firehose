@@ -70,7 +70,7 @@ POLICIES
 module "firehose" {
   source                      = "../../../"
   name                        = "${var.name_prefix}-delivery-stream"
-  destination                 = "elasticsearch"
+  destination                 = "opensearch"
   buffer_interval             = 60
   elasticsearch_domain_arn    = aws_opensearch_domain.this.arn
   elasticsearch_index_name    = "test"
