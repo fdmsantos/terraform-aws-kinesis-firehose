@@ -356,7 +356,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
           content_encoding = var.http_endpoint_request_configuration_content_encoding
 
           dynamic "common_attributes" {
-            for_each = var.http_endpoint_request_configuration_common_attributes
+            for_each = concat(var.http_endpoint_request_configuration_common_attributes, try(local.http_endpoint_destinations_parameters[var.destination], []))
             content {
               name  = common_attributes.value.name
               value = common_attributes.value.value

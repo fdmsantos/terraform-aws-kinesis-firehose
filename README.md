@@ -49,8 +49,12 @@ Supports all destinations and all Kinesis Firehose Features.
     - Dynamic Partition
   - Redshift
   - ElasticSearch / Opensearch
+    - VPC Support
   - Splunk
-  - Http Endpoint
+    - VPC Support
+  - Custom Http Endpoint
+  - DataDog
+  - Coralogix
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
@@ -228,7 +232,28 @@ module "firehose" {
   name                     = "firehose-delivery-stream"
   destination              = "datadog"
   datadog_endpoint_type    = "metrics_eu"
-  http_endpoint_access_key = "<datadog_access_key>"
+  http_endpoint_access_key = "<datadog_api_key>"
+}
+```
+
+#### Coralogix
+
+**To Enabled It:** `destination = "coralogix"`
+
+**Variables Prefix:** `http_endpoint_` and `coralogix_`
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and coralogix destinations**
+
+**Check [Firehose-to-Coralogix](https://coralogix.com/docs/aws-firehose/#data-source-configuration) to more details.
+
+```hcl
+module "firehose" {
+  source                   = "fdmsantos/kinesis-firehose/aws"
+  version                  = "x.x.x"
+  name                     = "firehose-delivery-stream"
+  destination              = "coralogix"
+  coralogix_endpoint_type  = "coralogix_ireland"
+  http_endpoint_access_key = "<coralogix_private_key>"
 }
 ```
 
@@ -529,14 +554,15 @@ module "firehose" {
 
 The destination variable configured in module is mapped to firehose valid destination.
 
-| Module Destination           | Firehose Destination | Differences                                                                                                                                                                  |
-|------------------------------|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                |
-| redshift                     | redshift             |                                                                                                                                                                              |
-| splunk                       | splunk               |                                                                                                                                                                              |
-| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                      |
-| http_endpoint                | http_endpoint        |                                                                                                                                                                              |
-| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable |
+| Module Destination           | Firehose Destination | Differences                                                                                                                                                                    |
+|------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                  |
+| redshift                     | redshift             |                                                                                                                                                                                |
+| splunk                       | splunk               |                                                                                                                                                                                |
+| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                        |
+| http_endpoint                | http_endpoint        |                                                                                                                                                                                |
+| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable   |
+| coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_type variable |
 
 ## Examples
 
@@ -551,7 +577,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Splunk In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/splunk-in-vpc) - Creates a Kinesis Firehose Stream with splunk in VPC as destination.
 - [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
 - [Datadog](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/datadog) - Creates a Kinesis Firehose Stream with datadog europe metrics as destination.
-
+- [Coralogix](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/coralogix) - Creates a Kinesis Firehose Stream with coralogix ireland as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -637,6 +663,10 @@ No modules.
 | <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
+| <a name="input_coralogix_endpoint_type"></a> [coralogix\_endpoint\_type](#input\_coralogix\_endpoint\_type) | Endpoint type to coralogix destination | `string` | `"coralogix_ireland"` | no |
+| <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName | `string` | `null` | no |
+| <a name="input_coralogix_parameter_subsystem_name"></a> [coralogix\_parameter\_subsystem\_name](#input\_coralogix\_parameter\_subsystem\_name) | By default, your delivery stream name will be used as subsystemName | `string` | `null` | no |
+| <a name="input_coralogix_parameter_use_dynamic_values"></a> [coralogix\_parameter\_use\_dynamic\_values](#input\_coralogix\_parameter\_use\_dynamic\_values) | To use dynamic values for applicationName and subsystemName | `bool` | `false` | no |
 | <a name="input_create"></a> [create](#input\_create) | Controls if kinesis firehose should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_create_application_role"></a> [create\_application\_role](#input\_create\_application\_role) | Set it to true to create role to be used by the source | `bool` | `false` | no |
 | <a name="input_create_application_role_policy"></a> [create\_application\_role\_policy](#input\_create\_application\_role\_policy) | Set it to true to create policy to the role used by the source | `bool` | `false` | no |

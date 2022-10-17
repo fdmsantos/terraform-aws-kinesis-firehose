@@ -66,4 +66,7 @@ http_endpoint_access_key = "<http_endpoint_access_key>"
 | Name | Description |
 |------|-------------|
 | <a name="output_firehose_role"></a> [firehose\_role](#output\_firehose\_role) | Firehose Role |
+| <a name="output_kinesis_firehose_arn"></a> [kinesis\_firehose\_arn](#output\_kinesis\_firehose\_arn) | The ARN of the Kinesis Firehose Stream |
+| <a name="output_kinesis_firehose_destination_id"></a> [kinesis\_firehose\_destination\_id](#output\_kinesis\_firehose\_destination\_id) | The Destination id of the Kinesis Firehose Stream |
+| <a name="output_kinesis_firehose_version_id"></a> [kinesis\_firehose\_version\_id](#output\_kinesis\_firehose\_version\_id) | The Version id of the Kinesis Firehose Stream |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

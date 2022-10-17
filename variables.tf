@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix"], var.destination)
   }
 }
 
@@ -932,6 +932,37 @@ variable "datadog_endpoint_type" {
     error_message = "Please use a valid endpoint type!"
     condition     = contains(["logs_us", "logs_eu", "logs_gov", "metrics_us", "metrics_eu"], var.datadog_endpoint_type)
   }
+}
+
+######
+# Coralogix Destination Variables
+######
+variable "coralogix_endpoint_type" {
+  description = "Endpoint type to coralogix destination"
+  type        = string
+  default     = "coralogix_ireland"
+  validation {
+    error_message = "Please use a valid endpoint type!"
+    condition     = contains(["coralogix_us", "coralogix_singapore", "coralogix_ireland", "coralogix_india", "coralogix_stockholm"], var.coralogix_endpoint_type)
+  }
+}
+
+variable "coralogix_parameter_application_name" {
+  description = "By default, your delivery stream arn will be used as applicationName"
+  type        = string
+  default     = null
+}
+
+variable "coralogix_parameter_subsystem_name" {
+  description = "By default, your delivery stream name will be used as subsystemName"
+  type        = string
+  default     = null
+}
+
+variable "coralogix_parameter_use_dynamic_values" {
+  description = "To use dynamic values for applicationName and subsystemName"
+  type        = bool
+  default     = false
 }
 
 ######

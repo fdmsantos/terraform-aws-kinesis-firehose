@@ -1,6 +1,6 @@
-# Datadog
+# Coralogix
 
-Configuration in this directory creates kinesis firehose stream with Direct Put as source and datadog as destination to Europe Metrics URL.
+Configuration in this directory creates kinesis firehose stream with Direct Put as source and coralogix as destination to Ireland Endpoint.
 
 This example can be tested with Demo Data in Kinesis Firehose Console.
 
@@ -17,7 +17,7 @@ $ terraform apply
 It's necessary configure the following variables:
 
 ```hcl
-datadog_api_key = "<datadog_api_key>"
+coralogix_private_key = "<coralogix_private_key>"
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -54,8 +54,8 @@ datadog_api_key = "<datadog_api_key>"
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_datadog_api_key"></a> [datadog\_api\_key](#input\_datadog\_api\_key) | Datadog Api Key | `string` | n/a | yes |
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-datadog"` | no |
+| <a name="input_coralogix_private_key"></a> [coralogix\_private\_key](#input\_coralogix\_private\_key) | Coralogix Access Key | `string` | n/a | yes |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-coralogix"` | no |
 
 ## Outputs
 

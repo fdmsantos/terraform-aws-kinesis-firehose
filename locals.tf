@@ -11,7 +11,8 @@ locals {
     opensearch : "elasticsearch",
     splunk : "splunk",
     http_endpoint : "http_endpoint",
-    datadog : "http_endpoint"
+    datadog : "http_endpoint",
+    coralogix : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -163,14 +164,20 @@ locals {
   http_endpoint_url = {
     http_endpoint : var.http_endpoint_url
     datadog : local.datadog_endpoint_url[var.datadog_endpoint_type]
+    coralogix : local.coralogix_endpoint_url[var.coralogix_endpoint_type]
   }
 
   http_endpoint_name = {
     http_endpoint : var.http_endpoint_name
     datadog : "Datadog"
+    coralogix : "Coralogix"
   }
 
-  # Data Dog
+  http_endpoint_destinations_parameters = {
+    coralogix : local.coralogix_parameters
+  }
+
+  # DataDog
   datadog_endpoint_url = {
     logs_us : "https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input"
     logs_eu : "https://aws-kinesis-http-intake.logs.datadoghq.eu/v1/input"
@@ -178,6 +185,30 @@ locals {
     metrics_us : "https://awsmetrics-intake.datadoghq.com/v1/input"
     metrics_eu : "https://awsmetrics-intake.datadoghq.eu/v1/input"
   }
+
+  # Coralogix
+  coralogix_endpoint_url = {
+    coralogix_us : "https://firehose-ingress.coralogix.us/firehose"
+    coralogix_singapore : "https://firehose-ingress.coralogixsg.com/firehose"
+    coralogix_ireland : "https://firehose-ingress.coralogix.com/firehose"
+    coralogix_india : "https://firehose-ingress.coralogix.in/firehose"
+    coralogix_stockholm : "https://firehose-ingress.eu2.coralogix.com/firehose"
+  }
+
+  coralogix_parameters = concat(
+    var.coralogix_parameter_application_name != null ? [{
+      name  = "applicationName"
+      value = var.coralogix_parameter_application_name
+    }] : [],
+    var.coralogix_parameter_subsystem_name != null ? [{
+      name  = "subsystemName"
+      value = var.coralogix_parameter_subsystem_name
+    }] : [],
+    var.coralogix_parameter_use_dynamic_values ? [{
+      name  = "dynamicMetadata"
+      value = var.coralogix_parameter_use_dynamic_values
+    }] : []
+  )
 
   # Networking
   firehose_cidr_blocks = {

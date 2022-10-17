@@ -18,7 +18,7 @@ module "firehose" {
   destination                                          = "datadog"
   buffer_interval                                      = 60
   datadog_endpoint_type                                = "metrics_eu"
-  http_endpoint_access_key                             = var.http_endpoint_access_key
+  http_endpoint_access_key                             = var.datadog_api_key
   http_endpoint_retry_duration                         = 400
   http_endpoint_enable_request_configuration           = true
   http_endpoint_request_configuration_content_encoding = "GZIP"
