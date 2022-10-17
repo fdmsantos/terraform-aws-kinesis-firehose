@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.6.0...v1.7.0) (2022-10-17)
+
+
+### Features
+
+* Add coralogix destination ([d8ea509](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/d8ea5096d34af8cec367c5f5b79413e20416e576))
+* Add Dynatrace destination ([378ba91](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/378ba91f4329542325b435c2891ef353f16251f2))
+* Add Honeycomb destination ([5dc04fe](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/5dc04fe00e3e6c3acc857ca8b00665d10e3eabca))
+* Add New Relic destination ([227d95e](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/227d95ea321b676308a7b3ad6fc1ac94c2e4e3e4))
+
 ## [1.6.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.5.0...v1.6.0) (2022-10-14)
 
 
