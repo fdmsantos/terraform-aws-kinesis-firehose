@@ -12,7 +12,8 @@ locals {
     splunk : "splunk",
     http_endpoint : "http_endpoint",
     datadog : "http_endpoint",
-    coralogix : "http_endpoint"
+    coralogix : "http_endpoint",
+    newrelic: "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -165,12 +166,14 @@ locals {
     http_endpoint : var.http_endpoint_url
     datadog : local.datadog_endpoint_url[var.datadog_endpoint_type]
     coralogix : local.coralogix_endpoint_url[var.coralogix_endpoint_type]
+    newrelic: local.newrelic_endpoint_url[var.newrelic_endpoint_type]
   }
 
   http_endpoint_name = {
     http_endpoint : var.http_endpoint_name
     datadog : "Datadog"
     coralogix : "Coralogix"
+    newrelic: "New Relic"
   }
 
   http_endpoint_destinations_parameters = {
@@ -209,6 +212,14 @@ locals {
       value = var.coralogix_parameter_use_dynamic_values
     }] : []
   )
+
+  # New Relic
+  newrelic_endpoint_url = {
+    logs_us : "https://aws-api.newrelic.om/firehose/v1"
+    logs_eu : "https://aws-api.eu.newrelic.com/firehose/v1"
+    metrics_us : "https://aws-api.newrelic.com/cloudwatch-metrics/v1"
+    metrics_eu : "https://aws-api.eu01.nr-data.net/cloudwatch-metrics/v1"
+  }
 
   # Networking
   firehose_cidr_blocks = {

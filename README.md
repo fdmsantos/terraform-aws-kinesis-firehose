@@ -18,6 +18,8 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Splunk](#splunk)
     * [HTTP Endpoint](#http-endpoint)
     * [Datadog](#datadog)
+    * [New Relic](#new-relic)
+    * [Coralogix](#coralogix)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -55,6 +57,7 @@ Supports all destinations and all Kinesis Firehose Features.
   - Custom Http Endpoint
   - DataDog
   - Coralogix
+  - New Relic
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
@@ -233,6 +236,25 @@ module "firehose" {
   destination              = "datadog"
   datadog_endpoint_type    = "metrics_eu"
   http_endpoint_access_key = "<datadog_api_key>"
+}
+```
+
+#### New Relic
+
+**To Enabled It:** `destination = "newrelic"`
+
+**Variables Prefix:** `http_endpoint_` and `newrelic_endpoint_type`
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and newrelic destinations**
+
+```hcl
+module "firehose" {
+  source                   = "fdmsantos/kinesis-firehose/aws"
+  version                  = "x.x.x"
+  name                     = "firehose-delivery-stream"
+  destination              = "newrelic"
+  newrelic_endpoint_type   = "metrics_eu"
+  http_endpoint_access_key = "<newrelic_api_key>"
 }
 ```
 
@@ -562,6 +584,7 @@ The destination variable configured in module is mapped to firehose valid destin
 | opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                        |
 | http_endpoint                | http_endpoint        |                                                                                                                                                                                |
 | datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable   |
+| newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable  |
 | coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_type variable |
 
 ## Examples
@@ -577,6 +600,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Splunk In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/splunk-in-vpc) - Creates a Kinesis Firehose Stream with splunk in VPC as destination.
 - [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
 - [Datadog](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/datadog) - Creates a Kinesis Firehose Stream with datadog europe metrics as destination.
+- [New Relic](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/newrelic) - Creates a Kinesis Firehose Stream with New Relic europe metrics as destination.
 - [Coralogix](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/coralogix) - Creates a Kinesis Firehose Stream with coralogix ireland as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

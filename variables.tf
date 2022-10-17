@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic"], var.destination)
   }
 }
 
@@ -933,6 +933,20 @@ variable "datadog_endpoint_type" {
     condition     = contains(["logs_us", "logs_eu", "logs_gov", "metrics_us", "metrics_eu"], var.datadog_endpoint_type)
   }
 }
+
+######
+# New Relic Destination Variables
+######
+variable "newrelic_endpoint_type" {
+  description = "Endpoint type to New Relic destination"
+  type        = string
+  default     = "logs_eu"
+  validation {
+    error_message = "Please use a valid endpoint type!"
+    condition     = contains(["logs_us", "logs_eu", "metrics_us", "metrics_eu"], var.newrelic_endpoint_type)
+  }
+}
+
 
 ######
 # Coralogix Destination Variables

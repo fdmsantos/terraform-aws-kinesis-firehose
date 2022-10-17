@@ -15,10 +15,10 @@ resource "aws_kms_key" "this" {
 module "firehose" {
   source                                               = "../../../"
   name                                                 = "${var.name_prefix}-delivery-stream"
-  destination                                          = "datadog"
+  destination                                          = "newrelic"
   buffer_interval                                      = 60
-  datadog_endpoint_type                                = "metrics_eu"
-  http_endpoint_access_key                             = var.datadog_api_key
+  newrelic_endpoint_type                                = "metrics_eu"
+  http_endpoint_access_key                             = var.newrelic_api_key
   http_endpoint_retry_duration                         = 60
   http_endpoint_enable_request_configuration           = true
   http_endpoint_request_configuration_content_encoding = "GZIP"
