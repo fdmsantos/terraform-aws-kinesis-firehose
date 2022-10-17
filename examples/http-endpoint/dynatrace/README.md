@@ -1,6 +1,6 @@
 # Datadog
 
-Configuration in this directory creates kinesis firehose stream with Direct Put as source and new relic as destination to Europe Metrics URL.
+Configuration in this directory creates kinesis firehose stream with Direct Put as source and dynatrace as destination to Europe.
 
 This example can be tested with Demo Data in Kinesis Firehose Console.
 
@@ -17,7 +17,8 @@ $ terraform apply
 It's necessary configure the following variables:
 
 ```hcl
-newrelic_api_key = "<newrelic_api_key>"
+dynatrace_api_token = "<dynatrace_api_token>"
+dynatrace_api_url   = "<dynatrace_api_url>"
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -54,8 +55,9 @@ newrelic_api_key = "<newrelic_api_key>"
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-newrelic"` | no |
-| <a name="input_newrelic_api_key"></a> [newrelic\_api\_key](#input\_newrelic\_api\_key) | New Relic Api Key | `string` | n/a | yes |
+| <a name="input_dynatrace_api_token"></a> [dynatrace\_api\_token](#input\_dynatrace\_api\_token) | Dynatrace Api Token | `string` | n/a | yes |
+| <a name="input_dynatrace_api_url"></a> [dynatrace\_api\_url](#input\_dynatrace\_api\_url) | Dynatrace Api url | `string` | n/a | yes |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-dynatrace"` | no |
 
 ## Outputs
 

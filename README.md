@@ -20,6 +20,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Datadog](#datadog)
     * [New Relic](#new-relic)
     * [Coralogix](#coralogix)
+    * [Dynatrace](#dynatrace)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -58,6 +59,7 @@ Supports all destinations and all Kinesis Firehose Features.
   - DataDog
   - Coralogix
   - New Relic
+  - Dynatrace
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
@@ -270,12 +272,32 @@ module "firehose" {
 
 ```hcl
 module "firehose" {
-  source                   = "fdmsantos/kinesis-firehose/aws"
-  version                  = "x.x.x"
-  name                     = "firehose-delivery-stream"
-  destination              = "coralogix"
-  coralogix_endpoint_type  = "coralogix_ireland"
-  http_endpoint_access_key = "<coralogix_private_key>"
+  source                       = "fdmsantos/kinesis-firehose/aws"
+  version                      = "x.x.x"
+  name                         = "firehose-delivery-stream"
+  destination                  = "coralogix"
+  coralogix_endpoint_location  = "ireland"
+  http_endpoint_access_key     = "<coralogix_private_key>"
+}
+```
+
+#### Dynatrace
+
+**To Enabled It:** `destination = "dynatrace"`
+
+**Variables Prefix:** `http_endpoint_`, `dynatrace_endpoint_location` and `dynatrace_api_url`
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and dynatrace destinations**
+
+```hcl
+module "firehose" {
+  source                      = "fdmsantos/kinesis-firehose/aws"
+  version                     = "x.x.x"
+  name                        = "firehose-delivery-stream"
+  destination                 = "dynatrace"
+  dynatrace_endpoint_location = "eu"
+  dynatrace_api_url           = "https://xyazb123456.live.dynatrace.com"
+  http_endpoint_access_key    = "<dynatrace_api_token>"
 }
 ```
 
@@ -576,16 +598,17 @@ module "firehose" {
 
 The destination variable configured in module is mapped to firehose valid destination.
 
-| Module Destination           | Firehose Destination | Differences                                                                                                                                                                    |
-|------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                  |
-| redshift                     | redshift             |                                                                                                                                                                                |
-| splunk                       | splunk               |                                                                                                                                                                                |
-| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                        |
-| http_endpoint                | http_endpoint        |                                                                                                                                                                                |
-| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable   |
-| newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable  |
-| coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_type variable |
+| Module Destination           | Firehose Destination | Differences                                                                                                                                                                                              |
+|------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                                            |
+| redshift                     | redshift             |                                                                                                                                                                                                          |
+| splunk                       | splunk               |                                                                                                                                                                                                          |
+| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                                                  |
+| http_endpoint                | http_endpoint        |                                                                                                                                                                                                          |
+| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                             |
+| newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                            |
+| coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_location variable                       |
+| dynatrace                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable |
 
 ## Examples
 
@@ -602,6 +625,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Datadog](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/datadog) - Creates a Kinesis Firehose Stream with datadog europe metrics as destination.
 - [New Relic](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/newrelic) - Creates a Kinesis Firehose Stream with New Relic europe metrics as destination.
 - [Coralogix](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/coralogix) - Creates a Kinesis Firehose Stream with coralogix ireland as destination.
+- [Dynatrace](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/dynatrace) - Creates a Kinesis Firehose Stream with dynatrace europe as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -687,7 +711,7 @@ No modules.
 | <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
-| <a name="input_coralogix_endpoint_type"></a> [coralogix\_endpoint\_type](#input\_coralogix\_endpoint\_type) | Endpoint type to coralogix destination | `string` | `"coralogix_ireland"` | no |
+| <a name="input_coralogix_endpoint_location"></a> [coralogix\_endpoint\_location](#input\_coralogix\_endpoint\_location) | Endpoint Location to coralogix destination | `string` | `"ireland"` | no |
 | <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName | `string` | `null` | no |
 | <a name="input_coralogix_parameter_subsystem_name"></a> [coralogix\_parameter\_subsystem\_name](#input\_coralogix\_parameter\_subsystem\_name) | By default, your delivery stream name will be used as subsystemName | `string` | `null` | no |
 | <a name="input_coralogix_parameter_use_dynamic_values"></a> [coralogix\_parameter\_use\_dynamic\_values](#input\_coralogix\_parameter\_use\_dynamic\_values) | To use dynamic values for applicationName and subsystemName | `bool` | `false` | no |
@@ -736,6 +760,8 @@ No modules.
 | <a name="input_dynamic_partition_record_deaggregation_delimiter"></a> [dynamic\_partition\_record\_deaggregation\_delimiter](#input\_dynamic\_partition\_record\_deaggregation\_delimiter) | Specifies the delimiter to be used for parsing through the records in the delivery stream and deaggregating them | `string` | `null` | no |
 | <a name="input_dynamic_partition_record_deaggregation_type"></a> [dynamic\_partition\_record\_deaggregation\_type](#input\_dynamic\_partition\_record\_deaggregation\_type) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `string` | `"JSON"` | no |
 | <a name="input_dynamic_partitioning_retry_duration"></a> [dynamic\_partitioning\_retry\_duration](#input\_dynamic\_partitioning\_retry\_duration) | Total amount of seconds Firehose spends on retries | `number` | `300` | no |
+| <a name="input_dynatrace_api_url"></a> [dynatrace\_api\_url](#input\_dynatrace\_api\_url) | API URL to Dynatrace destination | `string` | `null` | no |
+| <a name="input_dynatrace_endpoint_location"></a> [dynatrace\_endpoint\_location](#input\_dynatrace\_endpoint\_location) | Endpoint Location to Dynatrace destination | `string` | `"eu"` | no |
 | <a name="input_elasticsearch_domain_arn"></a> [elasticsearch\_domain\_arn](#input\_elasticsearch\_domain\_arn) | The ARN of the Amazon ES domain. The pattern needs to be arn:.* | `string` | `null` | no |
 | <a name="input_elasticsearch_enable_vpc"></a> [elasticsearch\_enable\_vpc](#input\_elasticsearch\_enable\_vpc) | Indicates if destination is configured in VPC. Supported only to Elasticsearch destinations | `bool` | `false` | no |
 | <a name="input_elasticsearch_index_name"></a> [elasticsearch\_index\_name](#input\_elasticsearch\_index\_name) | The Elasticsearch index name | `string` | `null` | no |
@@ -769,6 +795,7 @@ No modules.
 | <a name="input_kinesis_source_stream_arn"></a> [kinesis\_source\_stream\_arn](#input\_kinesis\_source\_stream\_arn) | The kinesis stream used as the source of the firehose delivery stream | `string` | `null` | no |
 | <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
 | <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in | `string` | n/a | yes |
+| <a name="input_newrelic_endpoint_type"></a> [newrelic\_endpoint\_type](#input\_newrelic\_endpoint\_type) | Endpoint type to New Relic destination | `string` | `"logs_eu"` | no |
 | <a name="input_policy_path"></a> [policy\_path](#input\_policy\_path) | Path of policies to that should be added to IAM role for Kinesis Firehose Stream | `string` | `null` | no |
 | <a name="input_redshift_cluster_endpoint"></a> [redshift\_cluster\_endpoint](#input\_redshift\_cluster\_endpoint) | The redshift endpoint | `string` | `null` | no |
 | <a name="input_redshift_cluster_identifier"></a> [redshift\_cluster\_identifier](#input\_redshift\_cluster\_identifier) | Redshift Cluster identifier. Necessary to associate the iam role to cluster | `string` | `null` | no |

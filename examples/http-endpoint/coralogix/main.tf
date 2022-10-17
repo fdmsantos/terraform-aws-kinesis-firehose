@@ -17,7 +17,7 @@ module "firehose" {
   name                                                 = "${var.name_prefix}-delivery-stream"
   destination                                          = "coralogix"
   buffer_interval                                      = 60
-  coralogix_endpoint_type                              = "coralogix_ireland"
+  coralogix_endpoint_location                          = "ireland"
   http_endpoint_access_key                             = var.coralogix_private_key
   http_endpoint_retry_duration                         = 30
   http_endpoint_enable_request_configuration           = true

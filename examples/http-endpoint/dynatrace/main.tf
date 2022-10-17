@@ -15,10 +15,11 @@ resource "aws_kms_key" "this" {
 module "firehose" {
   source                                               = "../../../"
   name                                                 = "${var.name_prefix}-delivery-stream"
-  destination                                          = "newrelic"
+  destination                                          = "dynatrace"
   buffer_interval                                      = 60
-  newrelic_endpoint_type                               = "metrics_eu"
-  http_endpoint_access_key                             = var.newrelic_api_key
+  dynatrace_endpoint_location                          = "eu"
+  dynatrace_api_url                                    = var.dynatrace_api_url
+  http_endpoint_access_key                             = var.dynatrace_api_token
   http_endpoint_retry_duration                         = 60
   http_endpoint_enable_request_configuration           = true
   http_endpoint_request_configuration_content_encoding = "GZIP"

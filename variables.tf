@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace"], var.destination)
   }
 }
 
@@ -947,17 +947,35 @@ variable "newrelic_endpoint_type" {
   }
 }
 
+######
+# Dynatrace Destination Variables
+######
+variable "dynatrace_endpoint_location" {
+  description = "Endpoint Location to Dynatrace destination"
+  type        = string
+  default     = "eu"
+  validation {
+    error_message = "Please use a valid endpoint type!"
+    condition     = contains(["us", "eu", "global"], var.dynatrace_endpoint_location)
+  }
+}
+
+variable "dynatrace_api_url" {
+  description = "API URL to Dynatrace destination"
+  type        = string
+  default     = null
+}
 
 ######
 # Coralogix Destination Variables
 ######
-variable "coralogix_endpoint_type" {
-  description = "Endpoint type to coralogix destination"
+variable "coralogix_endpoint_location" {
+  description = "Endpoint Location to coralogix destination"
   type        = string
-  default     = "coralogix_ireland"
+  default     = "ireland"
   validation {
     error_message = "Please use a valid endpoint type!"
-    condition     = contains(["coralogix_us", "coralogix_singapore", "coralogix_ireland", "coralogix_india", "coralogix_stockholm"], var.coralogix_endpoint_type)
+    condition     = contains(["us", "singapore", "ireland", "india", "stockholm"], var.coralogix_endpoint_location)
   }
 }
 

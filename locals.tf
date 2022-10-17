@@ -13,7 +13,8 @@ locals {
     http_endpoint : "http_endpoint",
     datadog : "http_endpoint",
     coralogix : "http_endpoint",
-    newrelic: "http_endpoint"
+    newrelic : "http_endpoint",
+    dynatrace : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -165,19 +166,22 @@ locals {
   http_endpoint_url = {
     http_endpoint : var.http_endpoint_url
     datadog : local.datadog_endpoint_url[var.datadog_endpoint_type]
-    coralogix : local.coralogix_endpoint_url[var.coralogix_endpoint_type]
-    newrelic: local.newrelic_endpoint_url[var.newrelic_endpoint_type]
+    coralogix : local.coralogix_endpoint_url[var.coralogix_endpoint_location]
+    newrelic : local.newrelic_endpoint_url[var.newrelic_endpoint_type]
+    dynatrace : local.dynatrace_endpoint_url[var.dynatrace_endpoint_location]
   }
 
   http_endpoint_name = {
     http_endpoint : var.http_endpoint_name
     datadog : "Datadog"
     coralogix : "Coralogix"
-    newrelic: "New Relic"
+    newrelic : "New Relic"
+    dynatrace : "Dynatrace"
   }
 
   http_endpoint_destinations_parameters = {
     coralogix : local.coralogix_parameters
+    dynatrace : local.dynatrace_parameters
   }
 
   # DataDog
@@ -189,13 +193,35 @@ locals {
     metrics_eu : "https://awsmetrics-intake.datadoghq.eu/v1/input"
   }
 
+  # New Relic
+  newrelic_endpoint_url = {
+    logs_us : "https://aws-api.newrelic.om/firehose/v1"
+    logs_eu : "https://aws-api.eu.newrelic.com/firehose/v1"
+    metrics_us : "https://aws-api.newrelic.com/cloudwatch-metrics/v1"
+    metrics_eu : "https://aws-api.eu01.nr-data.net/cloudwatch-metrics/v1"
+  }
+
+  # Dynatrace
+  dynatrace_endpoint_url = {
+    us : "https://us.aws.cloud.dynatrace.com"
+    eu : "https://eu.aws.cloud.dynatrace.com"
+    global : "https://aws.cloud.dynatrace.com"
+  }
+
+  dynatrace_parameters = concat(
+    var.destination == "dynatrace" ? [{
+      name  = "dt-url"
+      value = var.dynatrace_api_url
+    }] : [],
+  )
+
   # Coralogix
   coralogix_endpoint_url = {
-    coralogix_us : "https://firehose-ingress.coralogix.us/firehose"
-    coralogix_singapore : "https://firehose-ingress.coralogixsg.com/firehose"
-    coralogix_ireland : "https://firehose-ingress.coralogix.com/firehose"
-    coralogix_india : "https://firehose-ingress.coralogix.in/firehose"
-    coralogix_stockholm : "https://firehose-ingress.eu2.coralogix.com/firehose"
+    us : "https://firehose-ingress.coralogix.us/firehose"
+    singapore : "https://firehose-ingress.coralogixsg.com/firehose"
+    ireland : "https://firehose-ingress.coralogix.com/firehose"
+    india : "https://firehose-ingress.coralogix.in/firehose"
+    stockholm : "https://firehose-ingress.eu2.coralogix.com/firehose"
   }
 
   coralogix_parameters = concat(
@@ -212,14 +238,6 @@ locals {
       value = var.coralogix_parameter_use_dynamic_values
     }] : []
   )
-
-  # New Relic
-  newrelic_endpoint_url = {
-    logs_us : "https://aws-api.newrelic.om/firehose/v1"
-    logs_eu : "https://aws-api.eu.newrelic.com/firehose/v1"
-    metrics_us : "https://aws-api.newrelic.com/cloudwatch-metrics/v1"
-    metrics_eu : "https://aws-api.eu01.nr-data.net/cloudwatch-metrics/v1"
-  }
 
   # Networking
   firehose_cidr_blocks = {
