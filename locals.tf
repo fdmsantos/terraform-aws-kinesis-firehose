@@ -14,7 +14,8 @@ locals {
     datadog : "http_endpoint",
     coralogix : "http_endpoint",
     newrelic : "http_endpoint",
-    dynatrace : "http_endpoint"
+    dynatrace : "http_endpoint",
+    honeycomb : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -169,6 +170,7 @@ locals {
     coralogix : local.coralogix_endpoint_url[var.coralogix_endpoint_location]
     newrelic : local.newrelic_endpoint_url[var.newrelic_endpoint_type]
     dynatrace : local.dynatrace_endpoint_url[var.dynatrace_endpoint_location]
+    honeycomb : "${var.honeycomb_api_host}/1/kinesis_events/${var.honeycomb_dataset_name}"
   }
 
   http_endpoint_name = {
@@ -177,6 +179,7 @@ locals {
     coralogix : "Coralogix"
     newrelic : "New Relic"
     dynatrace : "Dynatrace"
+    honeycomb : "Honeycomb"
   }
 
   http_endpoint_destinations_parameters = {

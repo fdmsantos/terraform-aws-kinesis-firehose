@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb"], var.destination)
   }
 }
 
@@ -964,6 +964,21 @@ variable "dynatrace_api_url" {
   description = "API URL to Dynatrace destination"
   type        = string
   default     = null
+}
+
+######
+# Honeycomb Destination Variables
+######
+variable "honeycomb_api_host" {
+  type        = string
+  default     = "https://api.honeycomb.io"
+  description = "If you use a Secure Tenancy or other proxy, put its schema://host[:port] here"
+}
+
+variable "honeycomb_dataset_name" {
+  type        = string
+  description = "Your Honeycomb dataset name"
+  default     = ""
 }
 
 ######

@@ -21,6 +21,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [New Relic](#new-relic)
     * [Coralogix](#coralogix)
     * [Dynatrace](#dynatrace)
+    * [Honeycomb](#honeycomb)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -60,6 +61,7 @@ Supports all destinations and all Kinesis Firehose Features.
   - Coralogix
   - New Relic
   - Dynatrace
+  - Honeycomb
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
@@ -298,6 +300,26 @@ module "firehose" {
   dynatrace_endpoint_location = "eu"
   dynatrace_api_url           = "https://xyazb123456.live.dynatrace.com"
   http_endpoint_access_key    = "<dynatrace_api_token>"
+}
+```
+
+#### Honeycomb
+
+**To Enabled It:** `destination = "honeycomb"`
+
+**Variables Prefix:** `http_endpoint_`, `honeycomb_api_host (Default: https://api.honeycomb.io)` and `honeycomb_dataset_name`. 
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and honeycomb destinations**
+
+```hcl
+module "firehose" {
+  source                   = "fdmsantos/kinesis-firehose/aws"
+  version                  = "x.x.x"
+  name                     = "firehose-delivery-stream"
+  destination              = "honeycomb"
+  honeycomb_api_host       = "https://api.honeycomb.io"
+  honeycomb_dataset_name   =  "<honeycomb_dataset_name>"
+  http_endpoint_access_key = "<honeycomb_api_key>"
 }
 ```
 
@@ -609,6 +631,7 @@ The destination variable configured in module is mapped to firehose valid destin
 | newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                            |
 | coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_location variable                       |
 | dynatrace                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable |
+| honeycomb                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure honeycomb_dataset_name variable                            |
 
 ## Examples
 
@@ -626,6 +649,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [New Relic](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/newrelic) - Creates a Kinesis Firehose Stream with New Relic europe metrics as destination.
 - [Coralogix](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/coralogix) - Creates a Kinesis Firehose Stream with coralogix ireland as destination.
 - [Dynatrace](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/dynatrace) - Creates a Kinesis Firehose Stream with dynatrace europe as destination.
+- [Honeycomb](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/honeycomb) - Creates a Kinesis Firehose Stream with honeycomb as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -782,6 +806,8 @@ No modules.
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
 | <a name="input_firehose_role"></a> [firehose\_role](#input\_firehose\_role) | IAM role ARN attached to the Kinesis Firehose Stream. | `string` | `null` | no |
+| <a name="input_honeycomb_api_host"></a> [honeycomb\_api\_host](#input\_honeycomb\_api\_host) | If you use a Secure Tenancy or other proxy, put its schema://host[:port] here | `string` | `"https://api.honeycomb.io"` | no |
+| <a name="input_honeycomb_dataset_name"></a> [honeycomb\_dataset\_name](#input\_honeycomb\_dataset\_name) | Your Honeycomb dataset name | `string` | `null` | no |
 | <a name="input_http_endpoint_access_key"></a> [http\_endpoint\_access\_key](#input\_http\_endpoint\_access\_key) | The access key required for Kinesis Firehose to authenticate with the HTTP endpoint selected as the destination | `string` | `null` | no |
 | <a name="input_http_endpoint_enable_request_configuration"></a> [http\_endpoint\_enable\_request\_configuration](#input\_http\_endpoint\_enable\_request\_configuration) | The request configuration | `bool` | `false` | no |
 | <a name="input_http_endpoint_name"></a> [http\_endpoint\_name](#input\_http\_endpoint\_name) | The HTTP endpoint name | `string` | `null` | no |
