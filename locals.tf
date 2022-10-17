@@ -15,7 +15,8 @@ locals {
     coralogix : "http_endpoint",
     newrelic : "http_endpoint",
     dynatrace : "http_endpoint",
-    honeycomb : "http_endpoint"
+    honeycomb : "http_endpoint",
+    logicmonitor : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -171,6 +172,7 @@ locals {
     newrelic : local.newrelic_endpoint_url[var.newrelic_endpoint_type]
     dynatrace : local.dynatrace_endpoint_url[var.dynatrace_endpoint_location]
     honeycomb : "${var.honeycomb_api_host}/1/kinesis_events/${var.honeycomb_dataset_name}"
+    logicmonitor : "https://${var.logicmonitor_account}.logicmonitor.com"
   }
 
   http_endpoint_name = {
@@ -180,6 +182,7 @@ locals {
     newrelic : "New Relic"
     dynatrace : "Dynatrace"
     honeycomb : "Honeycomb"
+    logicmonitor : "LogicMonitor"
   }
 
   http_endpoint_destinations_parameters = {
