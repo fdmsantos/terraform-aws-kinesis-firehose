@@ -66,6 +66,11 @@ output "opensearch_iam_service_linked_role_arn" {
   value       = try(aws_iam_service_linked_role.opensearch[0].arn, "")
 }
 
+output "opensearch_cross_account_service_policy" {
+  description = "OpenSearch Service policy when the opensearch domain belongs to another account"
+  value       = try(data.aws_iam_policy_document.cross_account_elasticsearch[0].json, "")
+}
+
 output "application_role_arn" {
   description = "The ARN of the IAM role created for Kinesis Firehose Stream Source"
   value       = try(aws_iam_role.application[0].arn, "")

@@ -77,6 +77,8 @@ Supports all destinations and all Kinesis Firehose Features.
   - IAM Roles
   - Opensearch Service Role
   - Associate Role to Redshift Cluster Iam Roles
+  - Cross Account S3 Bucket Policy
+  - Cross Account OpenSearch Service policy
 
 ## How to Use
 

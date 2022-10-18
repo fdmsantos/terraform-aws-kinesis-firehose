@@ -373,7 +373,7 @@ data "aws_iam_policy_document" "elasticsearch" {
       "es:ESHttpPut"
     ]
     resources = [
-      var.elasticsearch_domain_arn, # E quando for cluster endpoint?
+      var.elasticsearch_domain_arn,
       "${var.elasticsearch_domain_arn}/*"
     ]
   }
@@ -412,6 +412,34 @@ resource "aws_iam_role_policy_attachment" "elasticsearch" {
   policy_arn = aws_iam_policy.elasticsearch[0].arn
 }
 
+data "aws_iam_policy_document" "cross_account_elasticsearch" {
+  count = local.add_elasticsearch_policy && var.elasticsearch_cross_account ? 1 : 0
+  version = "2012-10-17"
+  statement {
+    sid = "Cross Account Access to ${data.aws_caller_identity.current.account_id} Account"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [local.firehose_role_arn]
+    }
+
+    actions = [
+      "es:ESHttpGet"
+    ]
+
+    resources = [
+      "${var.elasticsearch_domain_arn}/_all/_settings",
+      "${var.elasticsearch_domain_arn}/_cluster/stats",
+      "${var.elasticsearch_domain_arn}/${var.elasticsearch_index_name}*/_mapping/${var.elasticsearch_type_name != null ? var.elasticsearch_type_name : "*"}",
+      "${var.elasticsearch_domain_arn}/_nodes",
+      "${var.elasticsearch_domain_arn}/_nodes/stats",
+      "${var.elasticsearch_domain_arn}/_nodes/*/stats",
+      "${var.elasticsearch_domain_arn}/_stats",
+      "${var.elasticsearch_domain_arn}/${var.elasticsearch_index_name}*/_stats"
+    ]
+  }
+}
 ##################
 # VPC
 ##################

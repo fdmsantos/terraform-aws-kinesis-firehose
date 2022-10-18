@@ -774,6 +774,12 @@ variable "elasticsearch_vpc_subnet_ids" {
   default     = null
 }
 
+variable "elasticsearch_cross_account" {
+  description = "Indicates if Elasticsearch domain is in a different account"
+  type        = bool
+  default     = false
+}
+
 variable "vpc_security_group_firehose_ids" {
   description = "A list of security group IDs to associate with Kinesis Firehose"
   type        = list(string)
