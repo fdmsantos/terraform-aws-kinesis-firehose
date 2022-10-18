@@ -87,7 +87,6 @@ data "aws_iam_policy_document" "kinesis" {
 
 resource "aws_iam_policy" "kinesis" {
   count = local.add_kinesis_source_policy ? 1 : 0
-
   name   = "${local.role_name}-kinesis"
   path   = var.policy_path
   policy = data.aws_iam_policy_document.kinesis[0].json
@@ -96,7 +95,6 @@ resource "aws_iam_policy" "kinesis" {
 
 resource "aws_iam_role_policy_attachment" "kinesis" {
   count = local.add_kinesis_source_policy ? 1 : 0
-
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.kinesis[0].arn
 }
@@ -118,7 +116,6 @@ data "aws_iam_policy_document" "lambda" {
 
 resource "aws_iam_policy" "lambda" {
   count = local.add_lambda_policy ? 1 : 0
-
   name   = "${local.role_name}-lambda"
   path   = var.policy_path
   policy = data.aws_iam_policy_document.lambda[0].json
@@ -127,7 +124,6 @@ resource "aws_iam_policy" "lambda" {
 
 resource "aws_iam_role_policy_attachment" "lambda" {
   count = local.add_lambda_policy ? 1 : 0
-
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.lambda[0].arn
 }
@@ -242,7 +238,6 @@ data "aws_iam_policy_document" "glue" {
 
 resource "aws_iam_policy" "glue" {
   count = local.add_glue_policy ? 1 : 0
-
   name   = "${local.role_name}-glue"
   path   = var.policy_path
   policy = data.aws_iam_policy_document.glue[0].json
@@ -251,7 +246,6 @@ resource "aws_iam_policy" "glue" {
 
 resource "aws_iam_role_policy_attachment" "glue" {
   count = local.add_glue_policy ? 1 : 0
-
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.glue[0].arn
 }
@@ -283,7 +277,6 @@ data "aws_iam_policy_document" "s3" {
 
 resource "aws_iam_policy" "s3" {
   count = local.add_s3_policy ? 1 : 0
-
   name   = "${local.role_name}-s3"
   path   = var.policy_path
   policy = data.aws_iam_policy_document.s3[0].json
@@ -292,9 +285,37 @@ resource "aws_iam_policy" "s3" {
 
 resource "aws_iam_role_policy_attachment" "s3" {
   count = local.add_s3_policy ? 1 : 0
-
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.s3[0].arn
+}
+
+data "aws_iam_policy_document" "cross_account_s3" {
+  count = var.create && var.create_role && local.s3_destination && var.s3_cross_account ? 1 : 0
+  version = "2012-10-17"
+  statement {
+    sid = "Cross Account Access to ${data.aws_caller_identity.current.account_id} Account"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [local.firehose_role_arn]
+    }
+
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject",
+      "s3:PutObjectAcl"
+    ]
+
+    resources = compact([
+      var.s3_bucket_arn != null ? var.s3_bucket_arn : "",
+      var.s3_bucket_arn != null ? "${var.s3_bucket_arn}/*" : "",
+    ])
+  }
 }
 
 ##################
@@ -316,7 +337,6 @@ data "aws_iam_policy_document" "cw" {
 
 resource "aws_iam_policy" "cw" {
   count = local.add_cw_policy ? 1 : 0
-
   name   = "${local.role_name}-cw"
   path   = var.policy_path
   policy = data.aws_iam_policy_document.cw[0].json
@@ -325,7 +345,6 @@ resource "aws_iam_policy" "cw" {
 
 resource "aws_iam_role_policy_attachment" "cw" {
   count = local.add_cw_policy ? 1 : 0
-
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.cw[0].arn
 }
@@ -338,7 +357,6 @@ resource "aws_redshift_cluster_iam_roles" "this" {
   cluster_identifier = var.redshift_cluster_identifier
   iam_role_arns      = [aws_iam_role.firehose[0].arn]
 }
-
 
 ##################
 # Elasticsearch

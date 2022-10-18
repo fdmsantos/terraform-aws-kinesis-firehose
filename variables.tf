@@ -294,6 +294,12 @@ variable "s3_own_bucket" {
   default     = true
 }
 
+variable "s3_cross_account" {
+  description = "Indicates if S3 bucket destination is in a different account"
+  type        = bool
+  default     = false
+}
+
 ######
 # Kinesis Source
 ######

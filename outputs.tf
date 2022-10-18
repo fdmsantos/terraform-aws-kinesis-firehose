@@ -56,6 +56,11 @@ output "kinesis_firehose_role_arn" {
   value       = try(aws_iam_role.firehose[0].arn, "")
 }
 
+output "s3_cross_account_bucket_policy" {
+  description = "Bucket Policy to S3 Bucket Destination when the bucket belongs to another account"
+  value       = try(data.aws_iam_policy_document.cross_account_s3[0].json, "")
+}
+
 output "opensearch_iam_service_linked_role_arn" {
   description = "The ARN of the Opensearch IAM Service linked role"
   value       = try(aws_iam_service_linked_role.opensearch[0].arn, "")
