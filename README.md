@@ -55,10 +55,11 @@ Supports all destinations and all Kinesis Firehose Features.
     - Data Format Conversion
     - Dynamic Partition
   - Redshift
+    - Redshift in VPC: Create Security Groups
   - ElasticSearch / Opensearch
     - VPC Support
   - Splunk
-    - VPC Support
+    - Splunk in VPC: Create Security Groups
   - Custom Http Endpoint
   - DataDog
   - Coralogix
@@ -71,6 +72,11 @@ Supports all destinations and all Kinesis Firehose Features.
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
+- Application Role to Direct Put Sources
+- Permissions
+  - IAM Roles
+  - Opensearch Service Role
+  - Associate Role to Redshift Cluster Iam Roles
 
 ## How to Use
 
@@ -929,6 +935,7 @@ No modules.
 | <a name="input_s3_compression_format"></a> [s3\_compression\_format](#input\_s3\_compression\_format) | The compression format | `string` | `"UNCOMPRESSED"` | no |
 | <a name="input_s3_error_output_prefix"></a> [s3\_error\_output\_prefix](#input\_s3\_error\_output\_prefix) | Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name. | `string` | `null` | no |
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
+| <a name="input_s3_own_bucket"></a> [s3\_own\_bucket](#input\_s3\_own\_bucket) | Indicates if you own the bucket. If not, will be configure permissions to grants the bucket owner full access to the objects delivered by Kinesis Data Firehose | `bool` | `true` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
 | <a name="input_splunk_hec_acknowledgment_timeout"></a> [splunk\_hec\_acknowledgment\_timeout](#input\_splunk\_hec\_acknowledgment\_timeout) | The amount of time, that Kinesis Firehose waits to receive an acknowledgment from Splunk after it sends it data | `number` | `600` | no |
 | <a name="input_splunk_hec_endpoint"></a> [splunk\_hec\_endpoint](#input\_splunk\_hec\_endpoint) | The HTTP Event Collector (HEC) endpoint to which Kinesis Firehose sends your data | `string` | `null` | no |

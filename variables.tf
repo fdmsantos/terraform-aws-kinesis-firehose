@@ -288,6 +288,12 @@ variable "s3_compression_format" {
   }
 }
 
+variable "s3_own_bucket" {
+  description = "Indicates if you own the bucket. If not, will be configure permissions to grants the bucket owner full access to the objects delivered by Kinesis Data Firehose"
+  type        = bool
+  default     = true
+}
+
 ######
 # Kinesis Source
 ######

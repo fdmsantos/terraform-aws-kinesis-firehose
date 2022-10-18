@@ -263,14 +263,15 @@ data "aws_iam_policy_document" "s3" {
   count = local.add_s3_policy ? 1 : 0
   statement {
     effect = "Allow"
-    actions = [
+    actions = compact([
       "s3:AbortMultipartUpload",
       "s3:GetBucketLocation",
       "s3:GetObject",
       "s3:ListBucket",
       "s3:ListBucketMultipartUploads",
-      "s3:PutObject"
-    ]
+      "s3:PutObject",
+      !var.s3_own_bucket ? "s3:PutObjectAcl" : "",
+    ])
     resources = distinct(compact([
       var.s3_bucket_arn != null ? var.s3_bucket_arn : "",
       var.s3_bucket_arn != null ? "${var.s3_bucket_arn}/*" : "",
