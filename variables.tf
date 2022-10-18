@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic"], var.destination)
   }
 }
 
@@ -978,7 +978,7 @@ variable "honeycomb_api_host" {
 variable "honeycomb_dataset_name" {
   type        = string
   description = "Your Honeycomb dataset name to Honeycomb destination"
-  default     = ""
+  default     = null
 }
 
 ######
@@ -987,7 +987,7 @@ variable "honeycomb_dataset_name" {
 variable "logicmonitor_account" {
   type        = string
   description = "Account to use in Logic Monitor destination"
-  default     = ""
+  default     = null
 }
 
 ######
@@ -995,8 +995,27 @@ variable "logicmonitor_account" {
 ######
 variable "mongodb_realm_webhook_url" {
   type        = string
-  description = "Account to use in Logic Monitor destination"
-  default     = ""
+  description = "Realm Webhook URL to use in MongoDB destination"
+  default     = null
+}
+
+######
+# SumoLogic Destination Variables
+######
+variable "sumologic_deployment_name" {
+  type        = string
+  description = "Deployment Name to use in Sumo Logic destination"
+  default     = null
+}
+
+variable "sumologic_data_type" {
+  type        = string
+  description = "Data Type to use in Sumo Logic destination"
+  default     = "log"
+  validation {
+    error_message = "Please use a valid data type!"
+    condition     = contains(["log", "metric"], var.sumologic_data_type)
+  }
 }
 
 ######

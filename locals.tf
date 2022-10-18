@@ -17,7 +17,8 @@ locals {
     dynatrace : "http_endpoint",
     honeycomb : "http_endpoint",
     logicmonitor : "http_endpoint",
-    mongodb : "http_endpoint"
+    mongodb : "http_endpoint",
+    sumologic : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -172,9 +173,10 @@ locals {
     coralogix : local.coralogix_endpoint_url[var.coralogix_endpoint_location]
     newrelic : local.newrelic_endpoint_url[var.newrelic_endpoint_type]
     dynatrace : local.dynatrace_endpoint_url[var.dynatrace_endpoint_location]
-    honeycomb : "${var.honeycomb_api_host}/1/kinesis_events/${var.honeycomb_dataset_name}"
-    logicmonitor : "https://${var.logicmonitor_account}.logicmonitor.com"
-    mongodb : var.mongodb_realm_webhook_url
+    honeycomb : "${coalesce(var.honeycomb_api_host, "n/a")}/1/kinesis_events/${coalesce(var.honeycomb_dataset_name, "n/a")}"
+    logicmonitor : "https://${coalesce(var.logicmonitor_account, "n/a")}.logicmonitor.com"
+    mongodb : coalesce(var.mongodb_realm_webhook_url, "n/a")
+    sumologic : "https://${coalesce(var.sumologic_deployment_name, "n/a")}.sumologic.net/receiver/v1/kinesis/${coalesce(var.sumologic_data_type, "n/a")}/${coalesce(var.http_endpoint_access_key, "n/a")}"
   }
 
   http_endpoint_name = {
@@ -186,6 +188,7 @@ locals {
     honeycomb : "Honeycomb"
     logicmonitor : "LogicMonitor"
     mongodb : "MongoDB Cloud"
+    sumologic : "Sumo Logic"
   }
 
   http_endpoint_destinations_parameters = {

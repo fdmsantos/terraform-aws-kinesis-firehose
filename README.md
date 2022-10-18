@@ -24,6 +24,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Honeycomb](#honeycomb)
     * [Logic Monitor](#logic-monitor)
     * [MongoDB](#mongodb)
+    * [SumoLogic](#sumologic)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -66,6 +67,7 @@ Supports all destinations and all Kinesis Firehose Features.
   - Honeycomb
   - Logic Monitor
   - MongoDB Cloud
+  - Sumo Logic
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
@@ -322,7 +324,7 @@ module "firehose" {
   name                     = "firehose-delivery-stream"
   destination              = "honeycomb"
   honeycomb_api_host       = "https://api.honeycomb.io"
-  honeycomb_dataset_name   =  "<honeycomb_dataset_name>"
+  honeycomb_dataset_name   = "<honeycomb_dataset_name>"
   http_endpoint_access_key = "<honeycomb_api_key>"
 }
 ```
@@ -362,6 +364,26 @@ module "firehose" {
   destination               = "mongodb"
   mongodb_realm_webhook_url = "<mongodb_realm_webhook_url>"
   http_endpoint_access_key  = "<mongodb_api_key>"
+}
+```
+
+#### SumoLogic
+
+**To Enabled It:** `destination = "sumologic"`
+
+**Variables Prefix:** `http_endpoint_`, `sumologic_deployment_name` and `sumologic_data_type`
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and Sumo Logic destinations**
+
+```hcl
+module "firehose" {
+  source                    = "fdmsantos/kinesis-firehose/aws"
+  version                   = "x.x.x"
+  name                      = "firehose-delivery-stream"
+  destination               = "sumologic"
+  sumologic_deployment_name = "<sumologic_deployment_name>"
+  sumologic_data_type       = "<sumologic_data_type>"
+  http_endpoint_access_key  = "<sumologic_access_token>"
 }
 ```
 
@@ -662,20 +684,21 @@ module "firehose" {
 
 The destination variable configured in module is mapped to firehose valid destination.
 
-| Module Destination           | Firehose Destination | Differences                                                                                                                                                                                              |
-|------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                                            |
-| redshift                     | redshift             |                                                                                                                                                                                                          |
-| splunk                       | splunk               |                                                                                                                                                                                                          |
-| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                                                  |
-| http_endpoint                | http_endpoint        |                                                                                                                                                                                                          |
-| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                             |
-| newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                            |
-| coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_location variable                       |
-| dynatrace                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable |
-| honeycomb                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure honeycomb_dataset_name variable                            |
-| logicmonitor                 | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure logicmonitor_account variable                              |
-| mongodb                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure mongodb_realm_webhook_url variable                         |
+| Module Destination           | Firehose Destination | Differences                                                                                                                                                                                               |
+|------------------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                                             |
+| redshift                     | redshift             |                                                                                                                                                                                                           |
+| splunk                       | splunk               |                                                                                                                                                                                                           |
+| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                                                   |
+| http_endpoint                | http_endpoint        |                                                                                                                                                                                                           |
+| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                              |
+| newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                             |
+| coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_location variable                        |
+| dynatrace                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable  |
+| honeycomb                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure honeycomb_dataset_name variable                             |
+| logicmonitor                 | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure logicmonitor_account variable                               |
+| mongodb                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure mongodb_realm_webhook_url variable                          |
+| sumologic                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure sumologic_deployment_name and sumologic_data_type variables |
 
 ## Examples
 
@@ -696,7 +719,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Honeycomb](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/honeycomb) - Creates a Kinesis Firehose Stream with honeycomb as destination.
 - [LogicMonitor](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/logicmonitor) - Creates a Kinesis Firehose Stream with Logic Monitor as destination.
 - [MongoDB](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/mongodb) - Creates a Kinesis Firehose Stream with MongoDB as destination.
-
+- [SumoLogic](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/sumologic) - Creates a Kinesis Firehose Stream with Sumo Logic as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -854,7 +877,7 @@ No modules.
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
 | <a name="input_firehose_role"></a> [firehose\_role](#input\_firehose\_role) | IAM role ARN attached to the Kinesis Firehose Stream. | `string` | `null` | no |
 | <a name="input_honeycomb_api_host"></a> [honeycomb\_api\_host](#input\_honeycomb\_api\_host) | If you use a Secure Tenancy or other proxy, put its schema://host[:port] here | `string` | `"https://api.honeycomb.io"` | no |
-| <a name="input_honeycomb_dataset_name"></a> [honeycomb\_dataset\_name](#input\_honeycomb\_dataset\_name) | Your Honeycomb dataset name to Honeycomb destination | `string` | `""` | no |
+| <a name="input_honeycomb_dataset_name"></a> [honeycomb\_dataset\_name](#input\_honeycomb\_dataset\_name) | Your Honeycomb dataset name to Honeycomb destination | `string` | `null` | no |
 | <a name="input_http_endpoint_access_key"></a> [http\_endpoint\_access\_key](#input\_http\_endpoint\_access\_key) | The access key required for Kinesis Firehose to authenticate with the HTTP endpoint selected as the destination | `string` | `null` | no |
 | <a name="input_http_endpoint_enable_request_configuration"></a> [http\_endpoint\_enable\_request\_configuration](#input\_http\_endpoint\_enable\_request\_configuration) | The request configuration | `bool` | `false` | no |
 | <a name="input_http_endpoint_name"></a> [http\_endpoint\_name](#input\_http\_endpoint\_name) | The HTTP endpoint name | `string` | `null` | no |
@@ -867,8 +890,8 @@ No modules.
 | <a name="input_kinesis_source_role_arn"></a> [kinesis\_source\_role\_arn](#input\_kinesis\_source\_role\_arn) | The ARN of the role that provides access to the source Kinesis stream | `string` | `null` | no |
 | <a name="input_kinesis_source_stream_arn"></a> [kinesis\_source\_stream\_arn](#input\_kinesis\_source\_stream\_arn) | The kinesis stream used as the source of the firehose delivery stream | `string` | `null` | no |
 | <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
-| <a name="input_logicmonitor_account"></a> [logicmonitor\_account](#input\_logicmonitor\_account) | Account to use in Logic Monitor destination | `string` | `""` | no |
-| <a name="input_mongodb_realm_webhook_url"></a> [mongodb\_realm\_webhook\_url](#input\_mongodb\_realm\_webhook\_url) | Account to use in Logic Monitor destination | `string` | `""` | no |
+| <a name="input_logicmonitor_account"></a> [logicmonitor\_account](#input\_logicmonitor\_account) | Account to use in Logic Monitor destination | `string` | `null` | no |
+| <a name="input_mongodb_realm_webhook_url"></a> [mongodb\_realm\_webhook\_url](#input\_mongodb\_realm\_webhook\_url) | Realm Webhook URL to use in MongoDB destination | `string` | `null` | no |
 | <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in | `string` | n/a | yes |
 | <a name="input_newrelic_endpoint_type"></a> [newrelic\_endpoint\_type](#input\_newrelic\_endpoint\_type) | Endpoint type to New Relic destination | `string` | `"logs_eu"` | no |
 | <a name="input_policy_path"></a> [policy\_path](#input\_policy\_path) | Path of policies to that should be added to IAM role for Kinesis Firehose Stream | `string` | `null` | no |
@@ -914,6 +937,8 @@ No modules.
 | <a name="input_splunk_retry_duration"></a> [splunk\_retry\_duration](#input\_splunk\_retry\_duration) | After an initial failure to deliver to Splunk, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt) | `number` | `300` | no |
 | <a name="input_sse_kms_key_arn"></a> [sse\_kms\_key\_arn](#input\_sse\_kms\_key\_arn) | Amazon Resource Name (ARN) of the encryption key | `string` | `null` | no |
 | <a name="input_sse_kms_key_type"></a> [sse\_kms\_key\_type](#input\_sse\_kms\_key\_type) | Type of encryption key. | `string` | `"AWS_OWNED_CMK"` | no |
+| <a name="input_sumologic_data_type"></a> [sumologic\_data\_type](#input\_sumologic\_data\_type) | Data Type to use in Sumo Logic destination | `string` | `"log"` | no |
+| <a name="input_sumologic_deployment_name"></a> [sumologic\_deployment\_name](#input\_sumologic\_deployment\_name) | Deployment Name to use in Sumo Logic destination | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
 | <a name="input_transform_lambda_arn"></a> [transform\_lambda\_arn](#input\_transform\_lambda\_arn) | Lambda ARN to Transform source records | `string` | `null` | no |
 | <a name="input_transform_lambda_buffer_interval"></a> [transform\_lambda\_buffer\_interval](#input\_transform\_lambda\_buffer\_interval) | The period of time during which Kinesis Data Firehose buffers incoming data before invoking the AWS Lambda function. The AWS Lambda function is invoked once the value of the buffer size or the buffer interval is reached. | `number` | `60` | no |

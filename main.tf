@@ -343,7 +343,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     content {
       url                = local.http_endpoint_url[var.destination]
       name               = local.http_endpoint_name[var.destination]
-      access_key         = var.http_endpoint_access_key
+      access_key         = var.destination != "sumologic" ? var.http_endpoint_access_key : null
       buffering_size     = var.buffer_size
       buffering_interval = var.buffer_interval
       role_arn           = local.firehose_role_arn
