@@ -14,7 +14,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb"], var.destination)
   }
 }
 
@@ -985,6 +985,15 @@ variable "honeycomb_dataset_name" {
 # Logic Monitor Destination Variables
 ######
 variable "logicmonitor_account" {
+  type        = string
+  description = "Account to use in Logic Monitor destination"
+  default     = ""
+}
+
+######
+# MongoDB Destination Variables
+######
+variable "mongodb_realm_webhook_url" {
   type        = string
   description = "Account to use in Logic Monitor destination"
   default     = ""

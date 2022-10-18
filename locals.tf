@@ -16,7 +16,8 @@ locals {
     newrelic : "http_endpoint",
     dynatrace : "http_endpoint",
     honeycomb : "http_endpoint",
-    logicmonitor : "http_endpoint"
+    logicmonitor : "http_endpoint",
+    mongodb : "http_endpoint"
   }
   destination    = local.destinations[var.destination]
   s3_destination = local.destination == "extended_s3" ? true : false
@@ -173,6 +174,7 @@ locals {
     dynatrace : local.dynatrace_endpoint_url[var.dynatrace_endpoint_location]
     honeycomb : "${var.honeycomb_api_host}/1/kinesis_events/${var.honeycomb_dataset_name}"
     logicmonitor : "https://${var.logicmonitor_account}.logicmonitor.com"
+    mongodb : var.mongodb_realm_webhook_url
   }
 
   http_endpoint_name = {
@@ -183,6 +185,7 @@ locals {
     dynatrace : "Dynatrace"
     honeycomb : "Honeycomb"
     logicmonitor : "LogicMonitor"
+    mongodb : "MongoDB Cloud"
   }
 
   http_endpoint_destinations_parameters = {

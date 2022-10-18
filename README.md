@@ -23,6 +23,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Dynatrace](#dynatrace)
     * [Honeycomb](#honeycomb)
     * [Logic Monitor](#logic-monitor)
+    * [MongoDB](#mongodb)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -64,6 +65,7 @@ Supports all destinations and all Kinesis Firehose Features.
   - Dynatrace
   - Honeycomb
   - Logic Monitor
+  - MongoDB Cloud
 - Data Transformation With Lambda
 - Original Data Backup in S3
 - Logging and Encryption
@@ -341,6 +343,25 @@ module "firehose" {
   destination              = "logicmonitor"
   logicmonitor_account     = "<logicmonitor_account>"
   http_endpoint_access_key = "<logicmonitor_api_key>"
+}
+```
+
+#### MongoDB
+
+**To Enabled It:** `destination = "mongodb"`
+
+**Variables Prefix:** `http_endpoint_` and `mongodb_realm_webhook_url`
+
+**Check [HTTP Endpoint](#http-endpoint) to more details and [Destinations Mapping](#destinations-mapping) to see the difference between http_endpoint and mongodb destinations**
+
+```hcl
+module "firehose" {
+  source                    = "fdmsantos/kinesis-firehose/aws"
+  version                   = "x.x.x"
+  name                      = "firehose-delivery-stream"
+  destination               = "mongodb"
+  mongodb_realm_webhook_url = "<mongodb_realm_webhook_url>"
+  http_endpoint_access_key  = "<mongodb_api_key>"
 }
 ```
 
@@ -654,6 +675,7 @@ The destination variable configured in module is mapped to firehose valid destin
 | dynatrace                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable |
 | honeycomb                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure honeycomb_dataset_name variable                            |
 | logicmonitor                 | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure logicmonitor_account variable                              |
+| mongodb                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure mongodb_realm_webhook_url variable                         |
 
 ## Examples
 
@@ -673,6 +695,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Dynatrace](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/dynatrace) - Creates a Kinesis Firehose Stream with dynatrace europe as destination.
 - [Honeycomb](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/honeycomb) - Creates a Kinesis Firehose Stream with honeycomb as destination.
 - [LogicMonitor](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/logicmonitor) - Creates a Kinesis Firehose Stream with Logic Monitor as destination.
+- [MongoDB](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/mongodb) - Creates a Kinesis Firehose Stream with MongoDB as destination.
 
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -845,6 +868,7 @@ No modules.
 | <a name="input_kinesis_source_stream_arn"></a> [kinesis\_source\_stream\_arn](#input\_kinesis\_source\_stream\_arn) | The kinesis stream used as the source of the firehose delivery stream | `string` | `null` | no |
 | <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
 | <a name="input_logicmonitor_account"></a> [logicmonitor\_account](#input\_logicmonitor\_account) | Account to use in Logic Monitor destination | `string` | `""` | no |
+| <a name="input_mongodb_realm_webhook_url"></a> [mongodb\_realm\_webhook\_url](#input\_mongodb\_realm\_webhook\_url) | Account to use in Logic Monitor destination | `string` | `""` | no |
 | <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in | `string` | n/a | yes |
 | <a name="input_newrelic_endpoint_type"></a> [newrelic\_endpoint\_type](#input\_newrelic\_endpoint\_type) | Endpoint type to New Relic destination | `string` | `"logs_eu"` | no |
 | <a name="input_policy_path"></a> [policy\_path](#input\_policy\_path) | Path of policies to that should be added to IAM role for Kinesis Firehose Stream | `string` | `null` | no |
