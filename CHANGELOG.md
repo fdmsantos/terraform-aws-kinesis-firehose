@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.7.0...v1.8.0) (2022-10-18)
+
+
+### Features
+
+* Add Logic Monitor destination ([60e1bb6](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/60e1bb60d6c34fc7748368e365accc295065203c))
+* Add MongoDB Cloud destination ([39ab429](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/39ab429d43440033059732426e275294ed6ec62b))
+* Add SumoLogic destination ([ea6cf3d](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/ea6cf3d1c91d34d068c91a4d0854b3ba20391ed7))
+
 ## [1.7.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.6.0...v1.7.0) (2022-10-17)
 
 
