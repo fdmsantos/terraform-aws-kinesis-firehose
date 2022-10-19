@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.8.0...v1.9.0) (2022-10-19)
+
+
+### Features
+
+* Add support to cross account opensearch domain in opensearch destination ([ac36ec1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/ac36ec1e9a3474d86195e9b38336288a77327705))
+* Add support to cross account s3 buckets in s3 destination ([aa42c43](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/aa42c439bcf27cf95b851c5bc0fafe7454bdd960))
+* Add support to iam role when don't own the bucket ([b07541e](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/b07541ee80f99f3d9a805072a50bbf28164428cf))
+
 ## [1.8.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.7.0...v1.8.0) (2022-10-18)
 
 
