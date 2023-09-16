@@ -5,6 +5,7 @@ Supports all destinations and all Kinesis Firehose Features.
 
 ## Table of Contents
 
+* [Module versioning rule](#module-versioning-rule)
 * [Features](#features)
 * [How to Use](#how-to-use)
   * [Sources](#sources)
@@ -44,6 +45,13 @@ Supports all destinations and all Kinesis Firehose Features.
 * [Inputs](#inputs)
 * [Outputs](#outputs)
 * [License](#license)
+
+## Module versioning rule
+
+| Module version | AWS Provider version |
+|----------------|----------------------|
+| >= 1.x.x       | ~> 4.4               |
+| >= 2.x.x       | ~> 5.0 (WIP)         |
 
 ## Features
 
@@ -735,13 +743,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.4 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.4 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.4 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.4 |
 
 ## Modules
 
@@ -786,6 +794,8 @@ No modules.
 | [aws_iam_policy_document.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.application_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.cross_account_elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.cross_account_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -864,6 +874,7 @@ No modules.
 | <a name="input_dynamic_partitioning_retry_duration"></a> [dynamic\_partitioning\_retry\_duration](#input\_dynamic\_partitioning\_retry\_duration) | Total amount of seconds Firehose spends on retries | `number` | `300` | no |
 | <a name="input_dynatrace_api_url"></a> [dynatrace\_api\_url](#input\_dynatrace\_api\_url) | API URL to Dynatrace destination | `string` | `null` | no |
 | <a name="input_dynatrace_endpoint_location"></a> [dynatrace\_endpoint\_location](#input\_dynatrace\_endpoint\_location) | Endpoint Location to Dynatrace destination | `string` | `"eu"` | no |
+| <a name="input_elasticsearch_cross_account"></a> [elasticsearch\_cross\_account](#input\_elasticsearch\_cross\_account) | Indicates if Elasticsearch domain is in a different account | `bool` | `false` | no |
 | <a name="input_elasticsearch_domain_arn"></a> [elasticsearch\_domain\_arn](#input\_elasticsearch\_domain\_arn) | The ARN of the Amazon ES domain. The pattern needs to be arn:.* | `string` | `null` | no |
 | <a name="input_elasticsearch_enable_vpc"></a> [elasticsearch\_enable\_vpc](#input\_elasticsearch\_enable\_vpc) | Indicates if destination is configured in VPC. Supported only to Elasticsearch destinations | `bool` | `false` | no |
 | <a name="input_elasticsearch_index_name"></a> [elasticsearch\_index\_name](#input\_elasticsearch\_index\_name) | The Elasticsearch index name | `string` | `null` | no |
@@ -935,6 +946,7 @@ No modules.
 | <a name="input_s3_backup_use_existing_role"></a> [s3\_backup\_use\_existing\_role](#input\_s3\_backup\_use\_existing\_role) | Indicates if want use the kinesis firehose role to s3 backup bucket access. | `bool` | `true` | no |
 | <a name="input_s3_bucket_arn"></a> [s3\_bucket\_arn](#input\_s3\_bucket\_arn) | The ARN of the S3 destination bucket | `string` | `null` | no |
 | <a name="input_s3_compression_format"></a> [s3\_compression\_format](#input\_s3\_compression\_format) | The compression format | `string` | `"UNCOMPRESSED"` | no |
+| <a name="input_s3_cross_account"></a> [s3\_cross\_account](#input\_s3\_cross\_account) | Indicates if S3 bucket destination is in a different account | `bool` | `false` | no |
 | <a name="input_s3_error_output_prefix"></a> [s3\_error\_output\_prefix](#input\_s3\_error\_output\_prefix) | Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name. | `string` | `null` | no |
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
 | <a name="input_s3_own_bucket"></a> [s3\_own\_bucket](#input\_s3\_own\_bucket) | Indicates if you own the bucket. If not, will be configure permissions to grants the bucket owner full access to the objects delivered by Kinesis Data Firehose | `bool` | `true` | no |
@@ -989,7 +1001,9 @@ No modules.
 | <a name="output_kinesis_firehose_name"></a> [kinesis\_firehose\_name](#output\_kinesis\_firehose\_name) | The name of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_role_arn"></a> [kinesis\_firehose\_role\_arn](#output\_kinesis\_firehose\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_version_id"></a> [kinesis\_firehose\_version\_id](#output\_kinesis\_firehose\_version\_id) | The Version id of the Kinesis Firehose Stream |
+| <a name="output_opensearch_cross_account_service_policy"></a> [opensearch\_cross\_account\_service\_policy](#output\_opensearch\_cross\_account\_service\_policy) | OpenSearch Service policy when the opensearch domain belongs to another account |
 | <a name="output_opensearch_iam_service_linked_role_arn"></a> [opensearch\_iam\_service\_linked\_role\_arn](#output\_opensearch\_iam\_service\_linked\_role\_arn) | The ARN of the Opensearch IAM Service linked role |
+| <a name="output_s3_cross_account_bucket_policy"></a> [s3\_cross\_account\_bucket\_policy](#output\_s3\_cross\_account\_bucket\_policy) | Bucket Policy to S3 Bucket Destination when the bucket belongs to another account |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## License
