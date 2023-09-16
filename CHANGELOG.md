@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.9.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.9.0...v1.9.1) (2023-09-16)
+
+
+### Bug Fixes
+
+* Add AWS Provider Version Constraint to major version 4 ([017f340](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/017f3408db24f3318e27d3a1308522925d2e5af7))
+
 ## [1.9.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.8.0...v1.9.0) (2022-10-19)
 
 
