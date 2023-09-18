@@ -36,8 +36,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       bucket_arn          = var.s3_bucket_arn
       prefix              = var.s3_prefix
       error_output_prefix = var.s3_error_output_prefix
-      buffer_size         = var.buffer_size
-      buffer_interval     = var.buffer_interval
+      buffering_size      = var.buffering_size
+      buffering_interval  = var.buffering_interval
       s3_backup_mode      = local.s3_backup
       kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
       compression_format  = var.s3_compression_format
@@ -140,8 +140,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
           bucket_arn          = var.s3_backup_bucket_arn
           role_arn            = local.s3_backup_role_arn
           prefix              = var.s3_backup_prefix
-          buffer_size         = var.s3_backup_buffer_size
-          buffer_interval     = var.s3_backup_buffer_interval
+          buffering_size      = var.s3_backup_buffering_size
+          buffering_interval  = var.s3_backup_buffering_interval
           compression_format  = var.s3_backup_compression
           error_output_prefix = var.s3_backup_error_output_prefix
           kms_key_arn         = var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null
@@ -164,20 +164,6 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     }
   }
 
-  dynamic "s3_configuration" {
-    for_each = !local.s3_destination ? [1] : []
-    content {
-      role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
-      bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
-      buffer_size         = !local.use_backup_vars_in_s3_configuration ? var.buffer_size : var.s3_backup_buffer_size
-      buffer_interval     = !local.use_backup_vars_in_s3_configuration ? var.buffer_interval : var.s3_backup_buffer_interval
-      compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
-      prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
-      error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
-      kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
-    }
-  }
-
   dynamic "redshift_configuration" {
     for_each = local.destination == "redshift" ? [1] : []
     content {
@@ -191,14 +177,26 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       s3_backup_mode     = local.s3_backup
       retry_duration     = var.redshift_retry_duration
 
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+
+      }
+
       dynamic "s3_backup_configuration" {
         for_each = var.enable_s3_backup ? [1] : []
         content {
           bucket_arn          = var.s3_backup_bucket_arn
           role_arn            = local.s3_backup_role_arn
           prefix              = var.s3_backup_prefix
-          buffer_size         = var.s3_backup_buffer_size
-          buffer_interval     = var.s3_backup_buffer_interval
+          buffering_size      = var.s3_backup_buffering_size
+          buffering_interval  = var.s3_backup_buffering_interval
           compression_format  = var.s3_backup_compression
           error_output_prefix = var.s3_backup_error_output_prefix
           kms_key_arn         = var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null
@@ -240,7 +238,6 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       }
 
     }
-
   }
 
   dynamic "elasticsearch_configuration" {
@@ -252,9 +249,20 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       index_rotation_period = var.elasticsearch_index_rotation_period
       retry_duration        = var.elasticsearch_retry_duration
       type_name             = var.elasticsearch_type_name
-      buffering_interval    = var.buffer_interval
-      buffering_size        = var.buffer_size
+      buffering_interval    = var.buffering_interval
+      buffering_size        = var.buffering_size
       s3_backup_mode        = local.s3_backup_mode
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
 
       dynamic "processing_configuration" {
         for_each = local.enable_processing ? [1] : []
@@ -307,6 +315,17 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       retry_duration             = var.splunk_retry_duration
       s3_backup_mode             = local.s3_backup_mode
 
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+
       dynamic "processing_configuration" {
         for_each = local.enable_processing ? [1] : []
         content {
@@ -344,11 +363,22 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       url                = local.http_endpoint_url[var.destination]
       name               = local.http_endpoint_name[var.destination]
       access_key         = var.destination != "sumologic" ? var.http_endpoint_access_key : null
-      buffering_size     = var.buffer_size
-      buffering_interval = var.buffer_interval
+      buffering_size     = var.buffering_size
+      buffering_interval = var.buffering_interval
       role_arn           = local.firehose_role_arn
       s3_backup_mode     = local.s3_backup_mode
       retry_duration     = var.http_endpoint_retry_duration
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
 
       dynamic "request_configuration" {
         for_each = var.http_endpoint_enable_request_configuration ? [1] : []

@@ -13,7 +13,7 @@ output "firehose_role" {
   value       = module.firehose.kinesis_firehose_role_arn
 }
 
-output "kibana_endpoint" {
+output "dashboard_endpoint" {
   description = "Kibana Endpoint"
-  value       = aws_opensearch_domain.this.kibana_endpoint
+  value       = aws_opensearch_domain.this.dashboard_endpoint
 }

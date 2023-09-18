@@ -39,8 +39,8 @@ resource "aws_kms_key" "backup" {
 module "firehose" {
   source                                        = "../../../"
   name                                          = "${var.name_prefix}-delivery-stream"
-  buffer_size                                   = 100
-  buffer_interval                               = 100
+  buffering_size                                = 100
+  buffering_interval                            = 100
   enable_kinesis_source                         = true
   kinesis_source_stream_arn                     = aws_kinesis_stream.this.arn
   destination                                   = "s3"
@@ -54,8 +54,8 @@ module "firehose" {
   s3_backup_bucket_arn                          = aws_s3_bucket.s3_backup.arn
   s3_backup_prefix                              = "backup/"
   s3_backup_error_output_prefix                 = "error/"
-  s3_backup_buffer_interval                     = 100
-  s3_backup_buffer_size                         = 100
+  s3_backup_buffering_interval                  = 100
+  s3_backup_buffering_size                      = 100
   s3_backup_compression                         = "GZIP"
   s3_backup_enable_encryption                   = true
   s3_backup_kms_key_arn                         = aws_kms_key.backup.arn

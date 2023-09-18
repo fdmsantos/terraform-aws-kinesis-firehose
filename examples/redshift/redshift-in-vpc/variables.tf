@@ -7,14 +7,12 @@ variable "name_prefix" {
 variable "redshift_username" {
   description = "The username that the firehose delivery stream will assume. It is strongly recommended that the username and password provided is used exclusively for Amazon Kinesis Firehose purposes, and that the permissions for the account are restricted for Amazon Redshift INSERT permissions"
   type        = string
-  default     = null
   sensitive   = true
 }
 
 variable "redshift_password" {
   description = "The password for the redshift username above"
   type        = string
-  default     = null
   sensitive   = true
 }
 

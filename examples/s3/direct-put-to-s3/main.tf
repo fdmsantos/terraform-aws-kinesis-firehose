@@ -61,8 +61,8 @@ module "firehose" {
   s3_backup_bucket_arn               = aws_s3_bucket.s3.arn
   s3_backup_prefix                   = "backup/"
   s3_backup_error_output_prefix      = "error/"
-  s3_backup_buffer_interval          = 100
-  s3_backup_buffer_size              = 100
+  s3_backup_buffering_interval       = 100
+  s3_backup_buffering_size           = 100
   s3_backup_compression              = "GZIP"
   s3_backup_use_existing_role        = false
   s3_backup_role_arn                 = aws_iam_role.this.arn

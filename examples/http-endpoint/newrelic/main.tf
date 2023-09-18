@@ -16,7 +16,7 @@ module "firehose" {
   source                                               = "../../../"
   name                                                 = "${var.name_prefix}-delivery-stream"
   destination                                          = "newrelic"
-  buffer_interval                                      = 60
+  buffering_interval                                   = 60
   newrelic_endpoint_type                               = "metrics_eu"
   http_endpoint_access_key                             = var.newrelic_api_key
   http_endpoint_retry_duration                         = 60
@@ -32,12 +32,12 @@ module "firehose" {
       value = "testvalue2"
     }
   ]
-  s3_backup_mode              = "All"
-  s3_backup_prefix            = "backup/"
-  s3_backup_bucket_arn        = aws_s3_bucket.s3.arn
-  s3_backup_buffer_interval   = 100
-  s3_backup_buffer_size       = 100
-  s3_backup_compression       = "GZIP"
-  s3_backup_enable_encryption = true
-  s3_backup_kms_key_arn       = aws_kms_key.this.arn
+  s3_backup_mode               = "All"
+  s3_backup_prefix             = "backup/"
+  s3_backup_bucket_arn         = aws_s3_bucket.s3.arn
+  s3_backup_buffering_interval = 100
+  s3_backup_buffering_size     = 100
+  s3_backup_compression        = "GZIP"
+  s3_backup_enable_encryption  = true
+  s3_backup_kms_key_arn        = aws_kms_key.this.arn
 }
