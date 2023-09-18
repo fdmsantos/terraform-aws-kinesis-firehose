@@ -1,5 +1,7 @@
 # AWS Kinesis Firehose Terraform module
 
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+
 Dynamic Terraform module, which creates a Kinesis Firehose Stream and others resources like Cloudwatch, IAM Roles and Security Groups that integrate with Kinesis Firehose.
 Supports all destinations and all Kinesis Firehose Features.
 
@@ -51,7 +53,7 @@ Supports all destinations and all Kinesis Firehose Features.
 | Module version | AWS Provider version |
 |----------------|----------------------|
 | >= 1.x.x       | ~> 4.4               |
-| >= 2.x.x       | ~> 5.0 (WIP)         |
+| >= 2.x.x       | ~> 5.0               |
 
 ## Features
 
@@ -743,13 +745,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.4 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.4 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
 
 ## Modules
 
@@ -820,8 +822,8 @@ No modules.
 | <a name="input_application_role_service_principal"></a> [application\_role\_service\_principal](#input\_application\_role\_service\_principal) | AWS Service Principal to assume application role | `string` | `null` | no |
 | <a name="input_application_role_tags"></a> [application\_role\_tags](#input\_application\_role\_tags) | A map of tags to assign to IAM Application role | `map(string)` | `{}` | no |
 | <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
-| <a name="input_buffer_interval"></a> [buffer\_interval](#input\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
-| <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
+| <a name="input_buffering_interval"></a> [buffering\_interval](#input\_buffering\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
+| <a name="input_buffering_size"></a> [buffering\_size](#input\_buffering\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
 | <a name="input_coralogix_endpoint_location"></a> [coralogix\_endpoint\_location](#input\_coralogix\_endpoint\_location) | Endpoint Location to coralogix destination | `string` | `"ireland"` | no |
 | <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName | `string` | `null` | no |
@@ -930,8 +932,8 @@ No modules.
 | <a name="input_role_permissions_boundary"></a> [role\_permissions\_boundary](#input\_role\_permissions\_boundary) | The ARN of the policy that is used to set the permissions boundary for the IAM role used by Kinesis Firehose Stream | `string` | `null` | no |
 | <a name="input_role_tags"></a> [role\_tags](#input\_role\_tags) | A map of tags to assign to IAM role | `map(string)` | `{}` | no |
 | <a name="input_s3_backup_bucket_arn"></a> [s3\_backup\_bucket\_arn](#input\_s3\_backup\_bucket\_arn) | The ARN of the S3 backup bucket | `string` | `null` | no |
-| <a name="input_s3_backup_buffer_interval"></a> [s3\_backup\_buffer\_interval](#input\_s3\_backup\_buffer\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. | `number` | `300` | no |
-| <a name="input_s3_backup_buffer_size"></a> [s3\_backup\_buffer\_size](#input\_s3\_backup\_buffer\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
+| <a name="input_s3_backup_buffering_interval"></a> [s3\_backup\_buffering\_interval](#input\_s3\_backup\_buffering\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. | `number` | `300` | no |
+| <a name="input_s3_backup_buffering_size"></a> [s3\_backup\_buffering\_size](#input\_s3\_backup\_buffering\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_s3_backup_compression"></a> [s3\_backup\_compression](#input\_s3\_backup\_compression) | The compression format | `string` | `"UNCOMPRESSED"` | no |
 | <a name="input_s3_backup_create_cw_log_group"></a> [s3\_backup\_create\_cw\_log\_group](#input\_s3\_backup\_create\_cw\_log\_group) | Enables or disables the cloudwatch log group creation | `bool` | `true` | no |
 | <a name="input_s3_backup_enable_encryption"></a> [s3\_backup\_enable\_encryption](#input\_s3\_backup\_enable\_encryption) | Indicates if want enable KMS Encryption in S3 Backup Bucket. | `bool` | `false` | no |
@@ -946,6 +948,8 @@ No modules.
 | <a name="input_s3_backup_use_existing_role"></a> [s3\_backup\_use\_existing\_role](#input\_s3\_backup\_use\_existing\_role) | Indicates if want use the kinesis firehose role to s3 backup bucket access. | `bool` | `true` | no |
 | <a name="input_s3_bucket_arn"></a> [s3\_bucket\_arn](#input\_s3\_bucket\_arn) | The ARN of the S3 destination bucket | `string` | `null` | no |
 | <a name="input_s3_compression_format"></a> [s3\_compression\_format](#input\_s3\_compression\_format) | The compression format | `string` | `"UNCOMPRESSED"` | no |
+| <a name="input_s3_configuration_buffering_interval"></a> [s3\_configuration\_buffering\_interval](#input\_s3\_configuration\_buffering\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. | `number` | `300` | no |
+| <a name="input_s3_configuration_buffering_size"></a> [s3\_configuration\_buffering\_size](#input\_s3\_configuration\_buffering\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting SizeInMBs to a value greater than the amount of data you typically ingest into the delivery stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec set SizeInMBs to be 10 MB or higher. | `number` | `5` | no |
 | <a name="input_s3_cross_account"></a> [s3\_cross\_account](#input\_s3\_cross\_account) | Indicates if S3 bucket destination is in a different account | `bool` | `false` | no |
 | <a name="input_s3_error_output_prefix"></a> [s3\_error\_output\_prefix](#input\_s3\_error\_output\_prefix) | Prefix added to failed records before writing them to S3. This prefix appears immediately following the bucket name. | `string` | `null` | no |
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |

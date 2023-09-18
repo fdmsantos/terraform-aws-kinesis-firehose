@@ -16,7 +16,7 @@ module "firehose" {
   source                                               = "../../../"
   name                                                 = "${var.name_prefix}-delivery-stream"
   destination                                          = "honeycomb"
-  buffer_interval                                      = 60
+  buffering_interval                                   = 60
   honeycomb_api_host                                   = "https://api.honeycomb.io"
   honeycomb_dataset_name                               = var.honeycomb_dataset_name
   http_endpoint_access_key                             = var.honeycomb_api_key
@@ -26,8 +26,8 @@ module "firehose" {
   s3_backup_mode                                       = "All"
   s3_backup_prefix                                     = "backup/"
   s3_backup_bucket_arn                                 = aws_s3_bucket.s3.arn
-  s3_backup_buffer_interval                            = 100
-  s3_backup_buffer_size                                = 100
+  s3_backup_buffering_interval                         = 100
+  s3_backup_buffering_size                             = 100
   s3_backup_compression                                = "GZIP"
   s3_backup_enable_encryption                          = true
   s3_backup_kms_key_arn                                = aws_kms_key.this.arn

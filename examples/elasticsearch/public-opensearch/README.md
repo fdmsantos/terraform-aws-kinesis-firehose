@@ -26,14 +26,14 @@ Note that this example may create resources which cost money. Run `terraform des
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.4 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 2.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.4 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 2.0 |
 
 ## Modules
@@ -64,8 +64,8 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Description |
 |------|-------------|
+| <a name="output_dashboard_endpoint"></a> [dashboard\_endpoint](#output\_dashboard\_endpoint) | Kibana Endpoint |
 | <a name="output_es_domain"></a> [es\_domain](#output\_es\_domain) | Opensearch Domain |
 | <a name="output_es_endpoint"></a> [es\_endpoint](#output\_es\_endpoint) | Opensearch Endpoint |
 | <a name="output_firehose_role"></a> [firehose\_role](#output\_firehose\_role) | Firehose Role |
-| <a name="output_kibana_endpoint"></a> [kibana\_endpoint](#output\_kibana\_endpoint) | Kibana Endpoint |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

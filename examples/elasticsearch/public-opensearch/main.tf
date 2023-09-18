@@ -68,18 +68,18 @@ POLICIES
 }
 
 module "firehose" {
-  source                      = "../../../"
-  name                        = "${var.name_prefix}-delivery-stream"
-  destination                 = "opensearch"
-  buffer_interval             = 60
-  elasticsearch_domain_arn    = aws_opensearch_domain.this.arn
-  elasticsearch_index_name    = "test"
-  s3_backup_mode              = "All"
-  s3_backup_prefix            = "backup/"
-  s3_backup_bucket_arn        = aws_s3_bucket.s3.arn
-  s3_backup_buffer_interval   = 100
-  s3_backup_buffer_size       = 100
-  s3_backup_compression       = "GZIP"
-  s3_backup_enable_encryption = true
-  s3_backup_kms_key_arn       = aws_kms_key.this.arn
+  source                       = "../../../"
+  name                         = "${var.name_prefix}-delivery-stream"
+  destination                  = "opensearch"
+  buffering_interval           = 60
+  elasticsearch_domain_arn     = aws_opensearch_domain.this.arn
+  elasticsearch_index_name     = "test"
+  s3_backup_mode               = "All"
+  s3_backup_prefix             = "backup/"
+  s3_backup_bucket_arn         = aws_s3_bucket.s3.arn
+  s3_backup_buffering_interval = 100
+  s3_backup_buffering_size     = 100
+  s3_backup_compression        = "GZIP"
+  s3_backup_enable_encryption  = true
+  s3_backup_kms_key_arn        = aws_kms_key.this.arn
 }

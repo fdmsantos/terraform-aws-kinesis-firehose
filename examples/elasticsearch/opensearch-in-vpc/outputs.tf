@@ -23,9 +23,9 @@ output "es_endpoint" {
   value       = aws_opensearch_domain.this.endpoint
 }
 
-output "kibana_endpoint" {
+output "dashboard_endpoint" {
   description = "Kibana Endpoint"
-  value       = aws_opensearch_domain.this.kibana_endpoint
+  value       = aws_opensearch_domain.this.dashboard_endpoint
 }
 
 output "opensearch_iam_service_linked_role_arn" {

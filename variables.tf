@@ -32,23 +32,23 @@ variable "tags" {
 ######
 # All Destinations
 ######
-variable "buffer_size" {
+variable "buffering_size" {
   description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
   type        = number
   default     = 5
   validation {
     error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
-    condition     = var.buffer_size >= 1 && var.buffer_size <= 128
+    condition     = var.buffering_size >= 1 && var.buffering_size <= 128
   }
 }
 
-variable "buffer_interval" {
+variable "buffering_interval" {
   description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination"
   type        = number
   default     = 300
   validation {
     error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
-    condition     = var.buffer_interval >= 60 && var.buffer_interval <= 900
+    condition     = var.buffering_interval >= 60 && var.buffering_interval <= 900
   }
 }
 
@@ -100,6 +100,26 @@ variable "transform_lambda_number_retries" {
   }
 }
 
+variable "s3_configuration_buffering_size" {
+  description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination. The default value is 5. We recommend setting SizeInMBs to a value greater than the amount of data you typically ingest into the delivery stream in 10 seconds. For example, if you typically ingest data at 1 MB/sec set SizeInMBs to be 10 MB or higher."
+  type        = number
+  default     = 5
+  validation {
+    error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
+    condition     = var.s3_configuration_buffering_size >= 1 && var.s3_configuration_buffering_size <= 128
+  }
+}
+
+variable "s3_configuration_buffering_interval" {
+  description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
+    condition     = var.s3_configuration_buffering_interval >= 60 && var.s3_configuration_buffering_interval <= 900
+  }
+}
+
 variable "enable_s3_backup" {
   description = "The Amazon S3 backup mode"
   type        = bool
@@ -118,23 +138,23 @@ variable "s3_backup_prefix" {
   default     = null
 }
 
-variable "s3_backup_buffer_size" {
+variable "s3_backup_buffering_size" {
   description = "Buffer incoming data to the specified size, in MBs, before delivering it to the destination."
   type        = number
   default     = 5
   validation {
     error_message = "Valid values: minimum: 1 MiB, maximum: 128 MiB."
-    condition     = var.s3_backup_buffer_size >= 1 && var.s3_backup_buffer_size <= 128
+    condition     = var.s3_backup_buffering_size >= 1 && var.s3_backup_buffering_size <= 128
   }
 }
 
-variable "s3_backup_buffer_interval" {
+variable "s3_backup_buffering_interval" {
   description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination."
   type        = number
   default     = 300
   validation {
     error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
-    condition     = var.s3_backup_buffer_interval >= 60 && var.s3_backup_buffer_interval <= 900
+    condition     = var.s3_backup_buffering_interval >= 60 && var.s3_backup_buffering_interval <= 900
   }
 }
 
@@ -1186,3 +1206,9 @@ variable "application_role_policy_actions" {
     "firehose:PutRecordBatch"
   ]
 }
+
+#variable "add_kms_policy" {
+#  description = "If use CUSTOMER_MANAGED_CMK set this variable to true to control Firehose KMS permissions via IAM. Set to false to control permissions via Key Policy"
+#  type = bool
+#  default = false
+#}
