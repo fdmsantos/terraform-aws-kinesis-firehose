@@ -11,7 +11,6 @@ locals {
   add_cw_policy                  = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
   add_elasticsearch_policy       = var.create && var.create_role && local.destination == "elasticsearch"
   add_vpc_policy                 = var.create && var.create_role && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_use_existing_role && local.destination == "elasticsearch"
-  #  add_sse_kms_policy             = var.create && var.create_role && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK" && var.add_kms_policy
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -174,47 +173,6 @@ resource "aws_iam_role_policy_attachment" "s3_kms" {
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.s3_kms[0].arn
 }
-
-#data "aws_iam_policy_document" "sse_kms" {
-#  count = local.add_sse_kms_policy ? 1 : 0
-#  statement {
-#    effect = "Allow"
-#    actions = [
-#      "kms:Encrypt",
-#      "kms:Decrypt",
-#      "kms:ReEncrypt*",
-#      "kms:GenerateDataKey*",
-#      "kms:DescribeKey"
-#    ]
-#    resources = [var.sse_kms_key_arn]
-#    condition {
-#      test     = "StringEquals"
-#      values   = ["firehose.${data.aws_region.current.name}.amazonaws.com"]
-#      variable = "kms:ViaService"
-#    }
-#    condition {
-#      test     = "StringLike"
-#      values   = ["arn:aws:firehose:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:deliverystream/${var.name}"]
-#      variable = "kms:EncryptionContext:aws:firehose:arn"
-#    }
-#  }
-#}
-#
-#resource "aws_iam_policy" "sse_kms" {
-#  count = local.add_sse_kms_policy ? 1 : 0
-#
-#  name   = "${local.role_name}-sse-kms"
-#  path   = var.policy_path
-#  policy = data.aws_iam_policy_document.sse_kms[0].json
-#  tags   = var.tags
-#}
-#
-#resource "aws_iam_role_policy_attachment" "sse_kms" {
-#  count = local.add_sse_kms_policy ? 1 : 0
-#
-#  role       = aws_iam_role.firehose[0].name
-#  policy_arn = aws_iam_policy.sse_kms[0].arn
-#}
 
 ##################
 # Glue

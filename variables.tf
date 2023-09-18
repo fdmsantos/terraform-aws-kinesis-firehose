@@ -1206,9 +1206,3 @@ variable "application_role_policy_actions" {
     "firehose:PutRecordBatch"
   ]
 }
-
-#variable "add_kms_policy" {
-#  description = "If use CUSTOMER_MANAGED_CMK set this variable to true to control Firehose KMS permissions via IAM. Set to false to control permissions via Key Policy"
-#  type = bool
-#  default = false
-#}
