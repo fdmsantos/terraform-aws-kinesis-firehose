@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.0.0...v2.1.0) (2023-09-19)
+
+
+### Features
+
+* Add Waf Source ([11abc46](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/11abc46eb71a758796f1f41a4e3a12f32e0cd2a8))
+
 ## [2.0.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.9.1...v2.0.0) (2023-09-18)
 
 
