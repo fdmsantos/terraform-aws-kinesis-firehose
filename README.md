@@ -14,6 +14,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Kinesis Data Stream](#kinesis-data-stream)
       * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
     * [Direct Put](#direct-put)
+    * [WAF](waf)
   * [Destinations](#destinations)
     * [S3](#s3)
     * [Redshift](#redshift)
@@ -46,6 +47,8 @@ Supports all destinations and all Kinesis Firehose Features.
 * [Resources](#resources)
 * [Inputs](#inputs)
 * [Outputs](#outputs)
+* [Deprecation](#deprecation)
+* [Upgrade](#upgrade)
 * [License](#license)
 
 ## Module versioning rule
@@ -60,6 +63,7 @@ Supports all destinations and all Kinesis Firehose Features.
 - Sources 
   - Kinesis Data Stream
   - Direct Put
+  - WAF
 - Destinations
   - S3
     - Data Format Conversion
@@ -96,14 +100,14 @@ Supports all destinations and all Kinesis Firehose Features.
 
 #### Kinesis Data Stream
 
-**To Enabled it:** `enable_kinesis_source = true`
+**To Enabled it:** `input_source = "kinesis"`. The use of variable `enable_kinesis_source` is deprecated and will be removed on next Major Release.
 
 ```hcl
 module "firehose" {
   source                    = "fdmsantos/kinesis-firehose/aws"
   version                   = "x.x.x"
   name                      = "firehose-delivery-stream"
-  enable_kinesis_source     = true
+  input_source              =  "kinesis"
   kinesis_source_stream_arn = "<kinesis_stream_arn>"
   destination               = "s3" # or destination = "extended_s3"
   s3_bucket_arn             = "<bucket_arn>"
@@ -114,11 +118,26 @@ module "firehose" {
 
 If Kinesis Data Stream is encrypted, it's necessary pass this info to module .
 
-**To Enabled It:**  `kinesis_source_is_encrypted = true`
+**To Enabled It:** `input_source = "kinesis"`. The use of variable `enable_kinesis_source` is deprecated and will be removed on next Major Release.
 
 **KMS Key:** use `kinesis_source_kms_arn` variable to indicate the KMS Key to module add permissions to policy to decrypt the Kinesis Data Stream.
 
 #### Direct Put
+
+**To Enabled it:** `input_source = "waf"`.
+
+```hcl
+module "firehose" {
+  source           = "fdmsantos/kinesis-firehose/aws"
+  version          = "x.x.x"
+  name             = "firehose-delivery-stream"
+  input_source     = "waf"
+  destination      = "s3" # or destination = "extended_s3"
+  s3_bucket_arn    = "<bucket_arn>"
+}
+```
+
+#### WAF
 
 ```hcl
 module "firehose" {
@@ -721,7 +740,8 @@ The destination variable configured in module is mapped to firehose valid destin
 ## Examples
 
 - [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
-- [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination .
+- [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination.
+- [WAF Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/waf-to-s3) - Creates a Kinesis Firehose Stream with AWS Web WAF as source and S3 as destination.
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
 - [Redshift In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/redshift-in-vpc) - Creates a Kinesis Firehose Stream with redshift in VPC as destination.
@@ -891,7 +911,7 @@ No modules.
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
 | <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |
-| <a name="input_enable_kinesis_source"></a> [enable\_kinesis\_source](#input\_enable\_kinesis\_source) | Set it to true to use kinesis data stream as source | `bool` | `false` | no |
+| <a name="input_enable_kinesis_source"></a> [enable\_kinesis\_source](#input\_enable\_kinesis\_source) | DEPRECATED: Use instead `input_source = "kinesis"` | `bool` | `false` | no |
 | <a name="input_enable_lambda_transform"></a> [enable\_lambda\_transform](#input\_enable\_lambda\_transform) | Set it to true to enable data transformation with lambda | `bool` | `false` | no |
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
@@ -906,6 +926,7 @@ No modules.
 | <a name="input_http_endpoint_request_configuration_content_encoding"></a> [http\_endpoint\_request\_configuration\_content\_encoding](#input\_http\_endpoint\_request\_configuration\_content\_encoding) | Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination | `string` | `"GZIP"` | no |
 | <a name="input_http_endpoint_retry_duration"></a> [http\_endpoint\_retry\_duration](#input\_http\_endpoint\_retry\_duration) | Total amount of seconds Firehose spends on retries. This duration starts after the initial attempt fails, It does not include the time periods during which Firehose waits for acknowledgment from the specified destination after each attempt | `number` | `300` | no |
 | <a name="input_http_endpoint_url"></a> [http\_endpoint\_url](#input\_http\_endpoint\_url) | The HTTP endpoint URL to which Kinesis Firehose sends your data | `string` | `null` | no |
+| <a name="input_input_source"></a> [input\_source](#input\_input\_source) | This is the kinesis firehose source | `string` | `"direct-put"` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |
 | <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records | `string` | `null` | no |
 | <a name="input_kinesis_source_role_arn"></a> [kinesis\_source\_role\_arn](#input\_kinesis\_source\_role\_arn) | The ARN of the role that provides access to the source Kinesis stream | `string` | `null` | no |
@@ -1009,6 +1030,16 @@ No modules.
 | <a name="output_opensearch_iam_service_linked_role_arn"></a> [opensearch\_iam\_service\_linked\_role\_arn](#output\_opensearch\_iam\_service\_linked\_role\_arn) | The ARN of the Opensearch IAM Service linked role |
 | <a name="output_s3_cross_account_bucket_policy"></a> [s3\_cross\_account\_bucket\_policy](#output\_s3\_cross\_account\_bucket\_policy) | Bucket Policy to S3 Bucket Destination when the bucket belongs to another account |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+## Deprecation
+
+### Version >= 2.1.0 
+
+* variable `enable_kinesis_source` is deprecated. Use instead `input_source = "kinesis"`.
+
+## Upgrade
+
+- Version 1.x to 2.x Upgrade Guide [here](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/blob/main/UPGRADE-2.0.md)
 
 ## License
 

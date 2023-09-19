@@ -9,6 +9,16 @@ variable "name" {
   type        = string
 }
 
+variable "input_source" {
+  description = "This is the kinesis firehose source"
+  type        = string
+  default     = "direct-put"
+  validation {
+    error_message = "Please use a valid source!"
+    condition     = contains(["direct-put", "kinesis", "waf"], var.input_source)
+  }
+}
+
 variable "destination" {
   description = "This is the destination to where the data is delivered"
   type        = string
@@ -346,7 +356,7 @@ variable "sse_kms_key_arn" {
 }
 
 variable "enable_kinesis_source" {
-  description = "Set it to true to use kinesis data stream as source"
+  description = "DEPRECATED: Use instead `input_source = \"kinesis\"`"
   type        = bool
   default     = false
 }

@@ -9,11 +9,11 @@ data "aws_subnet" "elasticsearch" {
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
   count       = var.create ? 1 : 0
-  name        = var.name
+  name        = local.is_waf_source ? "aws-waf-logs-${var.name}" : var.name
   destination = local.destination
 
   dynamic "kinesis_source_configuration" {
-    for_each = var.enable_kinesis_source ? [1] : []
+    for_each = local.is_kinesis_source ? [1] : []
     content {
       kinesis_stream_arn = var.kinesis_source_stream_arn
       role_arn           = local.kinesis_source_stream_role
@@ -21,7 +21,7 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 
   dynamic "server_side_encryption" {
-    for_each = !var.enable_kinesis_source && var.enable_sse ? [1] : []
+    for_each = !local.is_kinesis_source && var.enable_sse ? [1] : []
     content {
       enabled  = var.enable_sse
       key_arn  = var.sse_kms_key_arn
