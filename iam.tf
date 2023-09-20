@@ -1,6 +1,6 @@
 locals {
   role_name                      = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
-  application_role_name          = var.create_application_role ? coalesce(var.application_role_name, "${var.name}-application-role", "*") : null
+  application_role_name          = coalesce(var.application_role_name, "${var.name}-application-role", "*")
   create_application_role_policy = var.create && var.create_application_role_policy
   add_backup_policies            = local.enable_s3_backup && var.s3_backup_use_existing_role
   add_kinesis_source_policy      = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role
