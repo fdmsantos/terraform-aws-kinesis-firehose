@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.1.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.1.0...v2.1.1) (2023-09-20)
+
+
+### Bug Fixes
+
+* Merge pull request [#3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/3) from schshmuel/fix-configuring-existing-role ([74a626b](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/74a626b6f530684a37cf4149e06cb3ff1172755a)), closes [#2](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/2)
+
 ## [2.1.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.0.0...v2.1.0) (2023-09-19)
 
 
