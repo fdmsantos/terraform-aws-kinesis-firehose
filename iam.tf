@@ -187,9 +187,9 @@ data "aws_iam_policy_document" "glue" {
       "glue:GetTableVersions"
     ]
     resources = [
-      "arn:aws:glue:${local.data_format_conversion_glue_region}:${data.aws_caller_identity.current.account_id}:catalog",
-      "arn:aws:glue:${local.data_format_conversion_glue_region}:${data.aws_caller_identity.current.account_id}:database/${var.data_format_conversion_glue_database}",
-      "arn:aws:glue:${local.data_format_conversion_glue_region}:${data.aws_caller_identity.current.account_id}:table/${var.data_format_conversion_glue_database}/${var.data_format_conversion_glue_table_name}"
+      "arn:aws:glue:${local.data_format_conversion_glue_region}:${local.data_format_conversion_glue_catalog_id}:catalog",
+      "arn:aws:glue:${local.data_format_conversion_glue_region}:${local.data_format_conversion_glue_catalog_id}:database/${var.data_format_conversion_glue_database}",
+      "arn:aws:glue:${local.data_format_conversion_glue_region}:${local.data_format_conversion_glue_catalog_id}:table/${var.data_format_conversion_glue_database}/${var.data_format_conversion_glue_table_name}"
     ]
   }
 }
