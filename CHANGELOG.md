@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.1.2](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.1.1...v2.1.2) (2023-11-09)
+
+
+### Bug Fixes
+
+* Merge pull request [#4](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/4) from mzupan/main ([bb0ee4a](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/bb0ee4acfe1fd08775d482073393805e1edf463f))
+
 ### [2.1.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.1.0...v2.1.1) (2023-09-20)
 
 
