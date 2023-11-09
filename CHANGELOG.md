@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.1.2...v2.2.0) (2023-11-09)
+
+
+### Features
+
+* Merge pull request [#5](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/5) from angryhamsterx/glue_tables_another_account ([a09447e](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/a09447edc0b4e39e76d6ad6922ecbe5fef247bf9))
+
 ### [2.1.2](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.1.1...v2.1.2) (2023-11-09)
 
 
