@@ -910,7 +910,7 @@ variable "splunk_retry_duration" {
   type        = number
   default     = 300
   validation {
-    error_message = "Minimum: 0 seconds. Maximum: 7200 seconds"
+    error_message = "Minimum: 0 seconds. Maximum: 7200 seconds."
     condition     = var.splunk_retry_duration >= 0 && var.splunk_retry_duration <= 7200
   }
 }
@@ -942,7 +942,7 @@ variable "http_endpoint_retry_duration" {
   type        = number
   default     = 300
   validation {
-    error_message = "Minimum: 0 seconds. Maximum: 7200 seconds"
+    error_message = "Minimum: 0 seconds. Maximum: 7200 seconds."
     condition     = var.http_endpoint_retry_duration >= 0 && var.http_endpoint_retry_duration <= 7200
   }
 }
