@@ -67,7 +67,7 @@ data "aws_iam_policy_document" "kinesis" {
     content {
       effect = "Allow"
       actions = [
-        "kinesis:Decrypt"
+        "kms:Decrypt"
       ]
       resources = [var.kinesis_source_kms_arn]
       condition {
