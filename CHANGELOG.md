@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.2.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.2.0...v2.2.1) (2023-12-04)
+
+
+### Bug Fixes
+
+* change kinesisDecrypt to kmsDecrypt ([c3c28a0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/c3c28a013e1a6705c94bab448de123012bcd70e9))
+
 ## [2.2.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.1.2...v2.2.0) (2023-11-09)
 
 
