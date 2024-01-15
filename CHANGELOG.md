@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.2.2](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.2.1...v2.2.2) (2024-01-15)
+
+
+### Bug Fixes
+
+* buffering_interval variable validation doesn't allow to specify values less than 60 seconds ([#7](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/7)) ([fc78ff3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/fc78ff3816915f6414e750c2f438091c5304b17c))
+
 ### [2.2.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.2.0...v2.2.1) (2023-12-04)
 
 
