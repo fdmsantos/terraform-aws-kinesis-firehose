@@ -57,8 +57,8 @@ variable "buffering_interval" {
   type        = number
   default     = 300
   validation {
-    error_message = "Valid Values: Minimum: 60 seconds, maximum: 900 seconds."
-    condition     = var.buffering_interval >= 60 && var.buffering_interval <= 900
+    error_message = "Valid Values: Minimum: 0 seconds, maximum: 900 seconds."
+    condition     = var.buffering_interval >= 0 && var.buffering_interval <= 900
   }
 }
 
