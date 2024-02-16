@@ -24,7 +24,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic"], var.destination)
   }
 }
 
@@ -233,7 +233,7 @@ variable "s3_backup_log_stream_name" {
 }
 
 variable "s3_backup_mode" {
-  description = "Defines how documents should be delivered to Amazon S3. Used to elasticsearch, splunk, http configurations. For S3 and Redshift use enable_s3_backup"
+  description = "Defines how documents should be delivered to Amazon S3. Used to elasticsearch, opensearch, splunk, http configurations. For S3 and Redshift use enable_s3_backup"
   type        = string
   default     = "FailedOnly"
   validation {
@@ -326,6 +326,12 @@ variable "s3_own_bucket" {
 
 variable "s3_cross_account" {
   description = "Indicates if S3 bucket destination is in a different account"
+  type        = bool
+  default     = false
+}
+
+variable "destination_cross_account" {
+  description = "Indicates if destination is in a different account. Only supported to Elasticsearch and OpenSearch"
   type        = bool
   default     = false
 }
@@ -773,45 +779,116 @@ variable "elasticsearch_type_name" {
 variable "elasticsearch_retry_duration" {
   description = "The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt"
   type        = string
-  default     = 3600
+  default     = 300
   validation {
     error_message = "Minimum: 0 seconds."
-    condition     = var.elasticsearch_retry_duration >= 0
+    condition     = var.elasticsearch_retry_duration >= 0 && var.elasticsearch_retry_duration <= 7200
   }
 }
 
-variable "elasticsearch_enable_vpc" {
-  description = "Indicates if destination is configured in VPC. Supported only to Elasticsearch destinations"
-  type        = bool
-  default     = false
-}
-
-variable "elasticsearch_vpc_use_existing_role" {
-  description = "Indicates if want use the kinesis firehose role to VPC access."
-  type        = bool
-  default     = true
-}
-
-variable "elasticsearch_vpc_role_arn" {
-  description = "The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces"
+######
+# Opensearch Destination Variables
+######
+variable "opensearch_domain_arn" {
+  description = "The ARN of the Amazon Opensearch domain. The pattern needs to be arn:.*. Conflicts with cluster_endpoint."
   type        = string
   default     = null
 }
 
-variable "elasticsearch_vpc_subnet_ids" {
-  description = "A list of subnet IDs to associate with Kinesis Firehose"
-  type        = list(string)
+variable "opensearch_index_name" {
+  description = "The Opensearch (And OpenSearch Serverless) index name."
+  type        = string
   default     = null
 }
 
-variable "elasticsearch_cross_account" {
-  description = "Indicates if Elasticsearch domain is in a different account"
+variable "opensearch_index_rotation_period" {
+  description = "The Opensearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate expiration of old data"
+  type        = string
+  default     = "OneDay"
+  validation {
+    error_message = "Valid values are NoRotation, OneHour, OneDay, OneWeek, and OneMonth."
+    condition     = contains(["NoRotation", "OneHour", "OneDay", "OneWeek", "OneMonth"], var.opensearch_index_rotation_period)
+  }
+}
+
+variable "opensearch_type_name" {
+  description = "The opensearch type name with maximum length of 100 characters. Types are deprecated in OpenSearch_1.1. TypeName must be empty."
+  type        = string
+  default     = null
+}
+
+variable "opensearch_retry_duration" {
+  description = "After an initial failure to deliver to Amazon OpenSearch, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt). After this time has elapsed, the failed documents are written to Amazon S3. The default value is 300s. There will be no retry if the value is 0."
+  type        = string
+  default     = 300
+  validation {
+    error_message = "Minimum: 0 seconds."
+    condition     = var.opensearch_retry_duration >= 0 && var.opensearch_retry_duration <= 7200
+  }
+}
+
+variable "opensearch_vpc_create_service_linked_role" {
+  description = "Set it to True if want create Opensearch Service Linked Role to Access VPC."
   type        = bool
   default     = false
 }
 
+variable "opensearch_document_id_options" {
+  description = "The method for setting up document ID."
+  type        = string
+  default     = "FIREHOSE_DEFAULT"
+  validation {
+    error_message = "Valid values are FIREHOSE_DEFAULT and NO_DOCUMENT_ID."
+    condition     = contains(["FIREHOSE_DEFAULT", "NO_DOCUMENT_ID"], var.opensearch_document_id_options)
+  }
+}
+
+variable "opensearchserverless_collection_endpoint" {
+  description = "The endpoint to use when communicating with the collection in the Serverless offering for Amazon OpenSearch Service."
+  type        = string
+  default     = null
+}
+
+variable "opensearchserverless_collection_arn" {
+  description = "The ARN of the Amazon Opensearch Serverless Collection. The pattern needs to be arn:.*."
+  type        = string
+  default     = null
+}
+######
+# VPC Variables
+######
+variable "enable_vpc" {
+  description = "Indicates if destination is configured in VPC. Supports Elasticsearch and Opensearch destinations."
+  type        = bool
+  default     = false
+}
+
+variable "vpc_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role to VPC access. Supports Elasticsearch and Opensearch destinations."
+  type        = bool
+  default     = true
+}
+
+variable "vpc_role_arn" {
+  description = "The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces. Supports Elasticsearch and Opensearch destinations."
+  type        = string
+  default     = null
+}
+
+variable "vpc_subnet_ids" {
+  description = "A list of subnet IDs to associate with Kinesis Firehose. Supports Elasticsearch and Opensearch destinations."
+  type        = list(string)
+  default     = null
+}
+
+variable "vpc_security_group_same_as_destination" {
+  description = "Indicates if the firehose security group is the same as destination."
+  type        = bool
+  default     = true
+}
+
 variable "vpc_security_group_firehose_ids" {
-  description = "A list of security group IDs to associate with Kinesis Firehose"
+  description = "A list of security group IDs to associate with Kinesis Firehose."
   type        = list(string)
   default     = null
 }
@@ -824,18 +901,6 @@ variable "vpc_create_security_group" {
 
 variable "vpc_security_group_firehose_configure_existing" {
   description = "Indicates if want configure an existing firehose security group with the necessary rules"
-  type        = bool
-  default     = false
-}
-
-variable "elasticsearch_vpc_security_group_same_as_destination" {
-  description = "Indicates if the firehose security group is the same as destination"
-  type        = bool
-  default     = true
-}
-
-variable "elasticsearch_vpc_create_service_linked_role" {
-  description = "Set it to True if want create Opensearch Service Linked Role to Access VPC"
   type        = bool
   default     = false
 }

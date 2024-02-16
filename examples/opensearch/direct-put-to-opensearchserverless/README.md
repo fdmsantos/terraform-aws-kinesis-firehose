@@ -1,6 +1,6 @@
-# Public Opensearch
+# Public Opensearch Serverless
 
-Configuration in this directory creates kinesis firehose stream with Direct Put as source and Opensearch as destination.
+Configuration in this directory creates kinesis firehose stream with Direct Put as source and Opensearch Serverless as destination.
 
 This example can be tested with Demo Data in Kinesis Firehose Console.
 
@@ -13,10 +13,6 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
-
-Before sending test demo data, it's necessary execute the steps related in the following [link](https://aws.amazon.com/premiumsupport/knowledge-center/opensearch-troubleshoot-cloudwatch-logs/) in the section:
-
-`I'm unable to stream my CloudWatch log group to an OpenSearch Service domain when fine-grained access control is enabled`
 
 Note that this example may create resources which cost money. Run `terraform destroy` when you don't need these resources.
 
@@ -47,8 +43,10 @@ Note that this example may create resources which cost money. Run `terraform des
 | Name | Type |
 |------|------|
 | [aws_kms_key.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
-| [aws_opensearch_domain.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_domain) | resource |
-| [aws_opensearch_domain_policy.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_domain_policy) | resource |
+| [aws_opensearchserverless_access_policy.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearchserverless_access_policy) | resource |
+| [aws_opensearchserverless_collection.os](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearchserverless_collection) | resource |
+| [aws_opensearchserverless_security_policy.networking](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearchserverless_security_policy) | resource |
+| [aws_opensearchserverless_security_policy.security_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearchserverless_security_policy) | resource |
 | [aws_s3_bucket.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [random_pet.this](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) | resource |
 
@@ -56,16 +54,11 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_es_password"></a> [es\_password](#input\_es\_password) | ES Password | `string` | `null` | no |
-| <a name="input_es_username"></a> [es\_username](#input\_es\_username) | ES Username | `string` | `null` | no |
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-public-es"` | no |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"firehose-to-public-opensearch"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_dashboard_endpoint"></a> [dashboard\_endpoint](#output\_dashboard\_endpoint) | Kibana Endpoint |
-| <a name="output_es_domain"></a> [es\_domain](#output\_es\_domain) | Opensearch Domain |
-| <a name="output_es_endpoint"></a> [es\_endpoint](#output\_es\_endpoint) | Opensearch Endpoint |
-| <a name="output_firehose_role"></a> [firehose\_role](#output\_firehose\_role) | Firehose Role |
+| <a name="output_os_domain"></a> [os\_domain](#output\_os\_domain) | Opensearch Serverless Collection Endpoint |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

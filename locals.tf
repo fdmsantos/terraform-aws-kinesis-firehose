@@ -11,7 +11,8 @@ locals {
     extended_s3 : "extended_s3",
     redshift : "redshift",
     elasticsearch : "elasticsearch",
-    opensearch : "elasticsearch",
+    opensearch : "opensearch",
+    opensearchserverless : "opensearchserverless",
     splunk : "splunk",
     http_endpoint : "http_endpoint",
     datadog : "http_endpoint",
@@ -23,8 +24,9 @@ locals {
     mongodb : "http_endpoint",
     sumologic : "http_endpoint"
   }
-  destination    = local.destinations[var.destination]
-  s3_destination = local.destination == "extended_s3" ? true : false
+  destination           = local.destinations[var.destination]
+  s3_destination        = local.destination == "extended_s3" ? true : false
+  is_search_destination = contains(["elasticsearch", "opensearch", "opensearchserverless"], local.destination) ? true : false
 
   # Data Transformation
   enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning
@@ -116,7 +118,7 @@ locals {
   ) : null)
 
   # S3 Backup
-  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "splunk", "http_endpoint"], local.destination) ? true : false
+  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "opensearch", "opensearchserverless", "splunk", "http_endpoint"], local.destination) ? true : false
   s3_backup                           = var.enable_s3_backup ? "Enabled" : "Disabled"
   enable_s3_backup                    = var.enable_s3_backup || local.use_backup_vars_in_s3_configuration
   s3_backup_role_arn = (local.enable_s3_backup ? (
@@ -126,6 +128,14 @@ locals {
   s3_backup_cw_log_stream_name = var.create_destination_cw_log_group ? local.cw_log_backup_stream_name : var.s3_backup_log_stream_name
   backup_modes = {
     elasticsearch : {
+      FailedOnly : "FailedDocumentsOnly",
+      All : "AllDocuments"
+    }
+    opensearch : {
+      FailedOnly : "FailedDocumentsOnly",
+      All : "AllDocuments"
+    }
+    opensearchserverless : {
       FailedOnly : "FailedDocumentsOnly",
       All : "AllDocuments"
     }
@@ -154,21 +164,21 @@ locals {
   create_backup_logs      = var.create && var.enable_s3_backup && var.s3_backup_enable_log && var.s3_backup_create_cw_log_group
 
   # VPC Config
-  elasticsearch_vpc_role_arn = (var.elasticsearch_enable_vpc ? (
-    var.elasticsearch_vpc_use_existing_role ? local.firehose_role_arn : var.elasticsearch_vpc_role_arn
+  vpc_role_arn = (var.enable_vpc ? (
+    var.vpc_use_existing_role ? local.firehose_role_arn : var.vpc_role_arn
   ) : null)
 
-  elasticsearch_vpc_create_firehose_sg                    = local.destination == "elasticsearch" && var.vpc_create_security_group
-  elasticsearch_vpc_sgs                                   = local.elasticsearch_vpc_create_firehose_sg ? [aws_security_group.firehose[0].id] : var.vpc_security_group_firehose_ids
-  elasticsearch_vpc_configure_existing_firehose_sg        = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc && var.vpc_security_group_firehose_configure_existing && !local.elasticsearch_vpc_create_firehose_sg
-  elasticsearch_vpc_create_destination_group              = local.destination == "elasticsearch" && var.vpc_create_destination_security_group && !var.elasticsearch_vpc_security_group_same_as_destination
-  elasticsearch_vpc_firehose_sgs                          = local.elasticsearch_vpc_create_firehose_sg ? [aws_security_group.firehose[0].id] : var.vpc_security_group_firehose_ids
-  elasticsearch_vpc_destination_sgs                       = local.elasticsearch_vpc_create_destination_group ? [aws_security_group.destination[0].id] : var.vpc_security_group_destination_ids
-  not_elasticsearch_vpc_create_destination_group          = contains(["splunk", "redshift"], local.destination) && var.vpc_create_destination_security_group
-  vpc_create_destination_group                            = local.elasticsearch_vpc_create_destination_group || local.not_elasticsearch_vpc_create_destination_group
-  elasticsearch_vpc_configure_existing_destination_sg     = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc && var.vpc_security_group_destination_configure_existing && !local.elasticsearch_vpc_create_destination_group && !var.elasticsearch_vpc_security_group_same_as_destination
-  not_elasticsearch_vpc_configure_existing_destination_sg = contains(["splunk", "redshift"], local.destination) && var.vpc_security_group_destination_configure_existing
-  vpc_configure_destination_group                         = local.elasticsearch_vpc_configure_existing_destination_sg || local.not_elasticsearch_vpc_configure_existing_destination_sg
+  search_destination_vpc_create_firehose_sg                    = local.is_search_destination && var.vpc_create_security_group
+  search_destination_vpc_sgs                                   = local.search_destination_vpc_create_firehose_sg ? [aws_security_group.firehose[0].id] : var.vpc_security_group_firehose_ids
+  search_destination_vpc_configure_existing_firehose_sg        = local.is_search_destination && var.enable_vpc && var.vpc_security_group_firehose_configure_existing && !local.search_destination_vpc_create_firehose_sg
+  search_destination_vpc_create_destination_group              = local.is_search_destination && var.vpc_create_destination_security_group && !var.vpc_security_group_same_as_destination
+  search_destination_vpc_firehose_sgs                          = local.search_destination_vpc_create_firehose_sg ? [aws_security_group.firehose[0].id] : var.vpc_security_group_firehose_ids
+  search_destination_vpc_destination_sgs                       = local.search_destination_vpc_create_destination_group ? [aws_security_group.destination[0].id] : var.vpc_security_group_destination_ids
+  not_search_destination_vpc_create_destination_group          = contains(["splunk", "redshift"], local.destination) && var.vpc_create_destination_security_group
+  vpc_create_destination_group                                 = local.search_destination_vpc_create_destination_group || local.not_search_destination_vpc_create_destination_group
+  search_destination_vpc_configure_existing_destination_sg     = local.is_search_destination && var.enable_vpc && var.vpc_security_group_destination_configure_existing && !local.search_destination_vpc_create_destination_group && !var.vpc_security_group_same_as_destination
+  not_search_destination_vpc_configure_existing_destination_sg = contains(["splunk", "redshift"], local.destination) && var.vpc_security_group_destination_configure_existing
+  vpc_configure_destination_group                              = local.search_destination_vpc_configure_existing_destination_sg || local.not_search_destination_vpc_configure_existing_destination_sg
 
   http_endpoint_url = {
     http_endpoint : var.http_endpoint_url

@@ -7,6 +7,7 @@ Supports all destinations and all Kinesis Firehose Features.
 
 ## Table of Contents
 
+* [Table of Contents](#table-of-contents)
 * [Module versioning rule](#module-versioning-rule)
 * [Features](#features)
 * [How to Use](#how-to-use)
@@ -14,11 +15,13 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Kinesis Data Stream](#kinesis-data-stream)
       * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
     * [Direct Put](#direct-put)
-    * [WAF](waf)
+    * [WAF](#waf)
   * [Destinations](#destinations)
     * [S3](#s3)
     * [Redshift](#redshift)
-    * [Elasticsearch / Opensearch](#elasticsearch--opensearch)
+    * [Elasticsearch](#elasticsearch)
+    * [Opensearch](#opensearch)
+    * [Opensearch Serverless](#opensearch-serverless)
     * [Splunk](#splunk)
     * [HTTP Endpoint](#http-endpoint)
     * [Datadog](#datadog)
@@ -36,7 +39,7 @@ Supports all destinations and all Kinesis Firehose Features.
   * [S3 Backup Data](#s3-backup-data)
   * [Destination Delivery Logging](#destination-delivery-logging)
   * [VPC Support](#vpc-support)
-    * [ElasticSearch / Opensearch](#elasticsearch--opensearch)
+    * [ElasticSearch / Opensearch / Opensearch Serverless](#elasticsearch--opensearch--opensearch-serverless)
     * [Redshift / Splunk](#redshift--splunk)
   * [Application Role](#application-role)
 * [Destinations Mapping](#destinations-mapping)
@@ -48,8 +51,10 @@ Supports all destinations and all Kinesis Firehose Features.
 * [Inputs](#inputs)
 * [Outputs](#outputs)
 * [Deprecation](#deprecation)
+  * [Version &gt;= 2.1.0](#version--210)
 * [Upgrade](#upgrade)
 * [License](#license)
+
 
 ## Module versioning rule
 
@@ -57,6 +62,7 @@ Supports all destinations and all Kinesis Firehose Features.
 |----------------|----------------------|
 | >= 1.x.x       | ~> 4.4               |
 | >= 2.x.x       | ~> 5.0               |
+| >= 3.x.x       | >= 5.33              | 
 
 ## Features
 
@@ -69,11 +75,11 @@ Supports all destinations and all Kinesis Firehose Features.
     - Data Format Conversion
     - Dynamic Partition
   - Redshift
-    - Redshift in VPC: Create Security Groups
-  - ElasticSearch / Opensearch
-    - VPC Support
+    - VPC Support. Security Groups creation supported
+  - ElasticSearch / Opensearch / Opensearch Serverless
+    - VPC Support. Security Groups creation supported
   - Splunk
-    - Splunk in VPC: Create Security Groups
+    - VPC Support. Security Groups creation supported
   - Custom Http Endpoint
   - DataDog
   - Coralogix
@@ -89,10 +95,10 @@ Supports all destinations and all Kinesis Firehose Features.
 - Application Role to Direct Put Sources
 - Permissions
   - IAM Roles
-  - Opensearch Service Role
+  - Opensearch / Opensearch Serverless Service Role
   - Associate Role to Redshift Cluster Iam Roles
   - Cross Account S3 Bucket Policy
-  - Cross Account OpenSearch Service policy
+  - Cross Account Elasticsearch / OpenSearch / Opensearch Serverless Service policy
 
 ## How to Use
 
@@ -194,9 +200,9 @@ module "firehose" {
 }
 ```
 
-#### Elasticsearch / Opensearch
+#### Elasticsearch
 
-**To Enabled It:** `destination = "elasticsearch" or destination = "opensearch"`
+**To Enabled It:** `destination = "elasticsearch"`
 
 **Variables Prefix:** `elasticsearch_`
 
@@ -205,9 +211,44 @@ module "firehose" {
   source                   = "fdmsantos/kinesis-firehose/aws"
   version                  = "x.x.x"
   name                     = "firehose-delivery-stream"
-  destination              = "opensearch" # or destination = "elasticsearch"
+  destination              = "elasticsearch"
   elasticsearch_domain_arn = "<elasticsearch_domain_arn>"
   elasticsearch_index_name = "<elasticsearch_index_name"
+}
+```
+
+####  Opensearch
+
+**To Enabled It:** `destination = "opensearch"`
+
+**Variables Prefix:** `opensearch_` 
+
+```hcl
+module "firehose" {
+  source                = "fdmsantos/kinesis-firehose/aws"
+  version               = "x.x.x"
+  name                  = "firehose-delivery-stream"
+  destination           = "opensearch"
+  opensearch_domain_arn = "<opensearch_domain_arn>"
+  opensearch_index_name = "<opensearch_index_name"
+}
+```
+
+####  Opensearch Serverless
+
+**To Enabled It:** `destination = "opensearchserverless"`
+
+**Variables Prefix:** `opensearchserverless_`
+
+```hcl
+module "firehose" {
+  source                                   = "fdmsantos/kinesis-firehose/aws"
+  version                                  = "x.x.x"
+  name                                     = "firehose-delivery-stream"
+  destination                              = "opensearch"
+  opensearchserverless_collection_endpoint = "<opensearchserverless_collection_endpoint>"
+  opensearchserverless_collection_arn      = "<opensearchserverless_collection_arn>"
+  opensearch_index_name                    = "<opensearchserverless_index_name"
 }
 ```
 
@@ -584,15 +625,15 @@ It's possible use module only to create security groups.
 
 Use variable `create = false` for this feature.
 
-#### ElasticSearch / Opensearch
+#### ElasticSearch / Opensearch / Opensearch Serverless
 
 **Supported By:** ElasticSearch / Opensearch destination
 
-**To Enabled It:** `elasticsearch_enable_vpc = true`
+**To Enabled It:** `enable_vpc = true`
 
-**To Create Opensearch IAM Service Linked Role:** `elasticsearch_vpc_create_service_linked_role = true` 
+**To Create Opensearch IAM Service Linked Role:** `vpc_create_service_linked_role = true` 
 
-**If you want to have separate security groups for firehose and destination:** `elasticsearch_vpc_security_group_same_as_destination = false`
+**If you want to have separate security groups for firehose and destination:** `vpc_security_group_same_as_destination = false`
 
 **Examples**
 
@@ -602,11 +643,11 @@ module "firehose" {
   source                                               = "fdmsantos/kinesis-firehose/aws"
   version                                              = "x.x.x"
   name                                                 = "firehose-delivery-stream"
-  destination                                          = "opensearch" # or destination = "elasticsearch"
-  elasticsearch_domain_arn                             = "<elasticsearch_domain_arn>"
-  elasticsearch_index_name                             = "<elasticsearch_index_name>"
-  elasticsearch_enable_vpc                             = true
-  elasticsearch_vpc_subnet_ids                         = "<list(subnets_ids)>"
+  destination                                          = "opensearch"
+  opensearch_domain_arn                                = "<opensearch_domain_arn>"
+  opensearch_index_name                                = "<opensearch_index_name>"
+  enable_vpc                                           = true
+  vpc_subnet_ids                                       = "<list(subnets_ids)>"
   vpc_create_security_group                            = true
   vpc_create_destination_security_group                = true
   elasticsearch_vpc_security_group_same_as_destination = false
@@ -619,11 +660,11 @@ module "firehose" {
   source                          = "fdmsantos/kinesis-firehose/aws"
   version                         = "x.x.x"
   name                            = "firehose-delivery-stream"
-  destination                     = "opensearch" # or destination = "elasticsearch"
-  elasticsearch_domain_arn        = "<elasticsearch_domain_arn>"
-  elasticsearch_index_name        = "<elasticsearch_index_name>"
-  elasticsearch_enable_vpc        = true
-  elasticsearch_vpc_subnet_ids    = "<list(subnets_ids)>"
+  destination                     = "opensearch"
+  opensearch_domain_arn           = "<opensearch_domain_arn>"
+  opensearch_index_name           = "<opensearch_index_name>"
+  enable_vpc                      = true
+  vpc_subnet_ids                  = "<list(subnets_ids)>"
   vpc_security_group_firehose_ids = "<list(security_group_ids)>"
 }
 ```
@@ -631,18 +672,18 @@ module "firehose" {
 ```hcl
 # Configure Existing Security Groups
 module "firehose" {
-  source                                                       = "fdmsantos/kinesis-firehose/aws"
-  version                                                      = "x.x.x"
-  name                                                         = "firehose-delivery-stream"
-  destination                                                  = "opensearch" # or destination = "elasticsearch"
-  elasticsearch_domain_arn                                     = "<elasticsearch_domain_arn>"
-  elasticsearch_index_name                                     = "<elasticsearch_index_name>"
-  elasticsearch_enable_vpc                                     = true
-  elasticsearch_vpc_subnet_ids                                 = "<list(subnets_ids)>"
-  vpc_security_group_firehose_configure_existing = true
-  vpc_security_group_firehose_ids                              = "<list(security_group_ids)>"
-  vpc_security_group_destination_configure_existing            = true
-  vpc_security_group_destination_ids                           = "<list(security_group_ids)>"
+  source                                            = "fdmsantos/kinesis-firehose/aws"
+  version                                           = "x.x.x"
+  name                                              = "firehose-delivery-stream"
+  destination                                       = "opensearch"
+  opensearch_domain_arn                             = "<opensearch_domain_arn>"
+  opensearch_index_name                             = "<opensearch_index_name>"
+  enable_vpc                                        = true
+  vpc_subnet_ids                                    = "<list(subnets_ids)>"
+  vpc_security_group_firehose_configure_existing    = true
+  vpc_security_group_firehose_ids                   = "<list(security_group_ids)>"
+  vpc_security_group_destination_configure_existing = true
+  vpc_security_group_destination_ids                = "<list(security_group_ids)>"
 }
 ```
 
@@ -721,21 +762,23 @@ module "firehose" {
 
 The destination variable configured in module is mapped to firehose valid destination.
 
-| Module Destination           | Firehose Destination | Differences                                                                                                                                                                                               |
-|------------------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| s3 and extended_s3           | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                                             |
-| redshift                     | redshift             |                                                                                                                                                                                                           |
-| splunk                       | splunk               |                                                                                                                                                                                                           |
-| opensearch and elasticsearch | elasticsearch        | There is no difference between opensearch or elasticsearch destinations                                                                                                                                   |
-| http_endpoint                | http_endpoint        |                                                                                                                                                                                                           |
-| datadog                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                              |
-| newrelic                     | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                             |
-| coralogix                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_location variable                        |
-| dynatrace                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable  |
-| honeycomb                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure honeycomb_dataset_name variable                             |
-| logicmonitor                 | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure logicmonitor_account variable                               |
-| mongodb                      | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure mongodb_realm_webhook_url variable                          |
-| sumologic                    | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure sumologic_deployment_name and sumologic_data_type variables |
+| Module Destination   | Firehose Destination | Differences                                                                                                                                                                                               |
+|----------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| s3 and extended_s3   | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                                             |
+| redshift             | redshift             |                                                                                                                                                                                                           |
+| splunk               | splunk               |                                                                                                                                                                                                           |
+| opensearch           | elasticsearch        |                                                                                                                                                                                                           |
+| opensearch           | opensearch           |                                                                                                                                                                                                           |
+| opensearchserverless | opensearchserverless |                                                                                                                                                                                                           |
+| http_endpoint        | http_endpoint        |                                                                                                                                                                                                           |
+| datadog              | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                              |
+| newrelic             | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                             |
+| coralogix            | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure coralogix_endpoint_location variable                        |
+| dynatrace            | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure dynatrace_endpoint_location and dynatrace_api_url variable  |
+| honeycomb            | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure honeycomb_dataset_name variable                             |
+| logicmonitor         | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure logicmonitor_account variable                               |
+| mongodb              | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure mongodb_realm_webhook_url variable                          |
+| sumologic            | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure sumologic_deployment_name and sumologic_data_type variables |
 
 ## Examples
 
@@ -745,8 +788,9 @@ The destination variable configured in module is mapped to firehose valid destin
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
 - [Redshift In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/redshift-in-vpc) - Creates a Kinesis Firehose Stream with redshift in VPC as destination.
-- [Public Opensearch](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/elasticsearch/public-opensearch) - Creates a Kinesis Firehose Stream with public opensearch as destination.
-- [Opensearch In Vpc](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/elasticsearch/opensearch-in-vpc) - Creates a Kinesis Firehose Stream with public opensearch in VPC as destination.
+- [Public Opensearch](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/opensearch/direct-put-to-opensearch) - Creates a Kinesis Firehose Stream with public opensearch as destination.
+- [Public Opensearch Serverless](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/opensearch/direct-put-to-opensearchserverless) - Creates a Kinesis Firehose Stream with public serverless opensearch as destination.
+- [Opensearch Serverless In Vpc](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/opensearch/direct-put-to-opensearchserverless-in-vpc) - Creates a Kinesis Firehose Stream with serverless opensearch in VPC as destination.
 - [Public Splunk](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/public-splunk) - Creates a Kinesis Firehose Stream with public splunk as destination.
 - [Splunk In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/splunk-in-vpc) - Creates a Kinesis Firehose Stream with splunk in VPC as destination.
 - [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
@@ -765,13 +809,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.33 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.33 |
 
 ## Modules
 
@@ -790,6 +834,8 @@ No modules.
 | [aws_iam_policy.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -801,33 +847,40 @@ No modules.
 | [aws_iam_role_policy_attachment.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_service_linked_role.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
+| [aws_iam_service_linked_role.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
 | [aws_kinesis_firehose_delivery_stream.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
 | [aws_redshift_cluster_iam_roles.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/redshift_cluster_iam_roles) | resource |
 | [aws_security_group.destination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.destination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
-| [aws_security_group_rule.firehose_es_egress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.firehose_egress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.application_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cross_account_elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.cross_account_opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.cross_account_opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cross_account_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
-| [aws_subnet.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
+| [aws_subnet.subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
 
@@ -886,6 +939,7 @@ No modules.
 | <a name="input_data_format_conversion_parquet_writer_version"></a> [data\_format\_conversion\_parquet\_writer\_version](#input\_data\_format\_conversion\_parquet\_writer\_version) | Indicates the version of row format to output. | `string` | `"V1"` | no |
 | <a name="input_datadog_endpoint_type"></a> [datadog\_endpoint\_type](#input\_datadog\_endpoint\_type) | Endpoint type to datadog destination | `string` | `"logs_eu"` | no |
 | <a name="input_destination"></a> [destination](#input\_destination) | This is the destination to where the data is delivered | `string` | n/a | yes |
+| <a name="input_destination_cross_account"></a> [destination\_cross\_account](#input\_destination\_cross\_account) | Indicates if destination is in a different account. Only supported to Elasticsearch and OpenSearch | `bool` | `false` | no |
 | <a name="input_destination_log_group_name"></a> [destination\_log\_group\_name](#input\_destination\_log\_group\_name) | The CloudWatch group name for destination logs | `string` | `null` | no |
 | <a name="input_destination_log_stream_name"></a> [destination\_log\_stream\_name](#input\_destination\_log\_stream\_name) | The CloudWatch log stream name for destination logs | `string` | `null` | no |
 | <a name="input_dynamic_partition_append_delimiter_to_record"></a> [dynamic\_partition\_append\_delimiter\_to\_record](#input\_dynamic\_partition\_append\_delimiter\_to\_record) | To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
@@ -896,18 +950,11 @@ No modules.
 | <a name="input_dynamic_partitioning_retry_duration"></a> [dynamic\_partitioning\_retry\_duration](#input\_dynamic\_partitioning\_retry\_duration) | Total amount of seconds Firehose spends on retries | `number` | `300` | no |
 | <a name="input_dynatrace_api_url"></a> [dynatrace\_api\_url](#input\_dynatrace\_api\_url) | API URL to Dynatrace destination | `string` | `null` | no |
 | <a name="input_dynatrace_endpoint_location"></a> [dynatrace\_endpoint\_location](#input\_dynatrace\_endpoint\_location) | Endpoint Location to Dynatrace destination | `string` | `"eu"` | no |
-| <a name="input_elasticsearch_cross_account"></a> [elasticsearch\_cross\_account](#input\_elasticsearch\_cross\_account) | Indicates if Elasticsearch domain is in a different account | `bool` | `false` | no |
 | <a name="input_elasticsearch_domain_arn"></a> [elasticsearch\_domain\_arn](#input\_elasticsearch\_domain\_arn) | The ARN of the Amazon ES domain. The pattern needs to be arn:.* | `string` | `null` | no |
-| <a name="input_elasticsearch_enable_vpc"></a> [elasticsearch\_enable\_vpc](#input\_elasticsearch\_enable\_vpc) | Indicates if destination is configured in VPC. Supported only to Elasticsearch destinations | `bool` | `false` | no |
 | <a name="input_elasticsearch_index_name"></a> [elasticsearch\_index\_name](#input\_elasticsearch\_index\_name) | The Elasticsearch index name | `string` | `null` | no |
 | <a name="input_elasticsearch_index_rotation_period"></a> [elasticsearch\_index\_rotation\_period](#input\_elasticsearch\_index\_rotation\_period) | The Elasticsearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate expiration of old data | `string` | `"OneDay"` | no |
-| <a name="input_elasticsearch_retry_duration"></a> [elasticsearch\_retry\_duration](#input\_elasticsearch\_retry\_duration) | The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt | `string` | `3600` | no |
+| <a name="input_elasticsearch_retry_duration"></a> [elasticsearch\_retry\_duration](#input\_elasticsearch\_retry\_duration) | The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt | `string` | `300` | no |
 | <a name="input_elasticsearch_type_name"></a> [elasticsearch\_type\_name](#input\_elasticsearch\_type\_name) | The Elasticsearch type name with maximum length of 100 characters | `string` | `null` | no |
-| <a name="input_elasticsearch_vpc_create_service_linked_role"></a> [elasticsearch\_vpc\_create\_service\_linked\_role](#input\_elasticsearch\_vpc\_create\_service\_linked\_role) | Set it to True if want create Opensearch Service Linked Role to Access VPC | `bool` | `false` | no |
-| <a name="input_elasticsearch_vpc_role_arn"></a> [elasticsearch\_vpc\_role\_arn](#input\_elasticsearch\_vpc\_role\_arn) | The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces | `string` | `null` | no |
-| <a name="input_elasticsearch_vpc_security_group_same_as_destination"></a> [elasticsearch\_vpc\_security\_group\_same\_as\_destination](#input\_elasticsearch\_vpc\_security\_group\_same\_as\_destination) | Indicates if the firehose security group is the same as destination | `bool` | `true` | no |
-| <a name="input_elasticsearch_vpc_subnet_ids"></a> [elasticsearch\_vpc\_subnet\_ids](#input\_elasticsearch\_vpc\_subnet\_ids) | A list of subnet IDs to associate with Kinesis Firehose | `list(string)` | `null` | no |
-| <a name="input_elasticsearch_vpc_use_existing_role"></a> [elasticsearch\_vpc\_use\_existing\_role](#input\_elasticsearch\_vpc\_use\_existing\_role) | Indicates if want use the kinesis firehose role to VPC access. | `bool` | `true` | no |
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
 | <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |
@@ -916,6 +963,7 @@ No modules.
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
+| <a name="input_enable_vpc"></a> [enable\_vpc](#input\_enable\_vpc) | Indicates if destination is configured in VPC. Supports Elasticsearch and Opensearch destinations. | `bool` | `false` | no |
 | <a name="input_firehose_role"></a> [firehose\_role](#input\_firehose\_role) | IAM role ARN attached to the Kinesis Firehose Stream. | `string` | `null` | no |
 | <a name="input_honeycomb_api_host"></a> [honeycomb\_api\_host](#input\_honeycomb\_api\_host) | If you use a Secure Tenancy or other proxy, put its schema://host[:port] here | `string` | `"https://api.honeycomb.io"` | no |
 | <a name="input_honeycomb_dataset_name"></a> [honeycomb\_dataset\_name](#input\_honeycomb\_dataset\_name) | Your Honeycomb dataset name to Honeycomb destination | `string` | `null` | no |
@@ -936,6 +984,15 @@ No modules.
 | <a name="input_mongodb_realm_webhook_url"></a> [mongodb\_realm\_webhook\_url](#input\_mongodb\_realm\_webhook\_url) | Realm Webhook URL to use in MongoDB destination | `string` | `null` | no |
 | <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in | `string` | n/a | yes |
 | <a name="input_newrelic_endpoint_type"></a> [newrelic\_endpoint\_type](#input\_newrelic\_endpoint\_type) | Endpoint type to New Relic destination | `string` | `"logs_eu"` | no |
+| <a name="input_opensearch_document_id_options"></a> [opensearch\_document\_id\_options](#input\_opensearch\_document\_id\_options) | The method for setting up document ID. | `string` | `"FIREHOSE_DEFAULT"` | no |
+| <a name="input_opensearch_domain_arn"></a> [opensearch\_domain\_arn](#input\_opensearch\_domain\_arn) | The ARN of the Amazon Opensearch domain. The pattern needs to be arn:.*. Conflicts with cluster\_endpoint. | `string` | `null` | no |
+| <a name="input_opensearch_index_name"></a> [opensearch\_index\_name](#input\_opensearch\_index\_name) | The Opensearch (And OpenSearch Serverless) index name. | `string` | `null` | no |
+| <a name="input_opensearch_index_rotation_period"></a> [opensearch\_index\_rotation\_period](#input\_opensearch\_index\_rotation\_period) | The Opensearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate expiration of old data | `string` | `"OneDay"` | no |
+| <a name="input_opensearch_retry_duration"></a> [opensearch\_retry\_duration](#input\_opensearch\_retry\_duration) | After an initial failure to deliver to Amazon OpenSearch, the total amount of time, in seconds between 0 to 7200, during which Firehose re-attempts delivery (including the first attempt). After this time has elapsed, the failed documents are written to Amazon S3. The default value is 300s. There will be no retry if the value is 0. | `string` | `300` | no |
+| <a name="input_opensearch_type_name"></a> [opensearch\_type\_name](#input\_opensearch\_type\_name) | The opensearch type name with maximum length of 100 characters. Types are deprecated in OpenSearch\_1.1. TypeName must be empty. | `string` | `null` | no |
+| <a name="input_opensearch_vpc_create_service_linked_role"></a> [opensearch\_vpc\_create\_service\_linked\_role](#input\_opensearch\_vpc\_create\_service\_linked\_role) | Set it to True if want create Opensearch Service Linked Role to Access VPC. | `bool` | `false` | no |
+| <a name="input_opensearchserverless_collection_arn"></a> [opensearchserverless\_collection\_arn](#input\_opensearchserverless\_collection\_arn) | The ARN of the Amazon Opensearch Serverless Collection. The pattern needs to be arn:.*. | `string` | `null` | no |
+| <a name="input_opensearchserverless_collection_endpoint"></a> [opensearchserverless\_collection\_endpoint](#input\_opensearchserverless\_collection\_endpoint) | The endpoint to use when communicating with the collection in the Serverless offering for Amazon OpenSearch Service. | `string` | `null` | no |
 | <a name="input_policy_path"></a> [policy\_path](#input\_policy\_path) | Path of policies to that should be added to IAM role for Kinesis Firehose Stream | `string` | `null` | no |
 | <a name="input_redshift_cluster_endpoint"></a> [redshift\_cluster\_endpoint](#input\_redshift\_cluster\_endpoint) | The redshift endpoint | `string` | `null` | no |
 | <a name="input_redshift_cluster_identifier"></a> [redshift\_cluster\_identifier](#input\_redshift\_cluster\_identifier) | Redshift Cluster identifier. Necessary to associate the iam role to cluster | `string` | `null` | no |
@@ -963,7 +1020,7 @@ No modules.
 | <a name="input_s3_backup_kms_key_arn"></a> [s3\_backup\_kms\_key\_arn](#input\_s3\_backup\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used. | `string` | `null` | no |
 | <a name="input_s3_backup_log_group_name"></a> [s3\_backup\_log\_group\_name](#input\_s3\_backup\_log\_group\_name) | he CloudWatch group name for logging | `string` | `null` | no |
 | <a name="input_s3_backup_log_stream_name"></a> [s3\_backup\_log\_stream\_name](#input\_s3\_backup\_log\_stream\_name) | The CloudWatch log stream name for logging | `string` | `null` | no |
-| <a name="input_s3_backup_mode"></a> [s3\_backup\_mode](#input\_s3\_backup\_mode) | Defines how documents should be delivered to Amazon S3. Used to elasticsearch, splunk, http configurations. For S3 and Redshift use enable\_s3\_backup | `string` | `"FailedOnly"` | no |
+| <a name="input_s3_backup_mode"></a> [s3\_backup\_mode](#input\_s3\_backup\_mode) | Defines how documents should be delivered to Amazon S3. Used to elasticsearch, opensearch, splunk, http configurations. For S3 and Redshift use enable\_s3\_backup | `string` | `"FailedOnly"` | no |
 | <a name="input_s3_backup_prefix"></a> [s3\_backup\_prefix](#input\_s3\_backup\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
 | <a name="input_s3_backup_role_arn"></a> [s3\_backup\_role\_arn](#input\_s3\_backup\_role\_arn) | The role that Kinesis Data Firehose can use to access S3 Backup. | `string` | `null` | no |
 | <a name="input_s3_backup_use_existing_role"></a> [s3\_backup\_use\_existing\_role](#input\_s3\_backup\_use\_existing\_role) | Indicates if want use the kinesis firehose role to s3 backup bucket access. | `bool` | `true` | no |
@@ -993,12 +1050,16 @@ No modules.
 | <a name="input_transform_lambda_role_arn"></a> [transform\_lambda\_role\_arn](#input\_transform\_lambda\_role\_arn) | The ARN of the role to execute the transform lambda. If null use the Firehose Stream role | `string` | `null` | no |
 | <a name="input_vpc_create_destination_security_group"></a> [vpc\_create\_destination\_security\_group](#input\_vpc\_create\_destination\_security\_group) | Indicates if want create destination security group to associate to firehose destinations | `bool` | `false` | no |
 | <a name="input_vpc_create_security_group"></a> [vpc\_create\_security\_group](#input\_vpc\_create\_security\_group) | Indicates if want create security group to associate to kinesis firehose | `bool` | `false` | no |
+| <a name="input_vpc_role_arn"></a> [vpc\_role\_arn](#input\_vpc\_role\_arn) | The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces. Supports Elasticsearch and Opensearch destinations. | `string` | `null` | no |
 | <a name="input_vpc_security_group_destination_configure_existing"></a> [vpc\_security\_group\_destination\_configure\_existing](#input\_vpc\_security\_group\_destination\_configure\_existing) | Indicates if want configure an existing destination security group with the necessary rules | `bool` | `false` | no |
 | <a name="input_vpc_security_group_destination_ids"></a> [vpc\_security\_group\_destination\_ids](#input\_vpc\_security\_group\_destination\_ids) | A list of security group IDs associated to destinations to allow firehose traffic | `list(string)` | `null` | no |
 | <a name="input_vpc_security_group_destination_vpc_id"></a> [vpc\_security\_group\_destination\_vpc\_id](#input\_vpc\_security\_group\_destination\_vpc\_id) | VPC ID to create the destination security group. Only supported to Redshift and splunk destinations | `string` | `null` | no |
 | <a name="input_vpc_security_group_firehose_configure_existing"></a> [vpc\_security\_group\_firehose\_configure\_existing](#input\_vpc\_security\_group\_firehose\_configure\_existing) | Indicates if want configure an existing firehose security group with the necessary rules | `bool` | `false` | no |
-| <a name="input_vpc_security_group_firehose_ids"></a> [vpc\_security\_group\_firehose\_ids](#input\_vpc\_security\_group\_firehose\_ids) | A list of security group IDs to associate with Kinesis Firehose | `list(string)` | `null` | no |
+| <a name="input_vpc_security_group_firehose_ids"></a> [vpc\_security\_group\_firehose\_ids](#input\_vpc\_security\_group\_firehose\_ids) | A list of security group IDs to associate with Kinesis Firehose. | `list(string)` | `null` | no |
+| <a name="input_vpc_security_group_same_as_destination"></a> [vpc\_security\_group\_same\_as\_destination](#input\_vpc\_security\_group\_same\_as\_destination) | Indicates if the firehose security group is the same as destination. | `bool` | `true` | no |
 | <a name="input_vpc_security_group_tags"></a> [vpc\_security\_group\_tags](#input\_vpc\_security\_group\_tags) | A map of tags to assign to security group | `map(string)` | `{}` | no |
+| <a name="input_vpc_subnet_ids"></a> [vpc\_subnet\_ids](#input\_vpc\_subnet\_ids) | A list of subnet IDs to associate with Kinesis Firehose. Supports Elasticsearch and Opensearch destinations. | `list(string)` | `null` | no |
+| <a name="input_vpc_use_existing_role"></a> [vpc\_use\_existing\_role](#input\_vpc\_use\_existing\_role) | Indicates if want use the kinesis firehose role to VPC access. Supports Elasticsearch and Opensearch destinations. | `bool` | `true` | no |
 
 ## Outputs
 
@@ -1011,6 +1072,7 @@ No modules.
 | <a name="output_destination_security_group_id"></a> [destination\_security\_group\_id](#output\_destination\_security\_group\_id) | Security Group ID associated to destination |
 | <a name="output_destination_security_group_name"></a> [destination\_security\_group\_name](#output\_destination\_security\_group\_name) | Security Group Name associated to destination |
 | <a name="output_destination_security_group_rule_ids"></a> [destination\_security\_group\_rule\_ids](#output\_destination\_security\_group\_rule\_ids) | Security Group Rules ID created in Destination Security group |
+| <a name="output_elasticsearch_cross_account_service_policy"></a> [elasticsearch\_cross\_account\_service\_policy](#output\_elasticsearch\_cross\_account\_service\_policy) | Elasticsearch Service policy when the opensearch domain belongs to another account |
 | <a name="output_firehose_cidr_blocks"></a> [firehose\_cidr\_blocks](#output\_firehose\_cidr\_blocks) | Firehose stream cidr blocks to unblock on destination security group |
 | <a name="output_firehose_security_group_id"></a> [firehose\_security\_group\_id](#output\_firehose\_security\_group\_id) | Security Group ID associated to Firehose Stream. Only Supported for elasticsearch destination |
 | <a name="output_firehose_security_group_name"></a> [firehose\_security\_group\_name](#output\_firehose\_security\_group\_name) | Security Group Name associated to Firehose Stream. Only Supported for elasticsearch destination |
@@ -1026,8 +1088,10 @@ No modules.
 | <a name="output_kinesis_firehose_name"></a> [kinesis\_firehose\_name](#output\_kinesis\_firehose\_name) | The name of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_role_arn"></a> [kinesis\_firehose\_role\_arn](#output\_kinesis\_firehose\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_version_id"></a> [kinesis\_firehose\_version\_id](#output\_kinesis\_firehose\_version\_id) | The Version id of the Kinesis Firehose Stream |
-| <a name="output_opensearch_cross_account_service_policy"></a> [opensearch\_cross\_account\_service\_policy](#output\_opensearch\_cross\_account\_service\_policy) | OpenSearch Service policy when the opensearch domain belongs to another account |
+| <a name="output_opensearch_cross_account_service_policy"></a> [opensearch\_cross\_account\_service\_policy](#output\_opensearch\_cross\_account\_service\_policy) | Opensearch Service policy when the opensearch domain belongs to another account |
 | <a name="output_opensearch_iam_service_linked_role_arn"></a> [opensearch\_iam\_service\_linked\_role\_arn](#output\_opensearch\_iam\_service\_linked\_role\_arn) | The ARN of the Opensearch IAM Service linked role |
+| <a name="output_opensearchserverless_cross_account_service_policy"></a> [opensearchserverless\_cross\_account\_service\_policy](#output\_opensearchserverless\_cross\_account\_service\_policy) | Opensearch Serverless Service policy when the opensearch domain belongs to another account |
+| <a name="output_opensearchserverless_iam_service_linked_role_arn"></a> [opensearchserverless\_iam\_service\_linked\_role\_arn](#output\_opensearchserverless\_iam\_service\_linked\_role\_arn) | The ARN of the Opensearch Serverless IAM Service linked role |
 | <a name="output_s3_cross_account_bucket_policy"></a> [s3\_cross\_account\_bucket\_policy](#output\_s3\_cross\_account\_bucket\_policy) | Bucket Policy to S3 Bucket Destination when the bucket belongs to another account |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
@@ -1040,6 +1104,7 @@ No modules.
 ## Upgrade
 
 - Version 1.x to 2.x Upgrade Guide [here](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/blob/main/UPGRADE-2.0.md)
+- Version 2.x to 3.x Upgrade Guide [here](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/blob/main/UPGRADE-3.0.md)
 
 ## License
 

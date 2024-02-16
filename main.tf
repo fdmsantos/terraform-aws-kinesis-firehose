@@ -2,9 +2,9 @@ data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
-data "aws_subnet" "elasticsearch" {
-  count = local.elasticsearch_vpc_create_firehose_sg && var.elasticsearch_enable_vpc ? 1 : 0
-  id    = var.elasticsearch_vpc_subnet_ids[0]
+data "aws_subnet" "subnet" {
+  count = local.search_destination_vpc_create_firehose_sg && var.enable_vpc ? 1 : 0
+  id    = var.vpc_subnet_ids[0]
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "this" {
@@ -240,71 +240,6 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     }
   }
 
-  dynamic "elasticsearch_configuration" {
-    for_each = local.destination == "elasticsearch" ? [1] : []
-    content {
-      domain_arn            = var.elasticsearch_domain_arn
-      role_arn              = local.firehose_role_arn
-      index_name            = var.elasticsearch_index_name
-      index_rotation_period = var.elasticsearch_index_rotation_period
-      retry_duration        = var.elasticsearch_retry_duration
-      type_name             = var.elasticsearch_type_name
-      buffering_interval    = var.buffering_interval
-      buffering_size        = var.buffering_size
-      s3_backup_mode        = local.s3_backup_mode
-
-      s3_configuration {
-        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
-        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
-        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
-        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
-        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
-        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
-        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
-        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
-      }
-
-      dynamic "processing_configuration" {
-        for_each = local.enable_processing ? [1] : []
-        content {
-          enabled = local.enable_processing
-          dynamic "processors" {
-            for_each = local.processors
-            content {
-              type = processors.value["type"]
-              dynamic "parameters" {
-                for_each = processors.value["parameters"]
-                content {
-                  parameter_name  = parameters.value["name"]
-                  parameter_value = parameters.value["value"]
-                }
-              }
-            }
-          }
-        }
-      }
-
-      dynamic "cloudwatch_logging_options" {
-        for_each = var.enable_destination_log ? [1] : []
-        content {
-          enabled         = var.enable_destination_log
-          log_group_name  = local.destination_cw_log_group_name
-          log_stream_name = local.destination_cw_log_stream_name
-        }
-      }
-
-      dynamic "vpc_config" {
-        for_each = var.elasticsearch_enable_vpc ? [1] : []
-        content {
-          role_arn           = local.elasticsearch_vpc_role_arn
-          subnet_ids         = var.elasticsearch_vpc_subnet_ids
-          security_group_ids = local.elasticsearch_vpc_sgs
-        }
-      }
-
-    }
-  }
-
   dynamic "splunk_configuration" {
     for_each = local.destination == "splunk" ? [1] : []
     content {
@@ -428,6 +363,204 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     }
   }
 
+  dynamic "elasticsearch_configuration" {
+    for_each = local.destination == "elasticsearch" ? [1] : []
+    content {
+      domain_arn            = var.elasticsearch_domain_arn
+      role_arn              = local.firehose_role_arn
+      index_name            = var.elasticsearch_index_name
+      index_rotation_period = var.elasticsearch_index_rotation_period
+      retry_duration        = var.elasticsearch_retry_duration
+      type_name             = var.elasticsearch_type_name
+      buffering_interval    = var.buffering_interval
+      buffering_size        = var.buffering_size
+      s3_backup_mode        = local.s3_backup_mode
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      dynamic "vpc_config" {
+        for_each = var.enable_vpc ? [1] : []
+        content {
+          role_arn           = local.vpc_role_arn
+          subnet_ids         = var.vpc_subnet_ids
+          security_group_ids = local.search_destination_vpc_sgs
+        }
+      }
+
+    }
+  }
+
+  dynamic "opensearch_configuration" {
+    for_each = local.destination == "opensearch" ? [1] : []
+    content {
+      domain_arn            = var.opensearch_domain_arn
+      role_arn              = local.firehose_role_arn
+      index_name            = var.opensearch_index_name
+      index_rotation_period = var.opensearch_index_rotation_period
+      retry_duration        = var.opensearch_retry_duration
+      type_name             = var.opensearch_type_name
+      buffering_interval    = var.buffering_interval
+      buffering_size        = var.buffering_size
+      s3_backup_mode        = local.s3_backup_mode
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      dynamic "vpc_config" {
+        for_each = var.enable_vpc ? [1] : []
+        content {
+          role_arn           = local.vpc_role_arn
+          subnet_ids         = var.vpc_subnet_ids
+          security_group_ids = local.search_destination_vpc_sgs
+        }
+      }
+
+      document_id_options {
+        default_document_id_format = var.opensearch_document_id_options
+      }
+
+    }
+  }
+
+  dynamic "opensearchserverless_configuration" {
+    for_each = local.destination == "opensearchserverless" ? [1] : []
+    content {
+
+      collection_endpoint = var.opensearchserverless_collection_endpoint
+      index_name          = var.opensearch_index_name
+      buffering_interval  = var.buffering_interval
+      buffering_size      = var.buffering_size
+      retry_duration      = var.opensearch_retry_duration
+      role_arn            = local.firehose_role_arn
+      s3_backup_mode      = local.s3_backup_mode
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      dynamic "vpc_config" {
+        for_each = var.enable_vpc ? [1] : []
+        content {
+          role_arn           = local.vpc_role_arn
+          subnet_ids         = var.vpc_subnet_ids
+          security_group_ids = local.search_destination_vpc_sgs
+        }
+      }
+
+    }
+  }
+
   tags = var.tags
 
 }
@@ -458,13 +591,13 @@ resource "aws_cloudwatch_log_stream" "destination" {
 # Security Group
 ##################
 resource "aws_security_group" "firehose" {
-  count       = local.elasticsearch_vpc_create_firehose_sg ? 1 : 0
+  count       = local.search_destination_vpc_create_firehose_sg ? 1 : 0
   name        = "${var.name}-sg"
-  description = !var.elasticsearch_vpc_security_group_same_as_destination ? "Security group to kinesis firehose" : "Security Group to kinesis firehose and destination"
-  vpc_id      = var.elasticsearch_enable_vpc ? data.aws_subnet.elasticsearch[0].vpc_id : var.vpc_security_group_destination_vpc_id
+  description = !var.vpc_security_group_same_as_destination ? "Security group to kinesis firehose" : "Security Group to kinesis firehose and destination"
+  vpc_id      = var.enable_vpc ? data.aws_subnet.subnet[0].vpc_id : var.vpc_security_group_destination_vpc_id
 
   dynamic "ingress" {
-    for_each = var.elasticsearch_vpc_security_group_same_as_destination ? [1] : []
+    for_each = var.vpc_security_group_same_as_destination ? [1] : []
     content {
       from_port   = 443
       to_port     = 443
@@ -477,8 +610,8 @@ resource "aws_security_group" "firehose" {
   tags = merge(var.tags, var.vpc_security_group_tags)
 }
 
-resource "aws_security_group_rule" "firehose_es_egress_rule" {
-  for_each                 = local.elasticsearch_vpc_create_firehose_sg && !var.elasticsearch_vpc_security_group_same_as_destination ? (local.vpc_create_destination_group ? { for key, value in [aws_security_group.destination[0].id] : key => value } : { for key, value in var.vpc_security_group_destination_ids : key => value }) : {}
+resource "aws_security_group_rule" "firehose_egress_rule" {
+  for_each                 = local.search_destination_vpc_create_firehose_sg && !var.vpc_security_group_same_as_destination ? (local.vpc_create_destination_group ? { for key, value in [aws_security_group.destination[0].id] : key => value } : { for key, value in var.vpc_security_group_destination_ids : key => value }) : {}
   type                     = "egress"
   from_port                = 443
   to_port                  = 443
@@ -492,21 +625,21 @@ resource "aws_security_group" "destination" {
   count       = local.vpc_create_destination_group ? 1 : 0
   name        = "${var.name}-destination-sg"
   description = "Allow Inbound traffic from kinesis firehose stream"
-  vpc_id      = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc ? data.aws_subnet.elasticsearch[0].vpc_id : var.vpc_security_group_destination_vpc_id
+  vpc_id      = local.is_search_destination && var.enable_vpc ? data.aws_subnet.subnet[0].vpc_id : var.vpc_security_group_destination_vpc_id
 
   dynamic "ingress" {
-    for_each = local.destination == "elasticsearch" ? [1] : []
+    for_each = local.is_search_destination ? [1] : []
     content {
       from_port       = 443
       to_port         = 443
       protocol        = "tcp"
-      security_groups = local.elasticsearch_vpc_sgs
+      security_groups = local.search_destination_vpc_sgs
       description     = "Allow inbound traffic from Kinesis Firehose"
     }
   }
 
   dynamic "ingress" {
-    for_each = local.destination != "elasticsearch" ? [1] : []
+    for_each = !local.is_search_destination ? [1] : []
     content {
       from_port   = 443
       to_port     = 443
@@ -520,25 +653,25 @@ resource "aws_security_group" "destination" {
 }
 
 resource "aws_security_group_rule" "firehose" {
-  for_each                 = local.elasticsearch_vpc_configure_existing_firehose_sg ? (var.elasticsearch_vpc_security_group_same_as_destination ? toset(var.vpc_security_group_firehose_ids) : toset(flatten([for security_group in var.vpc_security_group_firehose_ids : [for destination_sg in local.elasticsearch_vpc_destination_sgs : "${security_group}_${destination_sg}"]]))) : toset([])
-  type                     = var.elasticsearch_vpc_security_group_same_as_destination ? "ingress" : "egress"
+  for_each                 = local.search_destination_vpc_configure_existing_firehose_sg ? (var.vpc_security_group_same_as_destination ? toset(var.vpc_security_group_firehose_ids) : toset(flatten([for security_group in var.vpc_security_group_firehose_ids : [for destination_sg in local.search_destination_vpc_destination_sgs : "${security_group}_${destination_sg}"]]))) : toset([])
+  type                     = var.vpc_security_group_same_as_destination ? "ingress" : "egress"
   from_port                = 443
   to_port                  = 443
   protocol                 = "tcp"
-  security_group_id        = var.elasticsearch_vpc_security_group_same_as_destination ? each.value : split("_", each.value)[0]
-  source_security_group_id = !var.elasticsearch_vpc_security_group_same_as_destination ? split("_", each.value)[1] : null
-  self                     = var.elasticsearch_vpc_security_group_same_as_destination ? true : false
-  description              = var.elasticsearch_vpc_security_group_same_as_destination ? "Allow Inbound HTTPS Traffic" : "Allow Outbound HTTPS Traffic"
+  security_group_id        = var.vpc_security_group_same_as_destination ? each.value : split("_", each.value)[0]
+  source_security_group_id = !var.vpc_security_group_same_as_destination ? split("_", each.value)[1] : null
+  self                     = var.vpc_security_group_same_as_destination ? true : false
+  description              = var.vpc_security_group_same_as_destination ? "Allow Inbound HTTPS Traffic" : "Allow Outbound HTTPS Traffic"
 }
 
 resource "aws_security_group_rule" "destination" {
-  for_each                 = local.vpc_configure_destination_group ? (local.destination == "elasticsearch" ? flatten([for security_group in var.vpc_security_group_destination_ids : [for destination_sg in local.elasticsearch_vpc_firehose_sgs : "${security_group}_${destination_sg}"]]) : { for key, value in var.vpc_security_group_destination_ids : key => value }) : {}
+  for_each                 = local.vpc_configure_destination_group ? (local.is_search_destination ? flatten([for security_group in var.vpc_security_group_destination_ids : [for destination_sg in local.search_destination_vpc_firehose_sgs : "${security_group}_${destination_sg}"]]) : { for key, value in var.vpc_security_group_destination_ids : key => value }) : {}
   type                     = "ingress"
   from_port                = 443
   to_port                  = 443
   protocol                 = "tcp"
-  cidr_blocks              = local.destination != "elasticsearch" ? local.firehose_cidr_blocks[local.destination][data.aws_region.current.name] : null
-  security_group_id        = local.destination == "elasticsearch" ? split("_", each.value)[0] : each.value
-  source_security_group_id = local.destination == "elasticsearch" ? split("_", each.value)[1] : null
+  cidr_blocks              = !local.is_search_destination ? local.firehose_cidr_blocks[local.destination][data.aws_region.current.name] : null
+  security_group_id        = local.is_search_destination ? split("_", each.value)[0] : each.value
+  source_security_group_id = local.is_search_destination ? split("_", each.value)[1] : null
   description              = "Allow Inbound HTTPS Traffic from Firehose"
 }

@@ -57,12 +57,10 @@ All notable changes to this project will be documented in this file.
 ### ⚠ BREAKING CHANGES
 
 * Bump Terraform AWS Provider version to 5.0
-* Bump Terraform AWS Provider version to 5.0
 
 ### Features
 
 * Bump Terraform AWS Provider version to 5.0 ([29601cf](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/29601cf8ad93a9a56ac3fba37f9e8b0c968c5c3f))
-* Bump Terraform AWS Provider version to 5.0 ([4be517c](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/4be517c9f13b62816cc3d0ccede495ab3715d009))
 
 ### [1.9.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v1.9.0...v1.9.1) (2023-09-16)
 

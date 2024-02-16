@@ -66,9 +66,25 @@ output "opensearch_iam_service_linked_role_arn" {
   value       = try(aws_iam_service_linked_role.opensearch[0].arn, "")
 }
 
-output "opensearch_cross_account_service_policy" {
-  description = "OpenSearch Service policy when the opensearch domain belongs to another account"
+output "elasticsearch_cross_account_service_policy" {
+  description = "Elasticsearch Service policy when the opensearch domain belongs to another account"
   value       = try(data.aws_iam_policy_document.cross_account_elasticsearch[0].json, "")
+}
+
+output "opensearch_cross_account_service_policy" {
+  description = "Opensearch Service policy when the opensearch domain belongs to another account"
+  value       = try(data.aws_iam_policy_document.cross_account_opensearch[0].json, "")
+}
+
+output "opensearchserverless_cross_account_service_policy" {
+  description = "Opensearch Serverless Service policy when the opensearch domain belongs to another account"
+  value       = try(data.aws_iam_policy_document.cross_account_opensearchserverless[0].json, "")
+}
+
+
+output "opensearchserverless_iam_service_linked_role_arn" {
+  description = "The ARN of the Opensearch Serverless IAM Service linked role"
+  value       = try(aws_iam_service_linked_role.opensearchserverless[0].arn, "")
 }
 
 output "application_role_arn" {
@@ -94,12 +110,12 @@ output "application_role_policy_name" {
 # Security Group
 output "firehose_security_group_id" {
   description = "Security Group ID associated to Firehose Stream. Only Supported for elasticsearch destination"
-  value       = local.elasticsearch_vpc_create_firehose_sg ? aws_security_group.firehose[0].id : null
+  value       = local.search_destination_vpc_create_firehose_sg ? aws_security_group.firehose[0].id : null
 }
 
 output "firehose_security_group_name" {
   description = "Security Group Name associated to Firehose Stream. Only Supported for elasticsearch destination"
-  value       = local.elasticsearch_vpc_create_firehose_sg ? aws_security_group.firehose[0].name : null
+  value       = local.search_destination_vpc_create_firehose_sg ? aws_security_group.firehose[0].name : null
 }
 
 output "destination_security_group_id" {
@@ -114,7 +130,7 @@ output "destination_security_group_name" {
 
 output "firehose_security_group_rule_ids" {
   description = "Security Group Rules ID created in Firehose Stream Security group. Only Supported for elasticsearch destination"
-  value       = local.elasticsearch_vpc_configure_existing_firehose_sg ? aws_security_group_rule.firehose[*].id : null
+  value       = local.search_destination_vpc_configure_existing_firehose_sg ? aws_security_group_rule.firehose[*].id : null
 }
 
 output "destination_security_group_rule_ids" {

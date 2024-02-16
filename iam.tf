@@ -1,16 +1,18 @@
 locals {
-  role_name                      = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
-  application_role_name          = coalesce(var.application_role_name, "${var.name}-application-role", "*")
-  create_application_role_policy = var.create && var.create_application_role_policy
-  add_backup_policies            = local.enable_s3_backup && var.s3_backup_use_existing_role
-  add_kinesis_source_policy      = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role
-  add_lambda_policy              = var.create && var.create_role && var.enable_lambda_transform
-  add_s3_kms_policy              = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
-  add_glue_policy                = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
-  add_s3_policy                  = var.create && var.create_role
-  add_cw_policy                  = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
-  add_elasticsearch_policy       = var.create && var.create_role && local.destination == "elasticsearch"
-  add_vpc_policy                 = var.create && var.create_role && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_use_existing_role && local.destination == "elasticsearch"
+  role_name                       = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
+  application_role_name           = coalesce(var.application_role_name, "${var.name}-application-role", "*")
+  create_application_role_policy  = var.create && var.create_application_role_policy
+  add_backup_policies             = local.enable_s3_backup && var.s3_backup_use_existing_role
+  add_kinesis_source_policy       = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role
+  add_lambda_policy               = var.create && var.create_role && var.enable_lambda_transform
+  add_s3_kms_policy               = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
+  add_glue_policy                 = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
+  add_s3_policy                   = var.create && var.create_role
+  add_cw_policy                   = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
+  add_elasticsearch_policy        = var.create && var.create_role && local.destination == "elasticsearch"
+  add_opensearch_policy           = var.create && var.create_role && local.destination == "opensearch"
+  add_opensearchserverless_policy = var.create && var.create_role && local.destination == "opensearchserverless"
+  add_vpc_policy                  = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -371,7 +373,7 @@ resource "aws_iam_role_policy_attachment" "elasticsearch" {
 }
 
 data "aws_iam_policy_document" "cross_account_elasticsearch" {
-  count   = local.add_elasticsearch_policy && var.elasticsearch_cross_account ? 1 : 0
+  count   = local.add_elasticsearch_policy && var.destination_cross_account ? 1 : 0
   version = "2012-10-17"
   statement {
     sid    = "Cross Account Access to ${data.aws_caller_identity.current.account_id} Account"
@@ -398,6 +400,158 @@ data "aws_iam_policy_document" "cross_account_elasticsearch" {
     ]
   }
 }
+
+##################
+# OpenSearch
+##################
+data "aws_iam_policy_document" "opensearch" { # TODO Change Actions
+  count = local.add_opensearch_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "es:DescribeDomain",
+      "es:DescribeDomains",
+      "es:DescribeDomainConfig",
+      "es:ESHttpPost",
+      "es:ESHttpPut"
+    ]
+    resources = [
+      var.opensearch_domain_arn,
+      "${var.opensearch_domain_arn}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "es:ESHttpGet"
+    ]
+    resources = [
+      "${var.opensearch_domain_arn}/_all/_settings",
+      "${var.opensearch_domain_arn}/_cluster/stats",
+      "${var.opensearch_domain_arn}/${var.opensearch_index_name}*/_mapping/${var.opensearch_type_name != null ? var.opensearch_type_name : "*"}",
+      "${var.opensearch_domain_arn}/_nodes",
+      "${var.opensearch_domain_arn}/_nodes/stats",
+      "${var.opensearch_domain_arn}/_nodes/*/stats",
+      "${var.opensearch_domain_arn}/_stats",
+      "${var.opensearch_domain_arn}/${var.opensearch_index_name}*/_stats"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "opensearch" {
+  count = local.add_opensearch_policy ? 1 : 0
+
+  name   = "${local.role_name}-opensearch"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.opensearch[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "opensearch" {
+  count = local.add_opensearch_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.opensearch[0].arn
+}
+
+data "aws_iam_policy_document" "cross_account_opensearch" { # TODO Change Actions
+  count   = local.add_opensearch_policy && var.destination_cross_account ? 1 : 0
+  version = "2012-10-17"
+  statement {
+    sid    = "Cross Account Access to ${data.aws_caller_identity.current.account_id} Account"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [local.firehose_role_arn]
+    }
+
+    actions = [
+      "es:ESHttpGet"
+    ]
+
+    resources = [
+      "${var.opensearch_domain_arn}/_all/_settings",
+      "${var.opensearch_domain_arn}/_cluster/stats",
+      "${var.opensearch_domain_arn}/${var.opensearch_index_name}*/_mapping/${var.opensearch_type_name != null ? var.opensearch_type_name : "*"}",
+      "${var.opensearch_domain_arn}/_nodes",
+      "${var.opensearch_domain_arn}/_nodes/stats",
+      "${var.opensearch_domain_arn}/_nodes/*/stats",
+      "${var.opensearch_domain_arn}/_stats",
+      "${var.opensearch_domain_arn}/${var.opensearch_index_name}*/_stats"
+    ]
+  }
+} # TODO Change Actions
+
+resource "aws_iam_service_linked_role" "opensearch" {
+  count            = contains(["elasticsearch", "opensearch"], local.destination) && var.enable_vpc && var.opensearch_vpc_create_service_linked_role ? 1 : 0
+  aws_service_name = "opensearchservice.amazonaws.com"
+  description      = "Allows Amazon OpenSearch to manage AWS resources for a domain on your behalf."
+  tags             = merge(var.tags, var.role_tags)
+}
+
+##################
+# Opensearch Serverless
+##################
+data "aws_iam_policy_document" "opensearchserverless" {
+  count = local.add_opensearchserverless_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "aoss:APIAccessAll"
+    ]
+    resources = [
+      var.opensearchserverless_collection_arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "opensearchserverless" {
+  count = local.add_opensearchserverless_policy ? 1 : 0
+
+  name   = "${local.role_name}-opensearchserverless"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.opensearchserverless[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "opensearchserverless" {
+  count = local.add_opensearchserverless_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.opensearchserverless[0].arn
+}
+
+data "aws_iam_policy_document" "cross_account_opensearchserverless" {
+  count   = local.add_opensearchserverless_policy && var.destination_cross_account ? 1 : 0
+  version = "2012-10-17"
+  statement {
+    sid    = "Cross Account Access to ${data.aws_caller_identity.current.account_id} Account"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [local.firehose_role_arn]
+    }
+
+    actions = [
+      "aoss:APIAccessAll"
+    ]
+
+    resources = [
+      var.opensearchserverless_collection_arn
+    ]
+  }
+}
+
+resource "aws_iam_service_linked_role" "opensearchserverless" {
+  count            = local.destination == "opensearchserverless" && var.opensearch_vpc_create_service_linked_role ? 1 : 0
+  aws_service_name = "observability.aoss.amazonaws.com"
+  description      = "Allows Amazon OpenSearch Serverless to manage AWS resources for a domain on your behalf."
+  tags             = merge(var.tags, var.role_tags)
+}
+
 ##################
 # VPC
 ##################
@@ -435,14 +589,6 @@ resource "aws_iam_role_policy_attachment" "vpc" {
 
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.vpc[0].arn
-}
-
-
-resource "aws_iam_service_linked_role" "opensearch" {
-  count            = local.destination == "elasticsearch" && var.elasticsearch_enable_vpc && var.elasticsearch_vpc_create_service_linked_role ? 1 : 0
-  aws_service_name = "opensearchservice.amazonaws.com"
-  description      = "Allows Amazon OpenSearch to manage AWS resources for a domain on your behalf."
-  tags             = merge(var.tags, var.role_tags)
 }
 
 ##################
