@@ -34,3 +34,7 @@ If you find a bug, please open an issue with supporting configuration to reprodu
 4. Added variables:
 
    - All variables prefixed with opensearch and opensearchserverless
+
+5. Deprecations
+
+   - Variable `enable_kinesis_source` removed. Use instead `input_source = "kinesis"`.

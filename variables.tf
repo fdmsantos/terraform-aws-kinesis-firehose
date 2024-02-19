@@ -361,12 +361,6 @@ variable "sse_kms_key_arn" {
   default     = null
 }
 
-variable "enable_kinesis_source" {
-  description = "DEPRECATED: Use instead `input_source = \"kinesis\"`"
-  type        = bool
-  default     = false
-}
-
 variable "kinesis_source_stream_arn" {
   description = "The kinesis stream used as the source of the firehose delivery stream"
   type        = string

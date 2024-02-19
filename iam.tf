@@ -404,7 +404,7 @@ data "aws_iam_policy_document" "cross_account_elasticsearch" {
 ##################
 # OpenSearch
 ##################
-data "aws_iam_policy_document" "opensearch" { # TODO Change Actions
+data "aws_iam_policy_document" "opensearch" {
   count = local.add_opensearch_policy ? 1 : 0
   statement {
     effect = "Allow"
@@ -455,7 +455,7 @@ resource "aws_iam_role_policy_attachment" "opensearch" {
   policy_arn = aws_iam_policy.opensearch[0].arn
 }
 
-data "aws_iam_policy_document" "cross_account_opensearch" { # TODO Change Actions
+data "aws_iam_policy_document" "cross_account_opensearch" {
   count   = local.add_opensearch_policy && var.destination_cross_account ? 1 : 0
   version = "2012-10-17"
   statement {
@@ -482,7 +482,7 @@ data "aws_iam_policy_document" "cross_account_opensearch" { # TODO Change Action
       "${var.opensearch_domain_arn}/${var.opensearch_index_name}*/_stats"
     ]
   }
-} # TODO Change Actions
+}
 
 resource "aws_iam_service_linked_role" "opensearch" {
   count            = contains(["elasticsearch", "opensearch"], local.destination) && var.enable_vpc && var.opensearch_vpc_create_service_linked_role ? 1 : 0

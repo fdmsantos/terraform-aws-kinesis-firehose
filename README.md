@@ -106,7 +106,7 @@ Supports all destinations and all Kinesis Firehose Features.
 
 #### Kinesis Data Stream
 
-**To Enabled it:** `input_source = "kinesis"`. The use of variable `enable_kinesis_source` is deprecated and will be removed on next Major Release.
+**To Enabled it:** `input_source = "kinesis"`.
 
 ```hcl
 module "firehose" {
@@ -124,7 +124,7 @@ module "firehose" {
 
 If Kinesis Data Stream is encrypted, it's necessary pass this info to module .
 
-**To Enabled It:** `input_source = "kinesis"`. The use of variable `enable_kinesis_source` is deprecated and will be removed on next Major Release.
+**To Enabled It:** `input_source = "kinesis"`.
 
 **KMS Key:** use `kinesis_source_kms_arn` variable to indicate the KMS Key to module add permissions to policy to decrypt the Kinesis Data Stream.
 
@@ -499,7 +499,7 @@ module "firehose" {
   source                           = "fdmsantos/kinesis-firehose/aws"
   version                          = "x.x.x"
   name                             = "firehose-delivery-stream"
-  enable_kinesis_source            = true
+  input_source                     = "kinesis"
   kinesis_source_stream_arn        = "<kinesis_stream_arn>"
   destination                      = "s3" # or destination = "extended_s3"
   s3_bucket_arn                    = "<bucket_arn>"
@@ -524,7 +524,7 @@ module "firehose" {
   source                                 = "fdmsantos/kinesis-firehose/aws"
   version                                = "x.x.x"
   name                                   = "firehose-delivery-stream"
-  enable_kinesis_source                  = true
+  input_source                           = "kinesis"
   kinesis_source_stream_arn              = "<kinesis_stream_arn>"
   destination                            = "s3" # or destination = "extended_s3"
   s3_bucket_arn                          = "<bucket_arn>"
@@ -550,7 +550,7 @@ module "firehose" {
   source                                        = "fdmsantos/kinesis-firehose/aws"
   version                                       = "x.x.x"
   name                                          = "firehose-delivery-stream"
-  enable_kinesis_source                         = true
+  input_source                                  = "kinesis"
   kinesis_source_stream_arn                     = "<kinesis_stream_arn>"
   destination                                   = "s3" # or destination = "extended_s3"
   s3_bucket_arn                                 = "<bucket_arn>"
@@ -958,7 +958,6 @@ No modules.
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
 | <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |
-| <a name="input_enable_kinesis_source"></a> [enable\_kinesis\_source](#input\_enable\_kinesis\_source) | DEPRECATED: Use instead `input_source = "kinesis"` | `bool` | `false` | no |
 | <a name="input_enable_lambda_transform"></a> [enable\_lambda\_transform](#input\_enable\_lambda\_transform) | Set it to true to enable data transformation with lambda | `bool` | `false` | no |
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
@@ -1094,12 +1093,6 @@ No modules.
 | <a name="output_opensearchserverless_iam_service_linked_role_arn"></a> [opensearchserverless\_iam\_service\_linked\_role\_arn](#output\_opensearchserverless\_iam\_service\_linked\_role\_arn) | The ARN of the Opensearch Serverless IAM Service linked role |
 | <a name="output_s3_cross_account_bucket_policy"></a> [s3\_cross\_account\_bucket\_policy](#output\_s3\_cross\_account\_bucket\_policy) | Bucket Policy to S3 Bucket Destination when the bucket belongs to another account |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-## Deprecation
-
-### Version >= 2.1.0 
-
-* variable `enable_kinesis_source` is deprecated. Use instead `input_source = "kinesis"`.
 
 ## Upgrade
 

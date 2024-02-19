@@ -41,7 +41,7 @@ module "firehose" {
   name                                          = "${var.name_prefix}-delivery-stream"
   buffering_size                                = 100
   buffering_interval                            = 100
-  enable_kinesis_source                         = true
+  input_source                                  = "kinesis"
   kinesis_source_stream_arn                     = aws_kinesis_stream.this.arn
   destination                                   = "s3"
   s3_bucket_arn                                 = aws_s3_bucket.s3.arn

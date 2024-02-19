@@ -3,7 +3,7 @@ locals {
   cw_log_group_name           = "/aws/kinesisfirehose/${var.name}"
   cw_log_delivery_stream_name = "DestinationDelivery"
   cw_log_backup_stream_name   = "BackupDelivery"
-  source                      = var.enable_kinesis_source ? "kinesis" : var.input_source # TODO: This should be removed when delete enable_kinesis_source variable (Next Major Version)
+  source                      = var.input_source
   is_kinesis_source           = local.source == "kinesis" ? true : false
   is_waf_source               = local.source == "waf" ? true : false
   destinations = {

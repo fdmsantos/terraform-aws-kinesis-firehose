@@ -25,7 +25,7 @@ resource "aws_kinesis_stream" "this" {
 module "firehose" {
   source                    = "../../../"
   name                      = "${var.name_prefix}-delivery-stream"
-  enable_kinesis_source     = true
+  input_source              = "kinesis"
   kinesis_source_stream_arn = aws_kinesis_stream.this.arn
   destination               = "s3"
   s3_bucket_arn             = aws_s3_bucket.s3.arn
