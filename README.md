@@ -16,6 +16,7 @@ Supports all destinations and all Kinesis Firehose Features.
       * [Kinesis Data Stream Encrypted](#kinesis-data-stream-encrypted)
     * [Direct Put](#direct-put)
     * [WAF](#waf)
+    * [MSK](#msk)
   * [Destinations](#destinations)
     * [S3](#s3)
     * [Redshift](#redshift)
@@ -50,9 +51,9 @@ Supports all destinations and all Kinesis Firehose Features.
 * [Resources](#resources)
 * [Inputs](#inputs)
 * [Outputs](#outputs)
-* [Deprecation](#deprecation)
-  * [Version &gt;= 2.1.0](#version--210)
 * [Upgrade](#upgrade)
+* [Deprecations](#deprecations)
+  * [Version 3.1.0](#version-310)
 * [License](#license)
 
 
@@ -70,6 +71,7 @@ Supports all destinations and all Kinesis Firehose Features.
   - Kinesis Data Stream
   - Direct Put
   - WAF
+  - MSK
 - Destinations
   - S3
     - Data Format Conversion
@@ -130,6 +132,21 @@ If Kinesis Data Stream is encrypted, it's necessary pass this info to module .
 
 #### Direct Put
 
+**To Enabled it:** `input_source = "direct-put"`.
+
+```hcl
+module "firehose" {
+  source           = "fdmsantos/kinesis-firehose/aws"
+  version          = "x.x.x"
+  name             = "firehose-delivery-stream"
+  input_source     = "direct-put"
+  destination      = "s3" # or destination = "extended_s3"
+  s3_bucket_arn    = "<bucket_arn>"
+}
+```
+
+#### WAF
+
 **To Enabled it:** `input_source = "waf"`.
 
 ```hcl
@@ -143,15 +160,20 @@ module "firehose" {
 }
 ```
 
-#### WAF
+#### MSK
+
+**To Enabled it:** `input_source = "msk"`.
 
 ```hcl
 module "firehose" {
-  source           = "fdmsantos/kinesis-firehose/aws"
-  version          = "x.x.x"
-  name             = "firehose-delivery-stream"
-  destination      = "s3" # or destination = "extended_s3"
-  s3_bucket_arn    = "<bucket_arn>"
+  source                 = "fdmsantos/kinesis-firehose/aws"
+  version                = "x.x.x"
+  name                   = "firehose-delivery-stream"
+  input_source           = "msk"
+  msk_source_cluster_arn = "<msk_cluster_arn>"
+  msk_source_topic_name  = "test"
+  destination            = "s3"
+  s3_bucket_arn          = "<bucket_arn>"
 }
 ```
 
@@ -785,6 +807,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
 - [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination.
 - [WAF Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/waf-to-s3) - Creates a Kinesis Firehose Stream with AWS Web WAF as source and S3 as destination.
+- [MSK Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/msk-to-s3) - Creates a Kinesis Firehose Stream with MSK Cluster as source and S3 as destination.
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
 - [Redshift In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/redshift-in-vpc) - Creates a Kinesis Firehose Stream with redshift in VPC as destination.
@@ -834,6 +857,7 @@ No modules.
 | [aws_iam_policy.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -847,6 +871,7 @@ No modules.
 | [aws_iam_role_policy_attachment.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -874,6 +899,7 @@ No modules.
 | [aws_iam_policy_document.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -895,18 +921,18 @@ No modules.
 | <a name="input_application_role_service_principal"></a> [application\_role\_service\_principal](#input\_application\_role\_service\_principal) | AWS Service Principal to assume application role | `string` | `null` | no |
 | <a name="input_application_role_tags"></a> [application\_role\_tags](#input\_application\_role\_tags) | A map of tags to assign to IAM Application role | `map(string)` | `{}` | no |
 | <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
-| <a name="input_buffering_interval"></a> [buffering\_interval](#input\_buffering\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. | `number` | `300` | no |
+| <a name="input_buffering_interval"></a> [buffering\_interval](#input\_buffering\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffering_size"></a> [buffering\_size](#input\_buffering\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
 | <a name="input_coralogix_endpoint_location"></a> [coralogix\_endpoint\_location](#input\_coralogix\_endpoint\_location) | Endpoint Location to coralogix destination | `string` | `"ireland"` | no |
 | <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName | `string` | `null` | no |
 | <a name="input_coralogix_parameter_subsystem_name"></a> [coralogix\_parameter\_subsystem\_name](#input\_coralogix\_parameter\_subsystem\_name) | By default, your delivery stream name will be used as subsystemName | `string` | `null` | no |
 | <a name="input_coralogix_parameter_use_dynamic_values"></a> [coralogix\_parameter\_use\_dynamic\_values](#input\_coralogix\_parameter\_use\_dynamic\_values) | To use dynamic values for applicationName and subsystemName | `bool` | `false` | no |
-| <a name="input_create"></a> [create](#input\_create) | Controls if kinesis firehose should be created (it affects almost all resources). | `bool` | `true` | no |
+| <a name="input_create"></a> [create](#input\_create) | Controls if kinesis firehose should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_create_application_role"></a> [create\_application\_role](#input\_create\_application\_role) | Set it to true to create role to be used by the source | `bool` | `false` | no |
 | <a name="input_create_application_role_policy"></a> [create\_application\_role\_policy](#input\_create\_application\_role\_policy) | Set it to true to create policy to the role used by the source | `bool` | `false` | no |
 | <a name="input_create_destination_cw_log_group"></a> [create\_destination\_cw\_log\_group](#input\_create\_destination\_cw\_log\_group) | Enables or disables the cloudwatch log group creation to destination | `bool` | `true` | no |
-| <a name="input_create_role"></a> [create\_role](#input\_create\_role) | Controls whether IAM role for Kinesis Firehose Stream should be created. | `bool` | `true` | no |
+| <a name="input_create_role"></a> [create\_role](#input\_create\_role) | Controls whether IAM role for Kinesis Firehose Stream should be created | `bool` | `true` | no |
 | <a name="input_cw_log_retention_in_days"></a> [cw\_log\_retention\_in\_days](#input\_cw\_log\_retention\_in\_days) | Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | `number` | `null` | no |
 | <a name="input_cw_tags"></a> [cw\_tags](#input\_cw\_tags) | A map of tags to assign to the resource. | `map(string)` | `{}` | no |
 | <a name="input_data_format_conversion_block_size"></a> [data\_format\_conversion\_block\_size](#input\_data\_format\_conversion\_block\_size) | The Hadoop Distributed File System (HDFS) block size. This is useful if you intend to copy the data from Amazon S3 to HDFS before querying. The Value is in Bytes. | `number` | `268435456` | no |
@@ -938,7 +964,7 @@ No modules.
 | <a name="input_data_format_conversion_parquet_page_size"></a> [data\_format\_conversion\_parquet\_page\_size](#input\_data\_format\_conversion\_parquet\_page\_size) | Column chunks are divided into pages. A page is conceptually an indivisible unit (in terms of compression and encoding). The value is in bytes | `number` | `1048576` | no |
 | <a name="input_data_format_conversion_parquet_writer_version"></a> [data\_format\_conversion\_parquet\_writer\_version](#input\_data\_format\_conversion\_parquet\_writer\_version) | Indicates the version of row format to output. | `string` | `"V1"` | no |
 | <a name="input_datadog_endpoint_type"></a> [datadog\_endpoint\_type](#input\_datadog\_endpoint\_type) | Endpoint type to datadog destination | `string` | `"logs_eu"` | no |
-| <a name="input_destination"></a> [destination](#input\_destination) | This is the destination to where the data is delivered. | `string` | n/a | yes |
+| <a name="input_destination"></a> [destination](#input\_destination) | This is the destination to where the data is delivered | `string` | n/a | yes |
 | <a name="input_destination_cross_account"></a> [destination\_cross\_account](#input\_destination\_cross\_account) | Indicates if destination is in a different account. Only supported to Elasticsearch and OpenSearch | `bool` | `false` | no |
 | <a name="input_destination_log_group_name"></a> [destination\_log\_group\_name](#input\_destination\_log\_group\_name) | The CloudWatch group name for destination logs | `string` | `null` | no |
 | <a name="input_destination_log_stream_name"></a> [destination\_log\_stream\_name](#input\_destination\_log\_stream\_name) | The CloudWatch log stream name for destination logs | `string` | `null` | no |
@@ -958,7 +984,7 @@ No modules.
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
 | <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |
-| <a name="input_enable_lambda_transform"></a> [enable\_lambda\_transform](#input\_enable\_lambda\_transform) | Set it to true to enable data transformation with lambda. | `bool` | `false` | no |
+| <a name="input_enable_lambda_transform"></a> [enable\_lambda\_transform](#input\_enable\_lambda\_transform) | Set it to true to enable data transformation with lambda | `bool` | `false` | no |
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
@@ -973,15 +999,18 @@ No modules.
 | <a name="input_http_endpoint_request_configuration_content_encoding"></a> [http\_endpoint\_request\_configuration\_content\_encoding](#input\_http\_endpoint\_request\_configuration\_content\_encoding) | Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination | `string` | `"GZIP"` | no |
 | <a name="input_http_endpoint_retry_duration"></a> [http\_endpoint\_retry\_duration](#input\_http\_endpoint\_retry\_duration) | Total amount of seconds Firehose spends on retries. This duration starts after the initial attempt fails, It does not include the time periods during which Firehose waits for acknowledgment from the specified destination after each attempt | `number` | `300` | no |
 | <a name="input_http_endpoint_url"></a> [http\_endpoint\_url](#input\_http\_endpoint\_url) | The HTTP endpoint URL to which Kinesis Firehose sends your data | `string` | `null` | no |
-| <a name="input_input_source"></a> [input\_source](#input\_input\_source) | This is the kinesis firehose source. | `string` | `"direct-put"` | no |
+| <a name="input_input_source"></a> [input\_source](#input\_input\_source) | This is the kinesis firehose source | `string` | `"direct-put"` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |
-| <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records | `string` | `null` | no |
+| <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records. | `string` | `null` | no |
 | <a name="input_kinesis_source_role_arn"></a> [kinesis\_source\_role\_arn](#input\_kinesis\_source\_role\_arn) | The ARN of the role that provides access to the source Kinesis stream | `string` | `null` | no |
 | <a name="input_kinesis_source_stream_arn"></a> [kinesis\_source\_stream\_arn](#input\_kinesis\_source\_stream\_arn) | The kinesis stream used as the source of the firehose delivery stream | `string` | `null` | no |
 | <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
 | <a name="input_logicmonitor_account"></a> [logicmonitor\_account](#input\_logicmonitor\_account) | Account to use in Logic Monitor destination | `string` | `null` | no |
 | <a name="input_mongodb_realm_webhook_url"></a> [mongodb\_realm\_webhook\_url](#input\_mongodb\_realm\_webhook\_url) | Realm Webhook URL to use in MongoDB destination | `string` | `null` | no |
-| <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in. | `string` | n/a | yes |
+| <a name="input_msk_source_cluster_arn"></a> [msk\_source\_cluster\_arn](#input\_msk\_source\_cluster\_arn) | The ARN of the Amazon MSK cluster. | `string` | `null` | no |
+| <a name="input_msk_source_connectivity_type"></a> [msk\_source\_connectivity\_type](#input\_msk\_source\_connectivity\_type) | The type of connectivity used to access the Amazon MSK cluster. Valid values: PUBLIC, PRIVATE. | `string` | `"PUBLIC"` | no |
+| <a name="input_msk_source_topic_name"></a> [msk\_source\_topic\_name](#input\_msk\_source\_topic\_name) | The topic name within the Amazon MSK cluster. | `string` | `null` | no |
+| <a name="input_name"></a> [name](#input\_name) | A name to identify the stream. This is unique to the AWS account and region the Stream is created in | `string` | n/a | yes |
 | <a name="input_newrelic_endpoint_type"></a> [newrelic\_endpoint\_type](#input\_newrelic\_endpoint\_type) | Endpoint type to New Relic destination | `string` | `"logs_eu"` | no |
 | <a name="input_opensearch_document_id_options"></a> [opensearch\_document\_id\_options](#input\_opensearch\_document\_id\_options) | The method for setting up document ID. | `string` | `"FIREHOSE_DEFAULT"` | no |
 | <a name="input_opensearch_domain_arn"></a> [opensearch\_domain\_arn](#input\_opensearch\_domain\_arn) | The ARN of the Amazon Opensearch domain. The pattern needs to be arn:.*. Conflicts with cluster\_endpoint. | `string` | `null` | no |
@@ -1032,6 +1061,8 @@ No modules.
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
 | <a name="input_s3_own_bucket"></a> [s3\_own\_bucket](#input\_s3\_own\_bucket) | Indicates if you own the bucket. If not, will be configure permissions to grants the bucket owner full access to the objects delivered by Kinesis Data Firehose | `bool` | `true` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
+| <a name="input_source_role_arn"></a> [source\_role\_arn](#input\_source\_role\_arn) | The ARN of the role that provides access to the source. Only Supported on Kinesis and MSK Sources | `string` | `null` | no |
+| <a name="input_source_use_existing_role"></a> [source\_use\_existing\_role](#input\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role for sources access. Only Supported on Kinesis and MSK Sources | `bool` | `true` | no |
 | <a name="input_splunk_hec_acknowledgment_timeout"></a> [splunk\_hec\_acknowledgment\_timeout](#input\_splunk\_hec\_acknowledgment\_timeout) | The amount of time, that Kinesis Firehose waits to receive an acknowledgment from Splunk after it sends it data | `number` | `600` | no |
 | <a name="input_splunk_hec_endpoint"></a> [splunk\_hec\_endpoint](#input\_splunk\_hec\_endpoint) | The HTTP Event Collector (HEC) endpoint to which Kinesis Firehose sends your data | `string` | `null` | no |
 | <a name="input_splunk_hec_endpoint_type"></a> [splunk\_hec\_endpoint\_type](#input\_splunk\_hec\_endpoint\_type) | The HEC endpoint type | `string` | `"Raw"` | no |
@@ -1042,11 +1073,11 @@ No modules.
 | <a name="input_sumologic_data_type"></a> [sumologic\_data\_type](#input\_sumologic\_data\_type) | Data Type to use in Sumo Logic destination | `string` | `"log"` | no |
 | <a name="input_sumologic_deployment_name"></a> [sumologic\_deployment\_name](#input\_sumologic\_deployment\_name) | Deployment Name to use in Sumo Logic destination | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
-| <a name="input_transform_lambda_arn"></a> [transform\_lambda\_arn](#input\_transform\_lambda\_arn) | Lambda ARN to Transform source records. | `string` | `null` | no |
+| <a name="input_transform_lambda_arn"></a> [transform\_lambda\_arn](#input\_transform\_lambda\_arn) | Lambda ARN to Transform source records | `string` | `null` | no |
 | <a name="input_transform_lambda_buffer_interval"></a> [transform\_lambda\_buffer\_interval](#input\_transform\_lambda\_buffer\_interval) | The period of time during which Kinesis Data Firehose buffers incoming data before invoking the AWS Lambda function. The AWS Lambda function is invoked once the value of the buffer size or the buffer interval is reached. | `number` | `60` | no |
 | <a name="input_transform_lambda_buffer_size"></a> [transform\_lambda\_buffer\_size](#input\_transform\_lambda\_buffer\_size) | The AWS Lambda function has a 6 MB invocation payload quota. Your data can expand in size after it's processed by the AWS Lambda function. A smaller buffer size allows for more room should the data expand after processing. | `number` | `3` | no |
 | <a name="input_transform_lambda_number_retries"></a> [transform\_lambda\_number\_retries](#input\_transform\_lambda\_number\_retries) | Number of retries for AWS Transformation lambda | `number` | `3` | no |
-| <a name="input_transform_lambda_role_arn"></a> [transform\_lambda\_role\_arn](#input\_transform\_lambda\_role\_arn) | The ARN of the role to execute the transform lambda. If null use the Firehose Stream role. | `string` | `null` | no |
+| <a name="input_transform_lambda_role_arn"></a> [transform\_lambda\_role\_arn](#input\_transform\_lambda\_role\_arn) | The ARN of the role to execute the transform lambda. If null use the Firehose Stream role | `string` | `null` | no |
 | <a name="input_vpc_create_destination_security_group"></a> [vpc\_create\_destination\_security\_group](#input\_vpc\_create\_destination\_security\_group) | Indicates if want create destination security group to associate to firehose destinations | `bool` | `false` | no |
 | <a name="input_vpc_create_security_group"></a> [vpc\_create\_security\_group](#input\_vpc\_create\_security\_group) | Indicates if want create security group to associate to kinesis firehose | `bool` | `false` | no |
 | <a name="input_vpc_role_arn"></a> [vpc\_role\_arn](#input\_vpc\_role\_arn) | The ARN of the IAM role to be assumed by Firehose for calling the Amazon EC2 configuration API and for creating network interfaces. Supports Elasticsearch and Opensearch destinations. | `string` | `null` | no |
@@ -1098,6 +1129,14 @@ No modules.
 
 - Version 1.x to 2.x Upgrade Guide [here](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/blob/main/UPGRADE-2.0.md)
 - Version 2.x to 3.x Upgrade Guide [here](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/blob/main/UPGRADE-3.0.md)
+
+
+## Deprecations
+
+### Version 3.1.0
+
+* Variable `kinesis_source_role_arn` is deprecated. Use `source_role_arn` instead.
+* Variable `kinesis_source_use_existing_role` is deprecated. Use `source_use_existing_role` instead.
 
 ## License
 

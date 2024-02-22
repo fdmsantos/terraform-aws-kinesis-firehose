@@ -3,7 +3,8 @@ locals {
   application_role_name           = coalesce(var.application_role_name, "${var.name}-application-role", "*")
   create_application_role_policy  = var.create && var.create_application_role_policy
   add_backup_policies             = local.enable_s3_backup && var.s3_backup_use_existing_role
-  add_kinesis_source_policy       = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role
+  add_kinesis_source_policy       = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role && var.source_use_existing_role
+  add_msk_source_policy           = var.create && var.create_role && local.is_msk_source && var.source_use_existing_role
   add_lambda_policy               = var.create && var.create_role && var.enable_lambda_transform
   add_s3_kms_policy               = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
   add_glue_policy                 = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
@@ -98,6 +99,59 @@ resource "aws_iam_role_policy_attachment" "kinesis" {
   count      = local.add_kinesis_source_policy ? 1 : 0
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.kinesis[0].arn
+}
+
+##################
+# MSK Source
+##################
+data "aws_iam_policy_document" "msk" {
+  count = local.add_msk_source_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "kafka:GetBootstrapBrokers",
+      "kafka:DescribeCluster",
+      "kafka:DescribeClusterV2",
+      "kafka-cluster:Connect"
+    ]
+    resources = [var.msk_source_cluster_arn]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kafka-cluster:DescribeTopic",
+      "kafka-cluster:DescribeTopicDynamicConfiguration",
+      "kafka-cluster:ReadData"
+    ]
+    resources = [
+      "${var.msk_source_cluster_arn}/${var.msk_source_topic_name}"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kafka-cluster:DescribeGroup"
+    ]
+    resources = [
+      "${var.msk_source_cluster_arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "msk" {
+  count  = local.is_msk_source ? 1 : 0
+  name   = "${local.role_name}-msk"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.msk[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "msk" {
+  count      = local.add_msk_source_policy ? 1 : 0
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.msk[0].arn
 }
 
 ##################

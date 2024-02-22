@@ -16,7 +16,19 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     for_each = local.is_kinesis_source ? [1] : []
     content {
       kinesis_stream_arn = var.kinesis_source_stream_arn
-      role_arn           = local.kinesis_source_stream_role
+      role_arn           = var.kinesis_source_use_existing_role ? local.source_role : local.kinesis_source_stream_role # TODO: Next Major version, role should be equals to local.source_role
+    }
+  }
+
+  dynamic "msk_source_configuration" {
+    for_each = local.is_msk_source ? [1] : []
+    content {
+      authentication_configuration {
+        connectivity = var.msk_source_connectivity_type
+        role_arn     = local.source_role
+      }
+      msk_cluster_arn = var.msk_source_cluster_arn
+      topic_name      = var.msk_source_topic_name
     }
   }
 

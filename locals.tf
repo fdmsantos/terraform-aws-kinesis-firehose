@@ -3,9 +3,9 @@ locals {
   cw_log_group_name           = "/aws/kinesisfirehose/${var.name}"
   cw_log_delivery_stream_name = "DestinationDelivery"
   cw_log_backup_stream_name   = "BackupDelivery"
-  source                      = var.input_source
-  is_kinesis_source           = local.source == "kinesis" ? true : false
-  is_waf_source               = local.source == "waf" ? true : false
+  is_kinesis_source           = var.input_source == "kinesis" ? true : false
+  is_waf_source               = var.input_source == "waf" ? true : false
+  is_msk_source               = var.input_source == "msk" ? true : false
   destinations = {
     s3 : "extended_s3",
     extended_s3 : "extended_s3",
@@ -150,8 +150,13 @@ locals {
   }
   s3_backup_mode = local.use_backup_vars_in_s3_configuration ? local.backup_modes[local.destination][var.s3_backup_mode] : null
 
+  # Common Source Variables
+  source_role = (local.is_kinesis_source || local.is_msk_source ? (
+    var.source_use_existing_role ? local.firehose_role_arn : var.source_role_arn
+  ) : null)
+
   # Kinesis source Stream
-  kinesis_source_stream_role = (local.is_kinesis_source ? (
+  kinesis_source_stream_role = (local.is_kinesis_source ? ( # TODO: Deprecated. Remove Next Major Version
     var.kinesis_source_use_existing_role ? local.firehose_role_arn : var.kinesis_source_role_arn
   ) : null)
 

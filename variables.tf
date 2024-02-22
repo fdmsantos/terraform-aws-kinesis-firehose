@@ -15,7 +15,7 @@ variable "input_source" {
   default     = "direct-put"
   validation {
     error_message = "Please use a valid source!"
-    condition     = contains(["direct-put", "kinesis", "waf"], var.input_source)
+    condition     = contains(["direct-put", "kinesis", "waf", "msk"], var.input_source)
   }
 }
 
@@ -336,9 +336,6 @@ variable "destination_cross_account" {
   default     = false
 }
 
-######
-# Kinesis Source
-######
 variable "enable_sse" {
   description = "Whether to enable encryption at rest. Only makes sense when source is Direct Put"
   type        = bool
@@ -361,19 +358,37 @@ variable "sse_kms_key_arn" {
   default     = null
 }
 
+######
+# Source Common Variables
+######
+variable "source_role_arn" {
+  description = "The ARN of the role that provides access to the source. Only Supported on Kinesis and MSK Sources"
+  type        = string
+  default     = null
+}
+
+variable "source_use_existing_role" {
+  description = "Indicates if want use the kinesis firehose role for sources access. Only Supported on Kinesis and MSK Sources"
+  type        = bool
+  default     = true
+}
+
+######
+# Kinesis Source
+######
 variable "kinesis_source_stream_arn" {
   description = "The kinesis stream used as the source of the firehose delivery stream"
   type        = string
   default     = null
 }
 
-variable "kinesis_source_role_arn" {
+variable "kinesis_source_role_arn" { # TODO: Deprecated. Remove Next Major Version
   description = "The ARN of the role that provides access to the source Kinesis stream"
   type        = string
   default     = null
 }
 
-variable "kinesis_source_use_existing_role" {
+variable "kinesis_source_use_existing_role" { # TODO: Deprecated. Remove Next Major Version
   description = "Indicates if want use the kinesis firehose role to kinesis data stream access."
   type        = bool
   default     = true
@@ -386,11 +401,35 @@ variable "kinesis_source_is_encrypted" {
 }
 
 variable "kinesis_source_kms_arn" {
-  description = "Kinesis Source KMS Key to add Firehose role to decrypt the records"
+  description = "Kinesis Source KMS Key to add Firehose role to decrypt the records."
   type        = string
   default     = null
 }
 
+######
+# MSK Source
+######
+variable "msk_source_cluster_arn" {
+  description = "The ARN of the Amazon MSK cluster."
+  type        = string
+  default     = null
+}
+
+variable "msk_source_topic_name" {
+  description = "The topic name within the Amazon MSK cluster."
+  type        = string
+  default     = null
+}
+
+variable "msk_source_connectivity_type" {
+  description = "The type of connectivity used to access the Amazon MSK cluster. Valid values: PUBLIC, PRIVATE."
+  type        = string
+  default     = "PUBLIC"
+  validation {
+    error_message = "Valid values are PUBLIC and PRIVATE."
+    condition     = contains(["PUBLIC", "PRIVATE"], var.msk_source_connectivity_type)
+  }
+}
 ######
 # S3 Destination Configurations
 ######

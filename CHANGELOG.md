@@ -7,10 +7,6 @@ All notable changes to this project will be documented in this file.
 
 ### ⚠ BREAKING CHANGES
 
-* Add support for Opensearch and Opensearch Serverless destinations
-
-### Features
-
 * Add support for Opensearch and Opensearch Serverless destinations ([9c37b8f](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/9c37b8f6b2c512ee1a493a044f9b2c852f6eeec8))
 
 ### [2.2.3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.2.2...v2.2.3) (2024-02-16)
