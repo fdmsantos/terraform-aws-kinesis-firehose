@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.0.0...v3.1.0) (2024-02-22)
+
+
+### Features
+
+* Add support for MSK Source Configuration ([#10](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/10)) ([9262a54](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/9262a545186b4e8faf7441095aa6cc07055f68f8))
+
 ## [3.0.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v2.2.3...v3.0.0) (2024-02-19)
 
 
