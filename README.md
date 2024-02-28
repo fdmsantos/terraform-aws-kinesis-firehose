@@ -56,7 +56,6 @@ Supports all destinations and all Kinesis Firehose Features.
   * [Version 3.1.0](#version-310)
 * [License](#license)
 
-
 ## Module versioning rule
 
 | Module version | AWS Provider version |
@@ -95,6 +94,7 @@ Supports all destinations and all Kinesis Firehose Features.
 - Original Data Backup in S3
 - Logging and Encryption
 - Application Role to Direct Put Sources
+- Turn on/off cloudwatch logs decompressing and data message extraction
 - Permissions
   - IAM Roles
   - Opensearch / Opensearch Serverless Service Role
@@ -981,6 +981,8 @@ No modules.
 | <a name="input_elasticsearch_index_rotation_period"></a> [elasticsearch\_index\_rotation\_period](#input\_elasticsearch\_index\_rotation\_period) | The Elasticsearch index rotation period. Index rotation appends a timestamp to the IndexName to facilitate expiration of old data | `string` | `"OneDay"` | no |
 | <a name="input_elasticsearch_retry_duration"></a> [elasticsearch\_retry\_duration](#input\_elasticsearch\_retry\_duration) | The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt | `string` | `300` | no |
 | <a name="input_elasticsearch_type_name"></a> [elasticsearch\_type\_name](#input\_elasticsearch\_type\_name) | The Elasticsearch type name with maximum length of 100 characters | `string` | `null` | no |
+| <a name="input_enable_cloudwatch_logs_data_message_extraction"></a> [enable\_cloudwatch\_logs\_data\_message\_extraction](#input\_enable\_cloudwatch\_logs\_data\_message\_extraction) | Cloudwatch Logs data message extraction | `bool` | `false` | no |
+| <a name="input_enable_cloudwatch_logs_decompression"></a> [enable\_cloudwatch\_logs\_decompression](#input\_enable\_cloudwatch\_logs\_decompression) | Enables or disables Cloudwatch Logs decompression | `bool` | `false` | no |
 | <a name="input_enable_data_format_conversion"></a> [enable\_data\_format\_conversion](#input\_enable\_data\_format\_conversion) | Set it to true if you want to disable format conversion. | `bool` | `false` | no |
 | <a name="input_enable_destination_log"></a> [enable\_destination\_log](#input\_enable\_destination\_log) | The CloudWatch Logging Options for the delivery stream | `bool` | `true` | no |
 | <a name="input_enable_dynamic_partitioning"></a> [enable\_dynamic\_partitioning](#input\_enable\_dynamic\_partitioning) | Enables or disables dynamic partitioning | `bool` | `false` | no |

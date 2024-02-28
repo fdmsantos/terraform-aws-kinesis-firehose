@@ -29,7 +29,7 @@ locals {
   is_search_destination = contains(["elasticsearch", "opensearch", "opensearchserverless"], local.destination) ? true : false
 
   # Data Transformation
-  enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning
+  enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning || var.enable_cloudwatch_logs_decompression
   lambda_processor = var.enable_lambda_transform ? {
     type = "Lambda"
     parameters = [
@@ -97,11 +97,31 @@ locals {
   record_deaggregation_processor = (var.enable_dynamic_partitioning && var.dynamic_partition_enable_record_deaggregation ?
     (var.dynamic_partition_record_deaggregation_type == "JSON" ? local.record_deaggregation_processor_json : local.record_deaggregation_processor_delimiter)
   : null)
+  cloudwatch_logs_decompression_processor = var.enable_cloudwatch_logs_decompression ? {
+    type = "Decompression"
+    parameters = [
+      {
+        name  = "CompressionFormat"
+        value = "GZIP"
+      }
+    ]
+  } : null
+  cloudwatch_logs_data_message_extraction_processor = var.enable_cloudwatch_logs_decompression && var.enable_cloudwatch_logs_data_message_extraction ? {
+    type = "CloudWatchLogProcessing"
+    parameters = [
+      {
+        name  = "DataMessageExtraction"
+        value = tostring(var.enable_cloudwatch_logs_data_message_extraction)
+      },
+    ]
+  } : null
   processors = [for each in [
     local.lambda_processor,
     local.metadata_extractor_processor,
     local.append_delimiter_processor,
-    local.record_deaggregation_processor
+    local.record_deaggregation_processor,
+    local.cloudwatch_logs_decompression_processor,
+    local.cloudwatch_logs_data_message_extraction_processor
   ] : each if local.enable_processing && each != null]
 
   # Data Format conversion

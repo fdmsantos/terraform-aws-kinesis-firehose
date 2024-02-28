@@ -433,6 +433,18 @@ variable "msk_source_connectivity_type" {
 ######
 # S3 Destination Configurations
 ######
+variable "enable_cloudwatch_logs_decompression" {
+  description = "Enables or disables Cloudwatch Logs decompression"
+  type        = bool
+  default     = false
+}
+
+variable "enable_cloudwatch_logs_data_message_extraction" {
+  description = "Cloudwatch Logs data message extraction"
+  type        = bool
+  default     = false
+}
+
 variable "enable_dynamic_partitioning" {
   description = "Enables or disables dynamic partitioning"
   type        = bool
