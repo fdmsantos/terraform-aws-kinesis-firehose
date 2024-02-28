@@ -439,16 +439,6 @@ variable "enable_cloudwatch_logs_decompression" {
   default     = false
 }
 
-variable "cloudwatch_logs_compression_type" {
-  description = "Cloudwatch Logs decompression types"
-  type        = string
-  default     = "GZIP"
-  validation {
-    error_message = "Valid value is GZIP."
-    condition     = contains(["GZIP"], var.cloudwatch_logs_compression_type)
-  }
-}
-
 variable "enable_cloudwatch_logs_data_message_extraction" {
   description = "Cloudwatch Logs data message extraction"
   type        = bool

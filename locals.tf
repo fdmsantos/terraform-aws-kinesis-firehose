@@ -102,7 +102,7 @@ locals {
     parameters = [
       {
         name  = "CompressionFormat"
-        value = var.cloudwatch_logs_compression_type
+        value = "GZIP"
       }
     ]
   } : null
