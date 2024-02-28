@@ -56,7 +56,6 @@ Supports all destinations and all Kinesis Firehose Features.
   * [Version 3.1.0](#version-310)
 * [License](#license)
 
-
 ## Module versioning rule
 
 | Module version | AWS Provider version |
@@ -95,6 +94,7 @@ Supports all destinations and all Kinesis Firehose Features.
 - Original Data Backup in S3
 - Logging and Encryption
 - Application Role to Direct Put Sources
+- Turn on/off cloudwatch logs decompressing and data message extraction
 - Permissions
   - IAM Roles
   - Opensearch / Opensearch Serverless Service Role
@@ -923,7 +923,6 @@ No modules.
 | <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
 | <a name="input_buffering_interval"></a> [buffering\_interval](#input\_buffering\_interval) | Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination | `number` | `300` | no |
 | <a name="input_buffering_size"></a> [buffering\_size](#input\_buffering\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
-| <a name="input_cloudwatch_logs_compression_type"></a> [cloudwatch\_logs\_compression\_type](#input\_cloudwatch\_logs\_compression\_type) | Cloudwatch Logs decompression types | `string` | `"GZIP"` | no |
 | <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
 | <a name="input_coralogix_endpoint_location"></a> [coralogix\_endpoint\_location](#input\_coralogix\_endpoint\_location) | Endpoint Location to coralogix destination | `string` | `"ireland"` | no |
 | <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName | `string` | `null` | no |
