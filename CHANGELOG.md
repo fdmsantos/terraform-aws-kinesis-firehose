@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.1.0...v3.2.0) (2024-02-28)
+
+
+### Features
+
+* Merge pull request [#12](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/12) from tropnikovvl/main ([7686e0e](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/7686e0e4b0d6f3d2e5bad3d59a892ba67004decc))
+
 ## [3.1.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.0.0...v3.1.0) (2024-02-22)
 
 
