@@ -73,6 +73,6 @@ module "firehose" {
   enable_dynamic_partitioning                   = true
   dynamic_partitioning_retry_duration           = 350
   dynamic_partition_metadata_extractor_query    = "{user_id:.user_id}"
-  dynamic_partition_append_delimiter_to_record  = true
+  append_delimiter_to_record                    = true
   dynamic_partition_enable_record_deaggregation = true
 }

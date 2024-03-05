@@ -461,7 +461,7 @@ variable "dynamic_partitioning_retry_duration" {
   }
 }
 
-variable "dynamic_partition_append_delimiter_to_record" {
+variable "dynamic_partition_append_delimiter_to_record" { # TODO Variable Deprecated. Remove on Next Major Version
   description = "To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3."
   type        = bool
   default     = false
@@ -719,6 +719,12 @@ variable "data_format_conversion_orc_stripe_size" {
     error_message = "Minimum Value is 8 MiB."
     condition     = var.data_format_conversion_orc_stripe_size >= 8388608
   }
+}
+
+variable "append_delimiter_to_record" {
+  description = "To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3."
+  type        = bool
+  default     = false
 }
 
 ######

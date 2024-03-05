@@ -29,7 +29,7 @@ locals {
   is_search_destination = contains(["elasticsearch", "opensearch", "opensearchserverless"], local.destination) ? true : false
 
   # Data Transformation
-  enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning || var.enable_cloudwatch_logs_decompression || var.dynamic_partition_append_delimiter_to_record
+  enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning || var.enable_cloudwatch_logs_decompression || var.dynamic_partition_append_delimiter_to_record || var.append_delimiter_to_record
   lambda_processor = var.enable_lambda_transform ? {
     type = "Lambda"
     parameters = [
@@ -68,7 +68,7 @@ locals {
       },
     ]
   } : null
-  append_delimiter_processor = var.dynamic_partition_append_delimiter_to_record ? {
+  append_delimiter_processor = var.dynamic_partition_append_delimiter_to_record || var.append_delimiter_to_record ? {
     type       = "AppendDelimiterToRecord"
     parameters = []
   } : null
