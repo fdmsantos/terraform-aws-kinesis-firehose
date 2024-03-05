@@ -581,7 +581,6 @@ module "firehose" {
   enable_dynamic_partitioning                   = true
   dynamic_partitioning_retry_duration           = 350
   dynamic_partition_metadata_extractor_query    = "{user_id:.user_id}"
-  dynamic_partition_append_delimiter_to_record  = true
   dynamic_partition_enable_record_deaggregation = true
 }
 
@@ -970,7 +969,7 @@ No modules.
 | <a name="input_destination_cross_account"></a> [destination\_cross\_account](#input\_destination\_cross\_account) | Indicates if destination is in a different account. Only supported to Elasticsearch and OpenSearch | `bool` | `false` | no |
 | <a name="input_destination_log_group_name"></a> [destination\_log\_group\_name](#input\_destination\_log\_group\_name) | The CloudWatch group name for destination logs | `string` | `null` | no |
 | <a name="input_destination_log_stream_name"></a> [destination\_log\_stream\_name](#input\_destination\_log\_stream\_name) | The CloudWatch log stream name for destination logs | `string` | `null` | no |
-| <a name="input_dynamic_partition_append_delimiter_to_record"></a> [dynamic\_partition\_append\_delimiter\_to\_record](#input\_dynamic\_partition\_append\_delimiter\_to\_record) | To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
+| <a name="input_dynamic_partition_append_delimiter_to_record"></a> [dynamic\_partition\_append\_delimiter\_to\_record](#input\_dynamic\_partition\_append\_delimiter\_to\_record) | DEPRECATED!! Use var append\_delimiter\_to\_record instead!! Use To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
 | <a name="input_dynamic_partition_enable_record_deaggregation"></a> [dynamic\_partition\_enable\_record\_deaggregation](#input\_dynamic\_partition\_enable\_record\_deaggregation) | Data deaggregation is the process of parsing through the records in a delivery stream and separating the records based either on valid JSON or on the specified delimiter | `bool` | `false` | no |
 | <a name="input_dynamic_partition_metadata_extractor_query"></a> [dynamic\_partition\_metadata\_extractor\_query](#input\_dynamic\_partition\_metadata\_extractor\_query) | Dynamic Partition JQ query. | `string` | `null` | no |
 | <a name="input_dynamic_partition_record_deaggregation_delimiter"></a> [dynamic\_partition\_record\_deaggregation\_delimiter](#input\_dynamic\_partition\_record\_deaggregation\_delimiter) | Specifies the delimiter to be used for parsing through the records in the delivery stream and deaggregating them | `string` | `null` | no |
@@ -1006,9 +1005,9 @@ No modules.
 | <a name="input_input_source"></a> [input\_source](#input\_input\_source) | This is the kinesis firehose source | `string` | `"direct-put"` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |
 | <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records. | `string` | `null` | no |
-| <a name="input_kinesis_source_role_arn"></a> [kinesis\_source\_role\_arn](#input\_kinesis\_source\_role\_arn) | The ARN of the role that provides access to the source Kinesis stream | `string` | `null` | no |
+| <a name="input_kinesis_source_role_arn"></a> [kinesis\_source\_role\_arn](#input\_kinesis\_source\_role\_arn) | DEPRECATED!! Use variable instead source\_role\_arn! The ARN of the role that provides access to the source Kinesis stream | `string` | `null` | no |
 | <a name="input_kinesis_source_stream_arn"></a> [kinesis\_source\_stream\_arn](#input\_kinesis\_source\_stream\_arn) | The kinesis stream used as the source of the firehose delivery stream | `string` | `null` | no |
-| <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
+| <a name="input_kinesis_source_use_existing_role"></a> [kinesis\_source\_use\_existing\_role](#input\_kinesis\_source\_use\_existing\_role) | DEPRECATED!! Use variable source\_use\_existing\_role instead! Indicates if want use the kinesis firehose role to kinesis data stream access. | `bool` | `true` | no |
 | <a name="input_logicmonitor_account"></a> [logicmonitor\_account](#input\_logicmonitor\_account) | Account to use in Logic Monitor destination | `string` | `null` | no |
 | <a name="input_mongodb_realm_webhook_url"></a> [mongodb\_realm\_webhook\_url](#input\_mongodb\_realm\_webhook\_url) | Realm Webhook URL to use in MongoDB destination | `string` | `null` | no |
 | <a name="input_msk_source_cluster_arn"></a> [msk\_source\_cluster\_arn](#input\_msk\_source\_cluster\_arn) | The ARN of the Amazon MSK cluster. | `string` | `null` | no |

@@ -383,13 +383,13 @@ variable "kinesis_source_stream_arn" {
 }
 
 variable "kinesis_source_role_arn" { # TODO: Deprecated. Remove Next Major Version
-  description = "The ARN of the role that provides access to the source Kinesis stream"
+  description = "DEPRECATED!! Use variable instead source_role_arn! The ARN of the role that provides access to the source Kinesis stream"
   type        = string
   default     = null
 }
 
 variable "kinesis_source_use_existing_role" { # TODO: Deprecated. Remove Next Major Version
-  description = "Indicates if want use the kinesis firehose role to kinesis data stream access."
+  description = "DEPRECATED!! Use variable source_use_existing_role instead! Indicates if want use the kinesis firehose role to kinesis data stream access."
   type        = bool
   default     = true
 }
@@ -462,7 +462,7 @@ variable "dynamic_partitioning_retry_duration" {
 }
 
 variable "dynamic_partition_append_delimiter_to_record" { # TODO Variable Deprecated. Remove on Next Major Version
-  description = "To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3."
+  description = "DEPRECATED!! Use var append_delimiter_to_record instead!! Use To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3."
   type        = bool
   default     = false
 }
