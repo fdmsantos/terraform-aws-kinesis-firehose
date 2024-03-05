@@ -54,6 +54,7 @@ Supports all destinations and all Kinesis Firehose Features.
 * [Upgrade](#upgrade)
 * [Deprecations](#deprecations)
   * [Version 3.1.0](#version-310)
+  * [Version 3.3.0](#version-330)
 * [License](#license)
 
 ## Module versioning rule
@@ -912,6 +913,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_append_delimiter_to_record"></a> [append\_delimiter\_to\_record](#input\_append\_delimiter\_to\_record) | To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
 | <a name="input_application_role_description"></a> [application\_role\_description](#input\_application\_role\_description) | Description of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
 | <a name="input_application_role_force_detach_policies"></a> [application\_role\_force\_detach\_policies](#input\_application\_role\_force\_detach\_policies) | Specifies to force detaching any policies the IAM Application role has before destroying it | `bool` | `true` | no |
 | <a name="input_application_role_name"></a> [application\_role\_name](#input\_application\_role\_name) | Name of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
@@ -1139,6 +1141,10 @@ No modules.
 
 * Variable `kinesis_source_role_arn` is deprecated. Use `source_role_arn` instead.
 * Variable `kinesis_source_use_existing_role` is deprecated. Use `source_use_existing_role` instead.
+
+### Version 3.3.0
+
+* Variable `dynamic_partition_append_delimiter_to_record` is deprecated. Use `append_delimiter_to_record` instead.
 
 ## License
 
