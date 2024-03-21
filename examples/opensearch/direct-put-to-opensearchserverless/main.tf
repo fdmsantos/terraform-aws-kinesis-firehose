@@ -12,91 +12,23 @@ resource "aws_s3_bucket" "s3" {
   force_destroy = true
 }
 
-resource "aws_opensearchserverless_security_policy" "security_policy" {
-  name = "os-security-policy"
-  type = "encryption"
-  policy = jsonencode({
-    "Rules" = [
-      {
-        "Resource" = [
-          "collection/${local.collection_name}"
-        ],
-        "ResourceType" = "collection"
-      }
-    ],
-    "AWSOwnedKey" = true
-  })
-}
-
-resource "aws_opensearchserverless_security_policy" "networking" {
-  name        = "networking-policy"
-  type        = "network"
-  description = "Public access"
-  policy = jsonencode([
+module "opensearch_serverless" {
+  source  = "fdmsantos/opensearch-serverless/aws"
+  version = "1.0.0"
+  name    = local.collection_name
+  access_policy_rules = [
     {
-      Description = "Public access to collection and Dashboards endpoint for example collection",
-      Rules = [
-        {
-          ResourceType = "collection",
-          Resource = [
-            "collection/${local.collection_name}"
-          ]
-        },
-        {
-          ResourceType = "dashboard"
-          Resource = [
-            "collection/${local.collection_name}"
-          ]
-        }
-      ],
-      AllowFromPublic = true
+      type        = "collection"
+      permissions = ["All"]
+      principals  = [module.firehose.kinesis_firehose_role_arn]
+    },
+    {
+      type        = "index"
+      permissions = ["All"]
+      indexes     = ["*"]
+      principals  = [module.firehose.kinesis_firehose_role_arn]
     }
-  ])
-}
-
-resource "aws_opensearchserverless_access_policy" "policy" {
-  name        = "data-access-policy"
-  type        = "data"
-  description = "read and write permissions"
-  policy = jsonencode([{
-    Rules = [
-      {
-        ResourceType = "collection",
-        Resource = [
-          "collection/${local.collection_name}"
-        ],
-        Permission = [
-          "aoss:CreateCollectionItems",
-          "aoss:DeleteCollectionItems",
-          "aoss:UpdateCollectionItems",
-          "aoss:DescribeCollectionItems"
-        ]
-      },
-      {
-        ResourceType = "index",
-        Resource = [
-          "index/${local.collection_name}/${local.index_name}"
-        ],
-        Permission = [
-          "aoss:CreateIndex",
-          "aoss:DeleteIndex",
-          "aoss:UpdateIndex",
-          "aoss:DescribeIndex",
-          "aoss:ReadDocument",
-          "aoss:WriteDocument"
-        ]
-      }
-    ],
-    Principal = [
-      module.firehose.kinesis_firehose_role_arn
-    ],
-    Description = "Data Access Policy"
-  }])
-}
-
-resource "aws_opensearchserverless_collection" "os" {
-  name       = local.collection_name
-  depends_on = [aws_opensearchserverless_security_policy.security_policy, aws_opensearchserverless_security_policy.networking]
+  ]
 }
 
 resource "aws_kms_key" "this" {
@@ -109,8 +41,8 @@ module "firehose" {
   name                                      = "${var.name_prefix}-delivery-stream"
   destination                               = "opensearchserverless"
   buffering_interval                        = 60
-  opensearchserverless_collection_endpoint  = aws_opensearchserverless_collection.os.collection_endpoint
-  opensearchserverless_collection_arn       = aws_opensearchserverless_collection.os.arn
+  opensearchserverless_collection_endpoint  = module.opensearch_serverless.collection_endpoint
+  opensearchserverless_collection_arn       = module.opensearch_serverless.collection_arn
   opensearch_vpc_create_service_linked_role = true
   opensearch_index_name                     = local.index_name
   s3_backup_mode                            = "All"
