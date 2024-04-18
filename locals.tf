@@ -30,30 +30,35 @@ locals {
 
   # Data Transformation
   enable_processing = var.enable_lambda_transform || var.enable_dynamic_partitioning || var.enable_cloudwatch_logs_decompression || var.dynamic_partition_append_delimiter_to_record || var.append_delimiter_to_record
+  lambda_processor_parameters = [
+    {
+      name  = "LambdaArn"
+      value = var.transform_lambda_arn
+    },
+    var.transform_lambda_buffer_size != null ?
+    {
+      name  = "BufferSizeInMBs"
+      value = var.transform_lambda_buffer_size
+    } : null,
+    var.transform_lambda_buffer_interval != null ?
+    {
+      name  = "BufferIntervalInSeconds"
+      value = var.transform_lambda_buffer_interval
+    } : null,
+    var.transform_lambda_number_retries != null ?
+    {
+      name  = "NumberOfRetries"
+      value = var.transform_lambda_number_retries
+    } : null,
+    var.transform_lambda_role_arn != null ?
+    {
+      name  = "RoleArn"
+      value = var.transform_lambda_role_arn
+    } : null,
+  ]
   lambda_processor = var.enable_lambda_transform ? {
-    type = "Lambda"
-    parameters = [
-      {
-        name  = "LambdaArn"
-        value = var.transform_lambda_arn
-      },
-      {
-        name  = "BufferSizeInMBs"
-        value = var.transform_lambda_buffer_size
-      },
-      {
-        name  = "BufferIntervalInSeconds"
-        value = var.transform_lambda_buffer_interval
-      },
-      {
-        name  = "NumberOfRetries"
-        value = var.transform_lambda_number_retries
-      },
-      {
-        name  = "RoleArn"
-        value = var.transform_lambda_role_arn != null ? var.transform_lambda_role_arn : local.firehose_role_arn
-      },
-    ]
+    type       = "Lambda"
+    parameters = [for parameter in local.lambda_processor_parameters : parameter if parameter != null]
   } : null
   metadata_extractor_processor = var.enable_dynamic_partitioning && var.dynamic_partition_metadata_extractor_query != null ? {
     type = "MetadataExtraction"

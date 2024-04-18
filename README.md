@@ -528,9 +528,9 @@ module "firehose" {
   s3_bucket_arn                    = "<bucket_arn>"
   enable_lambda_transform          = true
   transform_lambda_arn             = "<lambda_arn>"
-  transform_lambda_buffer_size     = 3
-  transform_lambda_buffer_interval = 60
-  transform_lambda_number_retries  = 3
+  transform_lambda_buffer_size     = 2 # Don't configure this parameter if you want use default value (1)
+  transform_lambda_buffer_interval = 90 # Don't configure this parameter if you want use default value (60)
+  transform_lambda_number_retries  = 4 # Don't configure this parameter if you want use default value (3)
 }
 ```
 
@@ -805,6 +805,7 @@ The destination variable configured in module is mapped to firehose valid destin
 ## Examples
 
 - [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
+- [Direct Put With Lambda](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3-with-lambda) - Creates a Kinesis firehose stream with Direct Put as source and S3 as destination with transformation lambda.
 - [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination.
 - [WAF Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/waf-to-s3) - Creates a Kinesis Firehose Stream with AWS Web WAF as source and S3 as destination.
 - [MSK Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/msk-to-s3) - Creates a Kinesis Firehose Stream with MSK Cluster as source and S3 as destination.
@@ -1077,9 +1078,9 @@ No modules.
 | <a name="input_sumologic_deployment_name"></a> [sumologic\_deployment\_name](#input\_sumologic\_deployment\_name) | Deployment Name to use in Sumo Logic destination | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
 | <a name="input_transform_lambda_arn"></a> [transform\_lambda\_arn](#input\_transform\_lambda\_arn) | Lambda ARN to Transform source records | `string` | `null` | no |
-| <a name="input_transform_lambda_buffer_interval"></a> [transform\_lambda\_buffer\_interval](#input\_transform\_lambda\_buffer\_interval) | The period of time during which Kinesis Data Firehose buffers incoming data before invoking the AWS Lambda function. The AWS Lambda function is invoked once the value of the buffer size or the buffer interval is reached. | `number` | `60` | no |
-| <a name="input_transform_lambda_buffer_size"></a> [transform\_lambda\_buffer\_size](#input\_transform\_lambda\_buffer\_size) | The AWS Lambda function has a 6 MB invocation payload quota. Your data can expand in size after it's processed by the AWS Lambda function. A smaller buffer size allows for more room should the data expand after processing. | `number` | `3` | no |
-| <a name="input_transform_lambda_number_retries"></a> [transform\_lambda\_number\_retries](#input\_transform\_lambda\_number\_retries) | Number of retries for AWS Transformation lambda | `number` | `3` | no |
+| <a name="input_transform_lambda_buffer_interval"></a> [transform\_lambda\_buffer\_interval](#input\_transform\_lambda\_buffer\_interval) | The period of time during which Kinesis Data Firehose buffers incoming data before invoking the AWS Lambda function. The AWS Lambda function is invoked once the value of the buffer size or the buffer interval is reached. | `number` | `null` | no |
+| <a name="input_transform_lambda_buffer_size"></a> [transform\_lambda\_buffer\_size](#input\_transform\_lambda\_buffer\_size) | The AWS Lambda function has a 6 MB invocation payload quota. Your data can expand in size after it's processed by the AWS Lambda function. A smaller buffer size allows for more room should the data expand after processing. | `number` | `null` | no |
+| <a name="input_transform_lambda_number_retries"></a> [transform\_lambda\_number\_retries](#input\_transform\_lambda\_number\_retries) | Number of retries for AWS Transformation lambda | `number` | `null` | no |
 | <a name="input_transform_lambda_role_arn"></a> [transform\_lambda\_role\_arn](#input\_transform\_lambda\_role\_arn) | The ARN of the role to execute the transform lambda. If null use the Firehose Stream role | `string` | `null` | no |
 | <a name="input_vpc_create_destination_security_group"></a> [vpc\_create\_destination\_security\_group](#input\_vpc\_create\_destination\_security\_group) | Indicates if want create destination security group to associate to firehose destinations | `bool` | `false` | no |
 | <a name="input_vpc_create_security_group"></a> [vpc\_create\_security\_group](#input\_vpc\_create\_security\_group) | Indicates if want create security group to associate to kinesis firehose | `bool` | `false` | no |

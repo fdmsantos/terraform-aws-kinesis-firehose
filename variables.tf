@@ -83,30 +83,30 @@ variable "transform_lambda_role_arn" {
 variable "transform_lambda_buffer_size" {
   description = "The AWS Lambda function has a 6 MB invocation payload quota. Your data can expand in size after it's processed by the AWS Lambda function. A smaller buffer size allows for more room should the data expand after processing."
   type        = number
-  default     = 3
+  default     = null
   validation {
     error_message = "Valid Values: minimum: 1 MB, maximum: 3 MB."
-    condition     = var.transform_lambda_buffer_size >= 1 && var.transform_lambda_buffer_size <= 3
+    condition     = var.transform_lambda_buffer_size == null || (coalesce(var.transform_lambda_buffer_size, 1) >= 1 && coalesce(var.transform_lambda_buffer_size, 1) <= 3)
   }
 }
 
 variable "transform_lambda_buffer_interval" {
   description = "The period of time during which Kinesis Data Firehose buffers incoming data before invoking the AWS Lambda function. The AWS Lambda function is invoked once the value of the buffer size or the buffer interval is reached."
   type        = number
-  default     = 60
+  default     = null
   validation {
     error_message = "Valid Values: minimum: 60 seconds, maximum: 900 seconds."
-    condition     = var.transform_lambda_buffer_interval >= 60 && var.transform_lambda_buffer_interval <= 900
+    condition     = var.transform_lambda_buffer_interval == null || (coalesce(var.transform_lambda_buffer_interval, 60) >= 60 && coalesce(var.transform_lambda_buffer_interval, 60) <= 900)
   }
 }
 
 variable "transform_lambda_number_retries" {
   description = "Number of retries for AWS Transformation lambda"
   type        = number
-  default     = 3
+  default     = null
   validation {
     error_message = "Number of retries for lambda must be between 0 and 300."
-    condition     = var.transform_lambda_number_retries >= 0 && var.transform_lambda_number_retries <= 300
+    condition     = var.transform_lambda_number_retries == null || (coalesce(var.transform_lambda_number_retries, 3) >= 0 && coalesce(var.transform_lambda_number_retries, 3) <= 300)
   }
 }
 
