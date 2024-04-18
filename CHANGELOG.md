@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.3.0...v3.4.0) (2024-04-18)
+
+
+### Features
+
+* Prevent perpetual differences during the terraform plan/apply ([#9](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/9)) ([0f72a49](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/0f72a49624a464cbbb004b18e02efd56d07b175b))
+
 ## [3.3.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.2.0...v3.3.0) (2024-03-05)
 
 
