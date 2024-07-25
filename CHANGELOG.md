@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.5.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.4.0...v3.5.0) (2024-07-25)
+
+
+### Features
+
+* Add Support for snowflake destination ([f98fad5](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/f98fad5599b8710212b6bba91cd92554a919141c))
+
 ## [3.4.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.3.0...v3.4.0) (2024-04-18)
 
 
