@@ -573,6 +573,77 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     }
   }
 
+  dynamic "snowflake_configuration" {
+    for_each = local.destination == "snowflake" ? [1] : []
+    content {
+      account_url          = "https://${var.snowflake_account_identifier}.snowflakecomputing.com"
+      database             = var.snowflake_database
+      private_key          = var.snowflake_private_key
+      key_passphrase       = var.snowflake_key_passphrase
+      role_arn             = local.firehose_role_arn
+      schema               = var.snowflake_schema
+      table                = var.snowflake_table
+      user                 = var.snowflake_user
+      data_loading_option  = var.snowflake_data_loading_option
+      metadata_column_name = var.snowflake_metadata_column_name
+      content_column_name  = var.snowflake_content_column_name
+      s3_backup_mode       = local.s3_backup_mode
+      retry_duration       = var.snowflake_retry_duration
+
+      snowflake_role_configuration {
+        enabled        = var.snowflake_role_configuration_enabled
+        snowflake_role = var.snowflake_role_configuration_role
+      }
+
+      dynamic "snowflake_vpc_configuration" {
+        for_each = var.snowflake_private_link_vpce_id != null ? [1] : []
+        content {
+          private_link_vpce_id = var.snowflake_private_link_vpce_id
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+    }
+  }
+
   tags = var.tags
 
 }

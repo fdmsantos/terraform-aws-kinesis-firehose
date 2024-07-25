@@ -22,7 +22,8 @@ locals {
     honeycomb : "http_endpoint",
     logicmonitor : "http_endpoint",
     mongodb : "http_endpoint",
-    sumologic : "http_endpoint"
+    sumologic : "http_endpoint",
+    snowflake : "snowflake"
   }
   destination           = local.destinations[var.destination]
   s3_destination        = local.destination == "extended_s3" ? true : false
@@ -143,7 +144,7 @@ locals {
   ) : null)
 
   # S3 Backup
-  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "opensearch", "opensearchserverless", "splunk", "http_endpoint"], local.destination) ? true : false
+  use_backup_vars_in_s3_configuration = contains(["elasticsearch", "opensearch", "opensearchserverless", "splunk", "http_endpoint", "snowflake"], local.destination) ? true : false
   s3_backup                           = var.enable_s3_backup ? "Enabled" : "Disabled"
   enable_s3_backup                    = var.enable_s3_backup || local.use_backup_vars_in_s3_configuration
   s3_backup_role_arn = (local.enable_s3_backup ? (
@@ -169,6 +170,10 @@ locals {
       All : "AllEvents"
     }
     http_endpoint : {
+      FailedOnly : "FailedDataOnly",
+      All : "AllData"
+    }
+    snowflake : {
       FailedOnly : "FailedDataOnly",
       All : "AllData"
     }

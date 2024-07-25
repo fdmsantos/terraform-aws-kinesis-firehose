@@ -24,6 +24,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Opensearch](#opensearch)
     * [Opensearch Serverless](#opensearch-serverless)
     * [Splunk](#splunk)
+    * [Snowflake](#snowflake)
     * [HTTP Endpoint](#http-endpoint)
     * [Datadog](#datadog)
     * [New Relic](#new-relic)
@@ -77,11 +78,13 @@ Supports all destinations and all Kinesis Firehose Features.
     - Data Format Conversion
     - Dynamic Partition
   - Redshift
-    - VPC Support. Security Groups creation supported
+    - VPC Support. Security Groups creation supported.
   - ElasticSearch / Opensearch / Opensearch Serverless
-    - VPC Support. Security Groups creation supported
+    - VPC Support. Security Groups creation supported.
   - Splunk
-    - VPC Support. Security Groups creation supported
+    - VPC Support. Security Groups creation supported.
+  - Snowflake
+    - VPCE Support.
   - Custom Http Endpoint
   - DataDog
   - Coralogix
@@ -292,6 +295,28 @@ module "firehose" {
   splunk_hec_token                  = "<splunk_hec_token>"
   splunk_hec_acknowledgment_timeout = 450
   splunk_retry_duration             = 450
+}
+```
+
+#### Snowflake
+
+**To Enabled It:** `destination = "snowflake"`
+
+**Variables Prefix:** `snowflake_`
+
+```hcl
+module "firehose" {
+  source                       = "fdmsantos/kinesis-firehose/aws"
+  version                      = "x.x.x"
+  name                         = "firehose-delivery-stream"
+  destination                  = "snowflake"
+  snowflake_account_identifier = "<snowflake_account_identifier>"
+  snowflake_private_key        = "<snowflake_private_key>"
+  snowflake_key_passphrase     = "<snowflake_key_passphrase>"
+  snowflake_user               = "<snowflake_user>"
+  snowflake_database           = "<snowflake_database>"
+  snowflake_schema             = "<snowflake_schema>"
+  snowflake_table              = "<snowflake_table>"
 }
 ```
 
@@ -789,9 +814,10 @@ The destination variable configured in module is mapped to firehose valid destin
 | s3 and extended_s3   | extended_s3          | There is no difference between s3 or extended_s3 destinations                                                                                                                                             |
 | redshift             | redshift             |                                                                                                                                                                                                           |
 | splunk               | splunk               |                                                                                                                                                                                                           |
-| opensearch           | elasticsearch        |                                                                                                                                                                                                           |
+| elasticsearch        | elasticsearch        |                                                                                                                                                                                                           |
 | opensearch           | opensearch           |                                                                                                                                                                                                           |
 | opensearchserverless | opensearchserverless |                                                                                                                                                                                                           |
+| snowflake            | snowflake            |                                                                                                                                                                                                           |
 | http_endpoint        | http_endpoint        |                                                                                                                                                                                                           |
 | datadog              | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                              |
 | newrelic             | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                             |
@@ -817,6 +843,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [Opensearch Serverless In Vpc](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/opensearch/direct-put-to-opensearchserverless-in-vpc) - Creates a Kinesis Firehose Stream with serverless opensearch in VPC as destination.
 - [Public Splunk](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/public-splunk) - Creates a Kinesis Firehose Stream with public splunk as destination.
 - [Splunk In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/splunk/splunk-in-vpc) - Creates a Kinesis Firehose Stream with splunk in VPC as destination.
+- [Snowflake](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/snowflake/direct-put-to-snowflake) - Creates a Kinesis Firehose Stream with snowflake as destination.
 - [Custom Http Endpoint](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/custom-http-endpoint) - Creates a Kinesis Firehose Stream with custom http endpoint as destination.
 - [Datadog](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/datadog) - Creates a Kinesis Firehose Stream with datadog europe metrics as destination.
 - [New Relic](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/newrelic) - Creates a Kinesis Firehose Stream with New Relic europe metrics as destination.
@@ -833,13 +860,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.33 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.47 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.33 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.47 |
 
 ## Modules
 
@@ -927,9 +954,9 @@ No modules.
 | <a name="input_buffering_size"></a> [buffering\_size](#input\_buffering\_size) | Buffer incoming data to the specified size, in MBs, before delivering it to the destination. | `number` | `5` | no |
 | <a name="input_configure_existing_application_role"></a> [configure\_existing\_application\_role](#input\_configure\_existing\_application\_role) | Set it to True if want use existing application role to add the firehose Policy | `bool` | `false` | no |
 | <a name="input_coralogix_endpoint_location"></a> [coralogix\_endpoint\_location](#input\_coralogix\_endpoint\_location) | Endpoint Location to coralogix destination | `string` | `"ireland"` | no |
-| <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName | `string` | `null` | no |
-| <a name="input_coralogix_parameter_subsystem_name"></a> [coralogix\_parameter\_subsystem\_name](#input\_coralogix\_parameter\_subsystem\_name) | By default, your delivery stream name will be used as subsystemName | `string` | `null` | no |
-| <a name="input_coralogix_parameter_use_dynamic_values"></a> [coralogix\_parameter\_use\_dynamic\_values](#input\_coralogix\_parameter\_use\_dynamic\_values) | To use dynamic values for applicationName and subsystemName | `bool` | `false` | no |
+| <a name="input_coralogix_parameter_application_name"></a> [coralogix\_parameter\_application\_name](#input\_coralogix\_parameter\_application\_name) | By default, your delivery stream arn will be used as applicationName. | `string` | `null` | no |
+| <a name="input_coralogix_parameter_subsystem_name"></a> [coralogix\_parameter\_subsystem\_name](#input\_coralogix\_parameter\_subsystem\_name) | By default, your delivery stream name will be used as subsystemName. | `string` | `null` | no |
+| <a name="input_coralogix_parameter_use_dynamic_values"></a> [coralogix\_parameter\_use\_dynamic\_values](#input\_coralogix\_parameter\_use\_dynamic\_values) | To use dynamic values for applicationName and subsystemName. | `bool` | `false` | no |
 | <a name="input_create"></a> [create](#input\_create) | Controls if kinesis firehose should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_create_application_role"></a> [create\_application\_role](#input\_create\_application\_role) | Set it to true to create role to be used by the source | `bool` | `false` | no |
 | <a name="input_create_application_role_policy"></a> [create\_application\_role\_policy](#input\_create\_application\_role\_policy) | Set it to true to create policy to the role used by the source | `bool` | `false` | no |
@@ -1065,6 +1092,20 @@ No modules.
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
 | <a name="input_s3_own_bucket"></a> [s3\_own\_bucket](#input\_s3\_own\_bucket) | Indicates if you own the bucket. If not, will be configure permissions to grants the bucket owner full access to the objects delivered by Kinesis Data Firehose | `bool` | `true` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
+| <a name="input_snowflake_account_identifier"></a> [snowflake\_account\_identifier](#input\_snowflake\_account\_identifier) | The Snowflake account identifier. | `string` | `null` | no |
+| <a name="input_snowflake_content_column_name"></a> [snowflake\_content\_column\_name](#input\_snowflake\_content\_column\_name) | The name of the content column. | `string` | `null` | no |
+| <a name="input_snowflake_data_loading_option"></a> [snowflake\_data\_loading\_option](#input\_snowflake\_data\_loading\_option) | The data loading option. | `string` | `null` | no |
+| <a name="input_snowflake_database"></a> [snowflake\_database](#input\_snowflake\_database) | The Snowflake database name. | `string` | `null` | no |
+| <a name="input_snowflake_key_passphrase"></a> [snowflake\_key\_passphrase](#input\_snowflake\_key\_passphrase) | The Snowflake passphrase for the private key. | `string` | `null` | no |
+| <a name="input_snowflake_metadata_column_name"></a> [snowflake\_metadata\_column\_name](#input\_snowflake\_metadata\_column\_name) | The name of the metadata column. | `string` | `null` | no |
+| <a name="input_snowflake_private_key"></a> [snowflake\_private\_key](#input\_snowflake\_private\_key) | The Snowflake private key for authentication. | `string` | `null` | no |
+| <a name="input_snowflake_private_link_vpce_id"></a> [snowflake\_private\_link\_vpce\_id](#input\_snowflake\_private\_link\_vpce\_id) | The VPCE ID for Firehose to privately connect with Snowflake. | `string` | `null` | no |
+| <a name="input_snowflake_retry_duration"></a> [snowflake\_retry\_duration](#input\_snowflake\_retry\_duration) | The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt. | `string` | `60` | no |
+| <a name="input_snowflake_role_configuration_enabled"></a> [snowflake\_role\_configuration\_enabled](#input\_snowflake\_role\_configuration\_enabled) | Whether the Snowflake role is enabled. | `bool` | `false` | no |
+| <a name="input_snowflake_role_configuration_role"></a> [snowflake\_role\_configuration\_role](#input\_snowflake\_role\_configuration\_role) | The Snowflake role. | `string` | `null` | no |
+| <a name="input_snowflake_schema"></a> [snowflake\_schema](#input\_snowflake\_schema) | The Snowflake schema name. | `string` | `null` | no |
+| <a name="input_snowflake_table"></a> [snowflake\_table](#input\_snowflake\_table) | The Snowflake table name. | `string` | `null` | no |
+| <a name="input_snowflake_user"></a> [snowflake\_user](#input\_snowflake\_user) | The user for authentication.. | `string` | `null` | no |
 | <a name="input_source_role_arn"></a> [source\_role\_arn](#input\_source\_role\_arn) | The ARN of the role that provides access to the source. Only Supported on Kinesis and MSK Sources | `string` | `null` | no |
 | <a name="input_source_use_existing_role"></a> [source\_use\_existing\_role](#input\_source\_use\_existing\_role) | Indicates if want use the kinesis firehose role for sources access. Only Supported on Kinesis and MSK Sources | `bool` | `true` | no |
 | <a name="input_splunk_hec_acknowledgment_timeout"></a> [splunk\_hec\_acknowledgment\_timeout](#input\_splunk\_hec\_acknowledgment\_timeout) | The amount of time, that Kinesis Firehose waits to receive an acknowledgment from Splunk after it sends it data | `number` | `600` | no |

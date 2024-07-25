@@ -24,7 +24,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic", "snowflake"], var.destination)
   }
 }
 
@@ -1196,21 +1196,118 @@ variable "coralogix_endpoint_location" {
 }
 
 variable "coralogix_parameter_application_name" {
-  description = "By default, your delivery stream arn will be used as applicationName"
+  description = "By default, your delivery stream arn will be used as applicationName."
   type        = string
   default     = null
 }
 
 variable "coralogix_parameter_subsystem_name" {
-  description = "By default, your delivery stream name will be used as subsystemName"
+  description = "By default, your delivery stream name will be used as subsystemName."
   type        = string
   default     = null
 }
 
 variable "coralogix_parameter_use_dynamic_values" {
-  description = "To use dynamic values for applicationName and subsystemName"
+  description = "To use dynamic values for applicationName and subsystemName."
   type        = bool
   default     = false
+}
+
+######
+# Snowflake Destination Variables
+######
+variable "snowflake_account_identifier" {
+  description = "The Snowflake account identifier."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_private_key" {
+  description = "The Snowflake private key for authentication."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "snowflake_key_passphrase" {
+  description = "The Snowflake passphrase for the private key."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "snowflake_user" {
+  description = "The user for authentication.."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_database" {
+  description = "The Snowflake database name."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_schema" {
+  description = "The Snowflake schema name."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_table" {
+  description = "The Snowflake table name."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_data_loading_option" {
+  description = "The data loading option."
+  type        = string
+  default     = null
+  validation {
+    error_message = "Please use a valid data loading option!"
+    condition     = var.snowflake_data_loading_option == null || contains(["JSON_MAPPING", "VARIANT_CONTENT_MAPPING", "VARIANT_CONTENT_AND_METADATA_MAPPING"], coalesce(var.snowflake_data_loading_option, "dummy"))
+  }
+}
+
+variable "snowflake_metadata_column_name" {
+  description = "The name of the metadata column."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_content_column_name" {
+  description = "The name of the content column."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_private_link_vpce_id" {
+  description = "The VPCE ID for Firehose to privately connect with Snowflake."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_role_configuration_enabled" {
+  description = "Whether the Snowflake role is enabled."
+  type        = bool
+  default     = false
+}
+
+variable "snowflake_role_configuration_role" {
+  description = "The Snowflake role."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_retry_duration" {
+  description = "The length of time during which Firehose retries delivery after a failure, starting from the initial request and including the first attempt."
+  type        = string
+  default     = 60
+  validation {
+    error_message = "Minimum: 0 second, maximum: 7200 seconds."
+    condition     = var.snowflake_retry_duration >= 0 && var.snowflake_retry_duration <= 7200
+  }
 }
 
 ######
