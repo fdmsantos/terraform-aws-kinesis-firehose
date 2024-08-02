@@ -44,6 +44,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [ElasticSearch / Opensearch / Opensearch Serverless](#elasticsearch--opensearch--opensearch-serverless)
     * [Redshift / Splunk](#redshift--splunk)
   * [Application Role](#application-role)
+  * [Secrets Manager](#secrets-manager)
 * [Destinations Mapping](#destinations-mapping)
 * [Examples](#examples)
 * [Requirements](#requirements)
@@ -79,20 +80,31 @@ Supports all destinations and all Kinesis Firehose Features.
     - Dynamic Partition
   - Redshift
     - VPC Support. Security Groups creation supported.
+    - Support to Secrets Manager.
   - ElasticSearch / Opensearch / Opensearch Serverless
     - VPC Support. Security Groups creation supported.
   - Splunk
     - VPC Support. Security Groups creation supported.
+    - Support to Secrets Manager.
   - Snowflake
     - VPCE Support.
+    - Support to Secrets Manager
   - Custom Http Endpoint
+    - Support to Secrets Manager
   - DataDog
+    - Support to Secrets Manager
   - Coralogix
+    - Support to Secrets Manager
   - New Relic
+    - Support to Secrets Manager
   - Dynatrace
+    - Support to Secrets Manager
   - Honeycomb
+    - Support to Secrets Manager
   - Logic Monitor
+    - Support to Secrets Manager
   - MongoDB Cloud
+    - Support to Secrets Manager
   - Sumo Logic
 - Data Transformation With Lambda
 - Original Data Backup in S3
@@ -805,6 +817,32 @@ module "firehose" {
 }
 ```
 
+### Secrets Manager
+
+**Supported By:** Snowflake / Redshift / Splunk and Http Endpoint destinations
+
+**To Enable:** `enable_secrets_manager = true`
+
+**Variables Prefix:** `secret_`
+
+```hcl
+module "firehose" {
+  source                      = "fdmsantos/kinesis-firehose/aws"
+  version                     = "x.x.x"
+  name                        = "firehose-delivery-stream"
+  destination                 = "redshift"
+  s3_bucket_arn               = "<bucket_arn>"
+  redshift_cluster_identifier = "<redshift_cluster_identifier>"
+  redshift_cluster_endpoint   = "<redshift_cluster_endpoint>"
+  redshift_database_name      = "<redshift_cluster_database>"
+  enable_secrets_manager      = true
+  secret_arn                  = "<secret_arn>"
+  secret_kms_key_arn          = "<secret_kms_key_arn>"
+  redshift_table_name         = "<redshift_cluster_table>"
+  redshift_copy_options       = "json 'auto ignorecase'"
+}
+```
+
 ## Destinations Mapping
 
 The destination variable configured in module is mapped to firehose valid destination.
@@ -837,6 +875,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [MSK Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/msk-to-s3) - Creates a Kinesis Firehose Stream with MSK Cluster as source and S3 as destination.
 - [S3 Destination Complete](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-complete) - Creates a Kinesis Firehose Stream with all features enabled.
 - [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift) - Creates a Kinesis Firehose Stream with redshift as destination.
+- [Redshift](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/direct-put-to-redshift-with-secrets-manager) - Creates a Kinesis Firehose Stream with redshift as destination using secrets manager.
 - [Redshift In VPC](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/redshift/redshift-in-vpc) - Creates a Kinesis Firehose Stream with redshift in VPC as destination.
 - [Public Opensearch](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/opensearch/direct-put-to-opensearch) - Creates a Kinesis Firehose Stream with public opensearch as destination.
 - [Public Opensearch Serverless](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/opensearch/direct-put-to-opensearchserverless) - Creates a Kinesis Firehose Stream with public serverless opensearch as destination.
@@ -860,13 +899,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.47 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.59 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.47 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.59 |
 
 ## Modules
 
@@ -890,6 +929,8 @@ No modules.
 | [aws_iam_policy.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.secretsmanager_cmk_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -904,6 +945,8 @@ No modules.
 | [aws_iam_role_policy_attachment.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.secretsmanager_cmk_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_service_linked_role.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
 | [aws_iam_service_linked_role.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
@@ -932,6 +975,8 @@ No modules.
 | [aws_iam_policy_document.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.secretsmanager_cmk_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_subnet.subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
@@ -1018,6 +1063,7 @@ No modules.
 | <a name="input_enable_lambda_transform"></a> [enable\_lambda\_transform](#input\_enable\_lambda\_transform) | Set it to true to enable data transformation with lambda | `bool` | `false` | no |
 | <a name="input_enable_s3_backup"></a> [enable\_s3\_backup](#input\_enable\_s3\_backup) | The Amazon S3 backup mode | `bool` | `false` | no |
 | <a name="input_enable_s3_encryption"></a> [enable\_s3\_encryption](#input\_enable\_s3\_encryption) | Indicates if want use encryption in S3 bucket. | `bool` | `false` | no |
+| <a name="input_enable_secrets_manager"></a> [enable\_secrets\_manager](#input\_enable\_secrets\_manager) | Enables or disables the Secrets Manager configuration. | `bool` | `false` | no |
 | <a name="input_enable_sse"></a> [enable\_sse](#input\_enable\_sse) | Whether to enable encryption at rest. Only makes sense when source is Direct Put | `bool` | `false` | no |
 | <a name="input_enable_vpc"></a> [enable\_vpc](#input\_enable\_vpc) | Indicates if destination is configured in VPC. Supports Elasticsearch and Opensearch destinations. | `bool` | `false` | no |
 | <a name="input_firehose_role"></a> [firehose\_role](#input\_firehose\_role) | IAM role ARN attached to the Kinesis Firehose Stream. | `string` | `null` | no |
@@ -1092,6 +1138,8 @@ No modules.
 | <a name="input_s3_kms_key_arn"></a> [s3\_kms\_key\_arn](#input\_s3\_kms\_key\_arn) | Specifies the KMS key ARN the stream will use to encrypt data. If not set, no encryption will be used | `string` | `null` | no |
 | <a name="input_s3_own_bucket"></a> [s3\_own\_bucket](#input\_s3\_own\_bucket) | Indicates if you own the bucket. If not, will be configure permissions to grants the bucket owner full access to the objects delivered by Kinesis Data Firehose | `bool` | `true` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | The YYYY/MM/DD/HH time format prefix is automatically used for delivered S3 files. You can specify an extra prefix to be added in front of the time format prefix. Note that if the prefix ends with a slash, it appears as a folder in the S3 bucket | `string` | `null` | no |
+| <a name="input_secret_arn"></a> [secret\_arn](#input\_secret\_arn) | The ARN of the Secrets Manager secret. This value is required if enable\_secrets\_manager is true. | `string` | `null` | no |
+| <a name="input_secret_kms_key_arn"></a> [secret\_kms\_key\_arn](#input\_secret\_kms\_key\_arn) | The ARN of the KMS Key to encrypt the Secret. This value is required if key used to encrypt the Secret is CMK and want the module generates the IAM Policy to access it. | `string` | `null` | no |
 | <a name="input_snowflake_account_identifier"></a> [snowflake\_account\_identifier](#input\_snowflake\_account\_identifier) | The Snowflake account identifier. | `string` | `null` | no |
 | <a name="input_snowflake_content_column_name"></a> [snowflake\_content\_column\_name](#input\_snowflake\_content\_column\_name) | The name of the content column. | `string` | `null` | no |
 | <a name="input_snowflake_data_loading_option"></a> [snowflake\_data\_loading\_option](#input\_snowflake\_data\_loading\_option) | The data loading option. | `string` | `null` | no |

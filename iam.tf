@@ -1,19 +1,21 @@
 locals {
-  role_name                       = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
-  application_role_name           = coalesce(var.application_role_name, "${var.name}-application-role", "*")
-  create_application_role_policy  = var.create && var.create_application_role_policy
-  add_backup_policies             = local.enable_s3_backup && var.s3_backup_use_existing_role
-  add_kinesis_source_policy       = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role && var.source_use_existing_role
-  add_msk_source_policy           = var.create && var.create_role && local.is_msk_source && var.source_use_existing_role
-  add_lambda_policy               = var.create && var.create_role && var.enable_lambda_transform
-  add_s3_kms_policy               = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
-  add_glue_policy                 = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
-  add_s3_policy                   = var.create && var.create_role
-  add_cw_policy                   = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
-  add_elasticsearch_policy        = var.create && var.create_role && local.destination == "elasticsearch"
-  add_opensearch_policy           = var.create && var.create_role && local.destination == "opensearch"
-  add_opensearchserverless_policy = var.create && var.create_role && local.destination == "opensearchserverless"
-  add_vpc_policy                  = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
+  role_name                         = var.create && var.create_role ? coalesce(var.role_name, var.name, "*") : null
+  application_role_name             = coalesce(var.application_role_name, "${var.name}-application-role", "*")
+  create_application_role_policy    = var.create && var.create_application_role_policy
+  add_backup_policies               = local.enable_s3_backup && var.s3_backup_use_existing_role
+  add_kinesis_source_policy         = var.create && var.create_role && local.is_kinesis_source && var.kinesis_source_use_existing_role && var.source_use_existing_role
+  add_msk_source_policy             = var.create && var.create_role && local.is_msk_source && var.source_use_existing_role
+  add_lambda_policy                 = var.create && var.create_role && var.enable_lambda_transform
+  add_s3_kms_policy                 = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
+  add_glue_policy                   = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
+  add_s3_policy                     = var.create && var.create_role
+  add_cw_policy                     = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
+  add_elasticsearch_policy          = var.create && var.create_role && local.destination == "elasticsearch"
+  add_opensearch_policy             = var.create && var.create_role && local.destination == "opensearch"
+  add_opensearchserverless_policy   = var.create && var.create_role && local.destination == "opensearchserverless"
+  add_vpc_policy                    = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
+  add_secretsmanager_policy         = var.create && var.create_role && var.enable_secrets_manager
+  add_secretsmanager_decrypt_policy = local.add_secretsmanager_policy && var.secret_kms_key_arn != null
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -695,3 +697,75 @@ resource "aws_iam_role_policy_attachment" "application" {
   role       = var.create_application_role ? aws_iam_role.application[0].name : var.application_role_name
   policy_arn = aws_iam_policy.application[0].arn
 }
+
+##################
+# Secrets Manager
+##################
+data "aws_iam_policy_document" "secretsmanager" {
+  count = local.add_secretsmanager_policy ? 1 : 0
+  statement {
+    sid    = "GetSecretValue"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue"
+    ]
+    resources = [
+      var.secret_arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "secretsmanager" {
+  count = local.add_secretsmanager_policy ? 1 : 0
+
+  name   = "${local.role_name}-secretsmanager"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.secretsmanager[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "secretsmanager" {
+  count = local.add_secretsmanager_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.secretsmanager[0].arn
+}
+
+data "aws_iam_policy_document" "secretsmanager_cmk_encryption" {
+  count = local.add_secretsmanager_decrypt_policy ? 1 : 0
+  statement {
+    sid    = "DecryptSecretWithKMSKey"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt"
+    ]
+    resources = [
+      var.secret_kms_key_arn
+    ]
+    condition {
+      test     = "StringEquals"
+      values   = ["secretsmanager.${data.aws_region.current.name}.amazonaws.com"]
+      variable = "kms:ViaService"
+    }
+  }
+}
+
+resource "aws_iam_policy" "secretsmanager_cmk_encryption" {
+  count = local.add_secretsmanager_decrypt_policy ? 1 : 0
+
+  name   = "${local.role_name}-secretsmanager-cmk-encryption"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.secretsmanager_cmk_encryption[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "secretsmanager_cmk_encryption" {
+  count = local.add_secretsmanager_decrypt_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.secretsmanager_cmk_encryption[0].arn
+}
+
+# TODO: Support Cross Account Secret
+# TODO: https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_examples_cross.html
+# Generate Outputs to Secret Resource Policy??? On Cross account scenario

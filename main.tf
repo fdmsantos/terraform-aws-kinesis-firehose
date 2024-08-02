@@ -249,6 +249,15 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
         }
       }
 
+      dynamic "secrets_manager_configuration" {
+        for_each = var.enable_secrets_manager ? [1] : []
+        content {
+          enabled    = var.enable_secrets_manager
+          secret_arn = var.secret_arn
+          role_arn   = local.firehose_role_arn
+        }
+      }
+
     }
   }
 
@@ -299,6 +308,15 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
           enabled         = var.enable_destination_log
           log_group_name  = local.destination_cw_log_group_name
           log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+
+      dynamic "secrets_manager_configuration" {
+        for_each = var.enable_secrets_manager ? [1] : []
+        content {
+          enabled    = var.enable_secrets_manager
+          secret_arn = var.secret_arn
+          role_arn   = local.firehose_role_arn
         }
       }
     }
@@ -372,6 +390,14 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
         }
       }
 
+      dynamic "secrets_manager_configuration" {
+        for_each = var.enable_secrets_manager ? [1] : []
+        content {
+          enabled    = var.enable_secrets_manager
+          secret_arn = var.secret_arn
+          role_arn   = local.firehose_role_arn
+        }
+      }
     }
   }
 
@@ -595,6 +621,17 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
         snowflake_role = var.snowflake_role_configuration_role
       }
 
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+
       dynamic "snowflake_vpc_configuration" {
         for_each = var.snowflake_private_link_vpce_id != null ? [1] : []
         content {
@@ -631,15 +668,13 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
         }
       }
 
-      s3_configuration {
-        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
-        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
-        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
-        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
-        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
-        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
-        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
-        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      dynamic "secrets_manager_configuration" {
+        for_each = var.enable_secrets_manager ? [1] : []
+        content {
+          enabled    = var.enable_secrets_manager
+          secret_arn = var.secret_arn
+          role_arn   = local.firehose_role_arn
+        }
       }
     }
   }

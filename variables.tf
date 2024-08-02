@@ -1311,6 +1311,27 @@ variable "snowflake_retry_duration" {
 }
 
 ######
+# Secrets Manager
+######
+variable "enable_secrets_manager" {
+  description = "Enables or disables the Secrets Manager configuration."
+  type        = bool
+  default     = false
+}
+
+variable "secret_arn" {
+  description = "The ARN of the Secrets Manager secret. This value is required if enable_secrets_manager is true."
+  type        = string
+  default     = null
+}
+
+variable "secret_kms_key_arn" {
+  description = "The ARN of the KMS Key to encrypt the Secret. This value is required if key used to encrypt the Secret is CMK and want the module generates the IAM Policy to access it."
+  type        = string
+  default     = null
+}
+
+######
 # IAM
 ######
 variable "firehose_role" {
