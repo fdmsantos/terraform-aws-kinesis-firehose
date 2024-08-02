@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.5.0...v3.6.0) (2024-08-02)
+
+
+### Features
+
+* Add Support secrets manager ([1f32a4c](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/1f32a4c246bbd2f2096f901ed1d0ce505e84a29f))
+
 ## [3.5.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.4.0...v3.5.0) (2024-07-25)
 
 
