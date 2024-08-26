@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.6.0...v3.7.0) (2024-08-26)
+
+
+### Features
+
+* Add custom_time_zone and file_extension attributes in s3 configuration ([e709b60](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/e709b60b49b58516a9d1a965564033a354a2fd88))
+
 ## [3.6.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.5.0...v3.6.0) (2024-08-02)
 
 
