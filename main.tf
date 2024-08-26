@@ -53,6 +53,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
       s3_backup_mode      = local.s3_backup
       kms_key_arn         = var.enable_s3_encryption ? var.s3_kms_key_arn : null
       compression_format  = var.s3_compression_format
+      custom_time_zone    = var.s3_custom_time_zone
+      file_extension      = var.s3_file_extension
 
       dynamic "dynamic_partitioning_configuration" {
         for_each = var.enable_dynamic_partitioning ? [1] : []

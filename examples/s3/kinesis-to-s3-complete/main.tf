@@ -75,4 +75,6 @@ module "firehose" {
   dynamic_partition_metadata_extractor_query    = "{user_id:.user_id}"
   append_delimiter_to_record                    = true
   dynamic_partition_enable_record_deaggregation = true
+  s3_custom_time_zone                           = "America/Los_Angeles"
+  s3_file_extension                             = ".json"
 }
