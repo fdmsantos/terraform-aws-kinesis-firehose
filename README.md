@@ -34,6 +34,7 @@ Supports all destinations and all Kinesis Firehose Features.
     * [Logic Monitor](#logic-monitor)
     * [MongoDB](#mongodb)
     * [SumoLogic](#sumologic)
+    * [Iceberg](#iceberg)
   * [Server Side Encryption](#server-side-encryption)
   * [Data Transformation with Lambda](#data-transformation-with-lambda)
   * [Data Format Conversion](#data-format-conversion)
@@ -525,6 +526,25 @@ module "firehose" {
 }
 ```
 
+#### Iceberg
+
+**To Enabled It:** `destination = "iceberg"`
+
+**Variables Prefix:** `iceberg_`
+
+```hcl
+module "firehose" {
+  source                = "fdmsantos/kinesis-firehose/aws"
+  version               = "x.x.x"
+  name                  = "firehose-delivery-stream"
+  destination           = "iceberg"
+  s3_bucket_arn         = "<s3_bucket_arn>"
+  iceberg_catalog_arn   = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:catalog"
+  iceberg_database_name = "<database>"
+  iceberg_table_name    = "<table>"
+}
+```
+
 ### Server Side Encryption
 
 **Supported By:** Only Direct Put source
@@ -856,6 +876,7 @@ The destination variable configured in module is mapped to firehose valid destin
 | opensearch           | opensearch           |                                                                                                                                                                                                           |
 | opensearchserverless | opensearchserverless |                                                                                                                                                                                                           |
 | snowflake            | snowflake            |                                                                                                                                                                                                           |
+| iceberg              | iceberg              |                                                                                                                                                                                                           |
 | http_endpoint        | http_endpoint        |                                                                                                                                                                                                           |
 | datadog              | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure datadog_endpoint_type variable                              |
 | newrelic             | http_endpoint        | The difference regarding http_endpoint is the http_endpoint_url and http_endpoint_name variables aren't support, and it's necessary configure newrelic_endpoint_type variable                             |
@@ -892,6 +913,7 @@ The destination variable configured in module is mapped to firehose valid destin
 - [LogicMonitor](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/logicmonitor) - Creates a Kinesis Firehose Stream with Logic Monitor as destination.
 - [MongoDB](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/mongodb) - Creates a Kinesis Firehose Stream with MongoDB as destination.
 - [SumoLogic](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/http-endpoint/sumologic) - Creates a Kinesis Firehose Stream with Sumo Logic as destination.
+- [Iceberg](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/iceberg/direct-put-to-iceberg) - Creates a Kinesis Firehose Stream with Iceberg as destination.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -899,13 +921,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.59 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.73 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.59 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.73 |
 
 ## Modules
 
@@ -922,6 +944,7 @@ No modules.
 | [aws_iam_policy.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.iceberg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -938,6 +961,7 @@ No modules.
 | [aws_iam_role_policy_attachment.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.iceberg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -968,6 +992,7 @@ No modules.
 | [aws_iam_policy_document.cw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.iceberg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.kinesis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -1076,6 +1101,12 @@ No modules.
 | <a name="input_http_endpoint_request_configuration_content_encoding"></a> [http\_endpoint\_request\_configuration\_content\_encoding](#input\_http\_endpoint\_request\_configuration\_content\_encoding) | Kinesis Data Firehose uses the content encoding to compress the body of a request before sending the request to the destination | `string` | `"GZIP"` | no |
 | <a name="input_http_endpoint_retry_duration"></a> [http\_endpoint\_retry\_duration](#input\_http\_endpoint\_retry\_duration) | Total amount of seconds Firehose spends on retries. This duration starts after the initial attempt fails, It does not include the time periods during which Firehose waits for acknowledgment from the specified destination after each attempt | `number` | `300` | no |
 | <a name="input_http_endpoint_url"></a> [http\_endpoint\_url](#input\_http\_endpoint\_url) | The HTTP endpoint URL to which Kinesis Firehose sends your data | `string` | `null` | no |
+| <a name="input_iceberg_catalog_arn"></a> [iceberg\_catalog\_arn](#input\_iceberg\_catalog\_arn) | Glue catalog ARN identifier of the destination Apache Iceberg Tables. You must specify the ARN in the format arn:aws:glue:region:account-id:catalog. | `string` | `null` | no |
+| <a name="input_iceberg_database_name"></a> [iceberg\_database\_name](#input\_iceberg\_database\_name) | The name of the Apache Iceberg database. | `string` | `null` | no |
+| <a name="input_iceberg_destination_config_s3_error_output_prefix"></a> [iceberg\_destination\_config\_s3\_error\_output\_prefix](#input\_iceberg\_destination\_config\_s3\_error\_output\_prefix) | The table specific S3 error output prefix. All the errors that occurred while delivering to this table will be prefixed with this value in S3 destination. | `string` | `null` | no |
+| <a name="input_iceberg_destination_config_unique_keys"></a> [iceberg\_destination\_config\_unique\_keys](#input\_iceberg\_destination\_config\_unique\_keys) | A list of unique keys for a given Apache Iceberg table. Firehose will use these for running Create, Update, or Delete operations on the given Iceberg table. | `list(string)` | `[]` | no |
+| <a name="input_iceberg_retry_duration"></a> [iceberg\_retry\_duration](#input\_iceberg\_retry\_duration) | The period of time, in seconds between 0 to 7200, during which Firehose retries to deliver data to the specified destination. | `number` | `300` | no |
+| <a name="input_iceberg_table_name"></a> [iceberg\_table\_name](#input\_iceberg\_table\_name) | The name of the Apache Iceberg Table. | `string` | `null` | no |
 | <a name="input_input_source"></a> [input\_source](#input\_input\_source) | This is the kinesis firehose source | `string` | `"direct-put"` | no |
 | <a name="input_kinesis_source_is_encrypted"></a> [kinesis\_source\_is\_encrypted](#input\_kinesis\_source\_is\_encrypted) | Indicates if Kinesis data stream source is encrypted | `bool` | `false` | no |
 | <a name="input_kinesis_source_kms_arn"></a> [kinesis\_source\_kms\_arn](#input\_kinesis\_source\_kms\_arn) | Kinesis Source KMS Key to add Firehose role to decrypt the records. | `string` | `null` | no |

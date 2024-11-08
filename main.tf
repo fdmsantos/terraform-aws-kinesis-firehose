@@ -681,6 +681,67 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
     }
   }
 
+  dynamic "iceberg_configuration" {
+    for_each = local.destination == "iceberg" ? [1] : []
+    content {
+      catalog_arn        = var.iceberg_catalog_arn
+      role_arn           = local.firehose_role_arn
+      buffering_interval = var.buffering_interval
+      buffering_size     = var.buffering_size
+      retry_duration     = var.iceberg_retry_duration
+
+      dynamic "destination_table_configuration" {
+        for_each = var.iceberg_database_name != null && var.iceberg_table_name != null ? [1] : []
+        content {
+          database_name          = var.iceberg_database_name
+          table_name             = var.iceberg_table_name
+          s3_error_output_prefix = var.iceberg_destination_config_s3_error_output_prefix
+          unique_keys            = var.iceberg_destination_config_unique_keys
+        }
+      }
+
+      s3_configuration {
+        role_arn            = !local.use_backup_vars_in_s3_configuration ? local.firehose_role_arn : local.s3_backup_role_arn
+        bucket_arn          = !local.use_backup_vars_in_s3_configuration ? var.s3_bucket_arn : var.s3_backup_bucket_arn
+        buffering_size      = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_size : var.s3_backup_buffering_size
+        buffering_interval  = !local.use_backup_vars_in_s3_configuration ? var.s3_configuration_buffering_interval : var.s3_backup_buffering_interval
+        compression_format  = !local.use_backup_vars_in_s3_configuration ? var.s3_compression_format : var.s3_backup_compression
+        prefix              = !local.use_backup_vars_in_s3_configuration ? var.s3_prefix : var.s3_backup_prefix
+        error_output_prefix = !local.use_backup_vars_in_s3_configuration ? var.s3_error_output_prefix : var.s3_backup_error_output_prefix
+        kms_key_arn         = (!local.use_backup_vars_in_s3_configuration && var.enable_s3_encryption ? var.s3_kms_key_arn : (local.use_backup_vars_in_s3_configuration && var.s3_backup_enable_encryption ? var.s3_backup_kms_key_arn : null))
+      }
+
+      dynamic "processing_configuration" {
+        for_each = local.enable_processing ? [1] : []
+        content {
+          enabled = local.enable_processing
+          dynamic "processors" {
+            for_each = local.processors
+            content {
+              type = processors.value["type"]
+              dynamic "parameters" {
+                for_each = processors.value["parameters"]
+                content {
+                  parameter_name  = parameters.value["name"]
+                  parameter_value = parameters.value["value"]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "cloudwatch_logging_options" {
+        for_each = var.enable_destination_log ? [1] : []
+        content {
+          enabled         = var.enable_destination_log
+          log_group_name  = local.destination_cw_log_group_name
+          log_stream_name = local.destination_cw_log_stream_name
+        }
+      }
+    }
+  }
+
   tags = var.tags
 
 }

@@ -24,7 +24,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic", "snowflake"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic", "snowflake", "iceberg"], var.destination)
   }
 }
 
@@ -1320,6 +1320,49 @@ variable "snowflake_retry_duration" {
     error_message = "Minimum: 0 second, maximum: 7200 seconds."
     condition     = var.snowflake_retry_duration >= 0 && var.snowflake_retry_duration <= 7200
   }
+}
+
+######
+# Iceberg Destination Variables
+######
+variable "iceberg_catalog_arn" {
+  description = "Glue catalog ARN identifier of the destination Apache Iceberg Tables. You must specify the ARN in the format arn:aws:glue:region:account-id:catalog."
+  type        = string
+  default     = null
+}
+
+variable "iceberg_retry_duration" {
+  description = "The period of time, in seconds between 0 to 7200, during which Firehose retries to deliver data to the specified destination."
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid values between 0 and 7200."
+    condition     = var.iceberg_retry_duration >= 0 && var.iceberg_retry_duration <= 7200
+  }
+}
+
+variable "iceberg_database_name" {
+  description = "The name of the Apache Iceberg database."
+  type        = string
+  default     = null
+}
+
+variable "iceberg_table_name" {
+  description = "The name of the Apache Iceberg Table."
+  type        = string
+  default     = null
+}
+
+variable "iceberg_destination_config_s3_error_output_prefix" {
+  description = "The table specific S3 error output prefix. All the errors that occurred while delivering to this table will be prefixed with this value in S3 destination."
+  type        = string
+  default     = null
+}
+
+variable "iceberg_destination_config_unique_keys" {
+  description = "A list of unique keys for a given Apache Iceberg table. Firehose will use these for running Create, Update, or Delete operations on the given Iceberg table."
+  type        = list(string)
+  default     = []
 }
 
 ######

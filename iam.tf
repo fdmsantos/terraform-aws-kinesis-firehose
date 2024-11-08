@@ -13,6 +13,7 @@ locals {
   add_elasticsearch_policy          = var.create && var.create_role && local.destination == "elasticsearch"
   add_opensearch_policy             = var.create && var.create_role && local.destination == "opensearch"
   add_opensearchserverless_policy   = var.create && var.create_role && local.destination == "opensearchserverless"
+  add_iceberg_policy                = var.create && var.create_role && local.destination == "iceberg"
   add_vpc_policy                    = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
   add_secretsmanager_policy         = var.create && var.create_role && var.enable_secrets_manager
   add_secretsmanager_decrypt_policy = local.add_secretsmanager_policy && var.secret_kms_key_arn != null
@@ -696,6 +697,40 @@ resource "aws_iam_role_policy_attachment" "application" {
   count      = (var.create_application_role || var.configure_existing_application_role) && local.create_application_role_policy ? 1 : 0
   role       = var.create_application_role ? aws_iam_role.application[0].name : var.application_role_name
   policy_arn = aws_iam_policy.application[0].arn
+}
+
+##################
+# Iceberg
+##################
+data "aws_iam_policy_document" "iceberg" {
+  count = local.add_iceberg_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "glue:GetTable",
+      "glue:GetDatabase",
+      "glue:UpdateTable"
+    ]
+    resources = [
+      var.iceberg_catalog_arn,
+      "${replace(var.iceberg_catalog_arn, ":catalog", "")}:database/${var.iceberg_database_name}",
+      "${replace(var.iceberg_catalog_arn, ":catalog", "")}:table/${var.iceberg_database_name}/${var.iceberg_table_name}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "iceberg" {
+  count  = local.add_iceberg_policy ? 1 : 0
+  name   = "${local.role_name}-iceberg"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.iceberg[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "iceberg" {
+  count      = local.add_iceberg_policy ? 1 : 0
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.iceberg[0].arn
 }
 
 ##################

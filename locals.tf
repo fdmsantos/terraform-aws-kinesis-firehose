@@ -23,7 +23,8 @@ locals {
     logicmonitor : "http_endpoint",
     mongodb : "http_endpoint",
     sumologic : "http_endpoint",
-    snowflake : "snowflake"
+    snowflake : "snowflake",
+    iceberg : "iceberg"
   }
   destination           = local.destinations[var.destination]
   s3_destination        = local.destination == "extended_s3" ? true : false
@@ -176,6 +177,9 @@ locals {
     snowflake : {
       FailedOnly : "FailedDataOnly",
       All : "AllData"
+    }
+    iceberg : {
+      FailedOnly : "FailedDataOnly"
     }
   }
   s3_backup_mode = local.use_backup_vars_in_s3_configuration ? local.backup_modes[local.destination][var.s3_backup_mode] : null
