@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.8.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.7.0...v3.8.0) (2024-11-08)
+
+
+### Features
+
+* Add iceberg destination ([fd0a9c7](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/fd0a9c76ec8c7226b1e0905812fa898a2de8dffb))
+
 ## [3.7.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.6.0...v3.7.0) (2024-08-26)
 
 
