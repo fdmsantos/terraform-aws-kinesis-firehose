@@ -890,6 +890,7 @@ The destination variable configured in module is mapped to firehose valid destin
 ## Examples
 
 - [Direct Put](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3) - Creates an encrypted Kinesis firehose stream with Direct Put as source and S3 as destination.
+- [Direct Put With Cross Account S3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-cross-account-s3) - Creates Kinesis firehose stream with Direct Put as source and Cross Account S3 bucket as destination.
 - [Direct Put With Lambda](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/direct-put-to-s3-with-lambda) - Creates a Kinesis firehose stream with Direct Put as source and S3 as destination with transformation lambda.
 - [Kinesis Data Stream Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/kinesis-to-s3-basic) - Creates a basic Kinesis Firehose stream with Kinesis data stream as source and s3 as destination.
 - [WAF Source](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/tree/main/examples/s3/waf-to-s3) - Creates a Kinesis Firehose Stream with AWS Web WAF as source and S3 as destination.
