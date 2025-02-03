@@ -144,7 +144,7 @@ data "aws_iam_policy_document" "msk" {
 }
 
 resource "aws_iam_policy" "msk" {
-  count  = local.is_msk_source ? 1 : 0
+  count  = local.add_msk_source_policy ? 1 : 0
   name   = "${local.role_name}-msk"
   path   = var.policy_path
   policy = data.aws_iam_policy_document.msk[0].json
