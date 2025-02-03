@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [3.8.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.0...v3.8.1) (2025-02-03)
+
+
+### Bug Fixes
+
+* Fix MSK Policy been created when `create_role = false` ([3788090](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/3788090cf5691607794252ec01a2d842cb3b69c2))
+
 ## [3.8.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.7.0...v3.8.0) (2024-11-08)
 
 
