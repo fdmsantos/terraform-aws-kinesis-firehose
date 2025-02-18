@@ -17,10 +17,12 @@ locals {
   add_vpc_policy                    = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
   add_secretsmanager_policy         = var.create && var.create_role && var.enable_secrets_manager
   add_secretsmanager_decrypt_policy = local.add_secretsmanager_policy && var.secret_kms_key_arn != null
+  msk_source_topic_arn              = local.add_msk_source_policy ? "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:topic/${data.aws_msk_cluster.this[0].cluster_name}/${data.aws_msk_cluster.this[0].cluster_uuid}/${var.msk_source_topic_name}" : null
+  msk_source_group_arn              = local.add_msk_source_policy ? "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:group/${data.aws_msk_cluster.this[0].cluster_name}/${data.aws_msk_cluster.this[0].cluster_uuid}/*" : null
 }
 
 data "aws_iam_policy_document" "assume_role" {
-  count = var.create && var.create_role ? 1 : 0
+  count = var.create && var.create_role && !local.is_msk_source ? 1 : 0
 
   statement {
     effect  = "Allow"
@@ -41,6 +43,20 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+data "aws_iam_policy_document" "msk_source_assume_role" {
+  count = var.create && var.create_role && local.is_msk_source ? 1 : 0
+
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["firehose.amazonaws.com"]
+    }
+  }
+}
+
 resource "aws_iam_role" "firehose" {
   count                 = var.create && var.create_role ? 1 : 0
   name                  = local.role_name
@@ -48,7 +64,7 @@ resource "aws_iam_role" "firehose" {
   path                  = var.role_path
   force_detach_policies = var.role_force_detach_policies
   permissions_boundary  = var.role_permissions_boundary
-  assume_role_policy    = data.aws_iam_policy_document.assume_role[0].json
+  assume_role_policy    = !local.is_msk_source ? data.aws_iam_policy_document.assume_role[0].json : data.aws_iam_policy_document.msk_source_assume_role[0].json
   tags                  = merge(var.tags, var.role_tags)
 }
 
@@ -128,7 +144,7 @@ data "aws_iam_policy_document" "msk" {
       "kafka-cluster:ReadData"
     ]
     resources = [
-      "${var.msk_source_cluster_arn}/${var.msk_source_topic_name}"
+      local.msk_source_topic_arn
     ]
   }
 
@@ -138,7 +154,7 @@ data "aws_iam_policy_document" "msk" {
       "kafka-cluster:DescribeGroup"
     ]
     resources = [
-      "${var.msk_source_cluster_arn}/*"
+      local.msk_source_group_arn
     ]
   }
 }

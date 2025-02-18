@@ -3,3 +3,9 @@ variable "name_prefix" {
   type        = string
   default     = "msk-to-s3-basic"
 }
+
+variable "tags" {
+  description = "Default Tags to be added to all resources."
+  type        = map(string)
+  default     = {}
+}

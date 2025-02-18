@@ -7,6 +7,11 @@ data "aws_subnet" "subnet" {
   id    = var.vpc_subnet_ids[0]
 }
 
+data "aws_msk_cluster" "this" {
+  count        = local.is_msk_source ? 1 : 0
+  cluster_name = split("/", var.msk_source_cluster_arn)[1]
+}
+
 resource "aws_kinesis_firehose_delivery_stream" "this" {
   count       = var.create ? 1 : 0
   name        = local.is_waf_source ? "aws-waf-logs-${var.name}" : var.name
