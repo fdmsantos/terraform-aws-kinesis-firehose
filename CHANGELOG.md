@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [3.8.2](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.1...v3.8.2) (2025-02-18)
+
+
+### Bug Fixes
+
+* Fix Incorrect ARNs in MSK Policy ([8707bcb](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/8707bcbdba6cb277386b02c7d3406c570ecbaa64))
+
 ### [3.8.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.0...v3.8.1) (2025-02-03)
 
 
