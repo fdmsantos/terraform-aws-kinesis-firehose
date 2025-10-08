@@ -62,10 +62,10 @@ splunk_hec_token         = "<splunk_hec_token>"
 | <a name="input_splunk_hec_endpoint"></a> [splunk\_hec\_endpoint](#input\_splunk\_hec\_endpoint) | Splunk Hec Endpoint | `string` | n/a | yes |
 | <a name="input_splunk_hec_endpoint_type"></a> [splunk\_hec\_endpoint\_type](#input\_splunk\_hec\_endpoint\_type) | Splunk Hec Endpoint Type | `string` | n/a | yes |
 | <a name="input_splunk_hec_token"></a> [splunk\_hec\_token](#input\_splunk\_hec\_token) | Splunk Hec Token | `string` | n/a | yes |
-| <a name="input_vpc_azs"></a> [vpc\_azs](#input\_vpc\_azs) | Redshift AZs | `list(string)` | <pre>[<br>  "eu-west-1a",<br>  "eu-west-1b",<br>  "eu-west-1c"<br>]</pre> | no |
+| <a name="input_vpc_azs"></a> [vpc\_azs](#input\_vpc\_azs) | Redshift AZs | `list(string)` | <pre>[<br/>  "eu-west-1a",<br/>  "eu-west-1b",<br/>  "eu-west-1c"<br/>]</pre> | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | VPC CIDR block | `string` | `"10.0.0.0/16"` | no |
-| <a name="input_vpc_private_subnets"></a> [vpc\_private\_subnets](#input\_vpc\_private\_subnets) | VPC Private Subnets | `list(string)` | <pre>[<br>  "10.0.1.0/24",<br>  "10.0.2.0/24",<br>  "10.0.3.0/24"<br>]</pre> | no |
-| <a name="input_vpc_public_subnets"></a> [vpc\_public\_subnets](#input\_vpc\_public\_subnets) | VPC Public Subnets | `list(string)` | <pre>[<br>  "10.0.101.0/24",<br>  "10.0.102.0/24",<br>  "10.0.103.0/24"<br>]</pre> | no |
+| <a name="input_vpc_private_subnets"></a> [vpc\_private\_subnets](#input\_vpc\_private\_subnets) | VPC Private Subnets | `list(string)` | <pre>[<br/>  "10.0.1.0/24",<br/>  "10.0.2.0/24",<br/>  "10.0.3.0/24"<br/>]</pre> | no |
+| <a name="input_vpc_public_subnets"></a> [vpc\_public\_subnets](#input\_vpc\_public\_subnets) | VPC Public Subnets | `list(string)` | <pre>[<br/>  "10.0.101.0/24",<br/>  "10.0.102.0/24",<br/>  "10.0.103.0/24"<br/>]</pre> | no |
 
 ## Outputs
 
