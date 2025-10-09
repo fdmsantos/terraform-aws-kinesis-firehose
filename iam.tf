@@ -7,6 +7,7 @@ locals {
   add_msk_source_policy             = var.create && var.create_role && local.is_msk_source && var.source_use_existing_role
   add_lambda_policy                 = var.create && var.create_role && var.enable_lambda_transform
   add_s3_kms_policy                 = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_encryption) || var.enable_s3_encryption)
+  add_sse_kms_policy                = var.create && var.create_role && !local.is_kinesis_source && var.enable_sse && var.sse_kms_key_type == "CUSTOMER_MANAGED_CMK"
   add_glue_policy                   = var.create && var.create_role && var.enable_data_format_conversion && var.data_format_conversion_glue_use_existing_role
   add_s3_policy                     = var.create && var.create_role
   add_cw_policy                     = var.create && var.create_role && ((local.add_backup_policies && var.s3_backup_enable_log) || var.enable_destination_log)
@@ -203,7 +204,7 @@ resource "aws_iam_role_policy_attachment" "lambda" {
 }
 
 ##################
-# KMS
+# S3 KMS
 ##################
 data "aws_iam_policy_document" "s3_kms" {
   count = local.add_s3_kms_policy ? 1 : 0
@@ -247,6 +248,40 @@ resource "aws_iam_role_policy_attachment" "s3_kms" {
 
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.s3_kms[0].arn
+}
+
+##################
+# Firehose SSE KMS
+##################
+data "aws_iam_policy_document" "sse_kms" {
+  count = local.add_sse_kms_policy ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    resources = [var.sse_kms_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "sse_kms" {
+  count = local.add_sse_kms_policy ? 1 : 0
+
+  name   = "${local.role_name}-sse-kms"
+  path   = var.policy_path
+  policy = data.aws_iam_policy_document.sse_kms[0].json
+  tags   = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "sse_kms" {
+  count = local.add_sse_kms_policy ? 1 : 0
+
+  role       = aws_iam_role.firehose[0].name
+  policy_arn = aws_iam_policy.sse_kms[0].arn
 }
 
 ##################

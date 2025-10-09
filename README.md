@@ -956,6 +956,7 @@ No modules.
 | [aws_iam_policy.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.secretsmanager_cmk_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.sse_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -973,6 +974,7 @@ No modules.
 | [aws_iam_role_policy_attachment.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.secretsmanager_cmk_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.sse_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_service_linked_role.opensearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
 | [aws_iam_service_linked_role.opensearchserverless](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role) | resource |
@@ -1005,6 +1007,7 @@ No modules.
 | [aws_iam_policy_document.s3_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.secretsmanager_cmk_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.sse_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_msk_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/msk_cluster) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
@@ -1020,7 +1023,7 @@ No modules.
 | <a name="input_application_role_name"></a> [application\_role\_name](#input\_application\_role\_name) | Name of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
 | <a name="input_application_role_path"></a> [application\_role\_path](#input\_application\_role\_path) | Path of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
 | <a name="input_application_role_permissions_boundary"></a> [application\_role\_permissions\_boundary](#input\_application\_role\_permissions\_boundary) | The ARN of the policy that is used to set the permissions boundary for the IAM Application role used by Kinesis Firehose Stream Source | `string` | `null` | no |
-| <a name="input_application_role_policy_actions"></a> [application\_role\_policy\_actions](#input\_application\_role\_policy\_actions) | List of Actions to Application Role Policy | `list(string)` | <pre>[<br>  "firehose:PutRecord",<br>  "firehose:PutRecordBatch"<br>]</pre> | no |
+| <a name="input_application_role_policy_actions"></a> [application\_role\_policy\_actions](#input\_application\_role\_policy\_actions) | List of Actions to Application Role Policy | `list(string)` | <pre>[<br/>  "firehose:PutRecord",<br/>  "firehose:PutRecordBatch"<br/>]</pre> | no |
 | <a name="input_application_role_service_principal"></a> [application\_role\_service\_principal](#input\_application\_role\_service\_principal) | AWS Service Principal to assume application role | `string` | `null` | no |
 | <a name="input_application_role_tags"></a> [application\_role\_tags](#input\_application\_role\_tags) | A map of tags to assign to IAM Application role | `map(string)` | `{}` | no |
 | <a name="input_associate_role_to_redshift_cluster"></a> [associate\_role\_to\_redshift\_cluster](#input\_associate\_role\_to\_redshift\_cluster) | Set it to false if don't want the module associate the role to redshift cluster | `bool` | `true` | no |
