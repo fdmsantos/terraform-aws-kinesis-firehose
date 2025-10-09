@@ -689,19 +689,19 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   dynamic "iceberg_configuration" {
     for_each = local.destination == "iceberg" ? [1] : []
     content {
-      catalog_arn        = var.iceberg_catalog_arn
+      catalog_arn        = var.destination == "iceberg" ? var.iceberg_catalog_arn : var.s3_tables_catalog_arn # If not iceberg, will be S3 Tables
       role_arn           = local.firehose_role_arn
       buffering_interval = var.buffering_interval
       buffering_size     = var.buffering_size
-      retry_duration     = var.iceberg_retry_duration
+      retry_duration     = var.destination == "iceberg" ? var.iceberg_retry_duration : var.s3_tables_retry_duration
 
       dynamic "destination_table_configuration" {
-        for_each = var.iceberg_database_name != null && var.iceberg_table_name != null ? [1] : []
+        for_each = (var.iceberg_database_name != null && var.iceberg_table_name != null) || (var.s3_tables_database_name != null && var.s3_tables_table_name != null) ? [1] : []
         content {
-          database_name          = var.iceberg_database_name
-          table_name             = var.iceberg_table_name
-          s3_error_output_prefix = var.iceberg_destination_config_s3_error_output_prefix
-          unique_keys            = var.iceberg_destination_config_unique_keys
+          database_name          = var.destination == "iceberg" ? var.iceberg_database_name : var.s3_tables_database_name
+          table_name             = var.destination == "iceberg" ? var.iceberg_table_name : var.s3_tables_table_name
+          s3_error_output_prefix = var.destination == "iceberg" ? var.iceberg_destination_config_s3_error_output_prefix : var.s3_tables_destination_config_s3_error_output_prefix
+          unique_keys            = var.destination == "iceberg" ? var.iceberg_destination_config_unique_keys : var.s3_tables_destination_config_unique_keys
         }
       }
 

@@ -13,7 +13,8 @@ locals {
   add_elasticsearch_policy          = var.create && var.create_role && local.destination == "elasticsearch"
   add_opensearch_policy             = var.create && var.create_role && local.destination == "opensearch"
   add_opensearchserverless_policy   = var.create && var.create_role && local.destination == "opensearchserverless"
-  add_iceberg_policy                = var.create && var.create_role && local.destination == "iceberg"
+  add_iceberg_policy                = var.create && var.create_role && var.destination == "iceberg"
+  add_s3_tables_policy              = var.create && var.create_role && var.destination == "s3tables"
   add_vpc_policy                    = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
   add_secretsmanager_policy         = var.create && var.create_role && var.enable_secrets_manager
   add_secretsmanager_decrypt_policy = local.add_secretsmanager_policy && var.secret_kms_key_arn != null
@@ -748,6 +749,44 @@ resource "aws_iam_role_policy_attachment" "iceberg" {
   role       = aws_iam_role.firehose[0].name
   policy_arn = aws_iam_policy.iceberg[0].arn
 }
+
+##################
+# S3 Tables
+##################
+# data "aws_iam_policy_document" "s3_tables" {
+#   count = local.add_s3_tables_policy ? 1 : 0
+#   statement {
+#     effect = "Allow"
+#     actions = [
+#       "glue:GetTable",
+#       "glue:GetDatabase",
+#       "glue:UpdateTable"
+#     ]
+#     resources = [
+#       var.s3_tables_catalog_arn,
+#       "${replace(var.s3_tables_catalog_arn, ":catalog", "")}:database/${var.s3_tables_database_name}",
+#       "${replace(var.s3_tables_catalog_arn, ":catalog", "")}:table/${var.s3_tables_database_name}/${var.s3_tables_table_name}",
+#
+#       # "arn:aws:glue:us-east-1:account-id:catalog/s3tablescatalog/*",
+#       # "arn:aws:glue:us-east-1:account-id:catalog/s3tablescatalog",
+#       # "arn:aws:glue:us-east-1:account-id:catalog", = var.s3_tables_catalog_arn, ??
+#     ]
+#   }
+# }
+#
+# resource "aws_iam_policy" "s3_tables" {
+#   count  = local.add_s3_tables_policy ? 1 : 0
+#   name   = "${local.role_name}-s3-tables"
+#   path   = var.policy_path
+#   policy = data.aws_iam_policy_document.s3_tables[0].json
+#   tags   = var.tags
+# }
+#
+# resource "aws_iam_role_policy_attachment" "s3_tables" {
+#   count      = local.add_s3_tables_policy ? 1 : 0
+#   role       = aws_iam_role.firehose[0].name
+#   policy_arn = aws_iam_policy.s3_tables[0].arn
+# }
 
 ##################
 # Secrets Manager

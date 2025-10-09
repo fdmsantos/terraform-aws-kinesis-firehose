@@ -24,7 +24,8 @@ locals {
     mongodb : "http_endpoint",
     sumologic : "http_endpoint",
     snowflake : "snowflake",
-    iceberg : "iceberg"
+    iceberg : "iceberg",
+    s3tables: "iceberg"
   }
   destination           = local.destinations[var.destination]
   s3_destination        = local.destination == "extended_s3" ? true : false

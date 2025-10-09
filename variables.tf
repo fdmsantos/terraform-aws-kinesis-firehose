@@ -24,7 +24,7 @@ variable "destination" {
   type        = string
   validation {
     error_message = "Please use a valid destination!"
-    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic", "snowflake", "iceberg"], var.destination)
+    condition     = contains(["s3", "extended_s3", "redshift", "opensearch", "opensearchserverless", "elasticsearch", "splunk", "http_endpoint", "datadog", "coralogix", "newrelic", "dynatrace", "honeycomb", "logicmonitor", "mongodb", "sumologic", "snowflake", "iceberg", "s3tables"], var.destination)
   }
 }
 
@@ -1361,6 +1361,49 @@ variable "iceberg_destination_config_s3_error_output_prefix" {
 
 variable "iceberg_destination_config_unique_keys" {
   description = "A list of unique keys for a given Apache Iceberg table. Firehose will use these for running Create, Update, or Delete operations on the given Iceberg table."
+  type        = list(string)
+  default     = []
+}
+
+######
+# S3 Tables Destination Variables
+######
+variable "s3_tables_catalog_arn" {
+  description = "Glue catalog ARN identifier of the destination S3 Tables Tables."
+  type        = string
+  default     = null
+}
+
+variable "s3_tables_retry_duration" {
+  description = "The period of time, in seconds between 0 to 7200, during which Firehose retries to deliver data to the specified destination."
+  type        = number
+  default     = 300
+  validation {
+    error_message = "Valid values between 0 and 7200."
+    condition     = var.s3_tables_retry_duration >= 0 && var.s3_tables_retry_duration <= 7200
+  }
+}
+
+variable "s3_tables_database_name" {
+  description = "The name of the S3 Tables database."
+  type        = string
+  default     = null
+}
+
+variable "s3_tables_table_name" {
+  description = "The name of the S3 Tables Table."
+  type        = string
+  default     = null
+}
+
+variable "s3_tables_destination_config_s3_error_output_prefix" {
+  description = "The table specific S3 error output prefix. All the errors that occurred while delivering to this table will be prefixed with this value in S3 destination."
+  type        = string
+  default     = null
+}
+
+variable "s3_tables_destination_config_unique_keys" {
+  description = "A list of unique keys for a given S3 Tables table. Firehose will use these for running Create, Update, or Delete operations on the given S3 Tables table."
   type        = list(string)
   default     = []
 }
