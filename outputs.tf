@@ -140,5 +140,5 @@ output "destination_security_group_rule_ids" {
 
 output "firehose_cidr_blocks" {
   description = "Firehose stream cidr blocks to unblock on destination security group"
-  value       = contains(["splunk", "redshift"], local.destination) ? local.firehose_cidr_blocks[local.destination][data.aws_region.current.name] : null
+  value       = contains(["splunk", "redshift"], local.destination) ? local.firehose_cidr_blocks[local.destination][data.aws_region.current.id] : null
 }

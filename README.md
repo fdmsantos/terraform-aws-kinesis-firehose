@@ -539,7 +539,7 @@ module "firehose" {
   name                  = "firehose-delivery-stream"
   destination           = "iceberg"
   s3_bucket_arn         = "<s3_bucket_arn>"
-  iceberg_catalog_arn   = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:catalog"
+  iceberg_catalog_arn   = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:catalog"
   iceberg_database_name = "<database>"
   iceberg_table_name    = "<table>"
 }

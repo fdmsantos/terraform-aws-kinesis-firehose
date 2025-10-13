@@ -830,7 +830,7 @@ resource "aws_security_group" "destination" {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
-      cidr_blocks = local.firehose_cidr_blocks[local.destination][data.aws_region.current.name]
+      cidr_blocks = local.firehose_cidr_blocks[local.destination][data.aws_region.current.id]
       description = "Allow inbound traffic from Kinesis Firehose"
     }
   }
@@ -856,7 +856,7 @@ resource "aws_security_group_rule" "destination" {
   from_port                = 443
   to_port                  = 443
   protocol                 = "tcp"
-  cidr_blocks              = !local.is_search_destination ? local.firehose_cidr_blocks[local.destination][data.aws_region.current.name] : null
+  cidr_blocks              = !local.is_search_destination ? local.firehose_cidr_blocks[local.destination][data.aws_region.current.id] : null
   security_group_id        = local.is_search_destination ? split("_", each.value)[0] : each.value
   source_security_group_id = local.is_search_destination ? split("_", each.value)[1] : null
   description              = "Allow Inbound HTTPS Traffic from Firehose"

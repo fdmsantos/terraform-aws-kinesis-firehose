@@ -18,8 +18,8 @@ locals {
   add_vpc_policy                    = var.create && var.create_role && var.enable_vpc && var.vpc_use_existing_role && local.is_search_destination
   add_secretsmanager_policy         = var.create && var.create_role && var.enable_secrets_manager
   add_secretsmanager_decrypt_policy = local.add_secretsmanager_policy && var.secret_kms_key_arn != null
-  msk_source_topic_arn              = local.add_msk_source_policy ? "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:topic/${data.aws_msk_cluster.this[0].cluster_name}/${data.aws_msk_cluster.this[0].cluster_uuid}/${var.msk_source_topic_name}" : null
-  msk_source_group_arn              = local.add_msk_source_policy ? "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:group/${data.aws_msk_cluster.this[0].cluster_name}/${data.aws_msk_cluster.this[0].cluster_uuid}/*" : null
+  msk_source_topic_arn              = local.add_msk_source_policy ? "arn:aws:kafka:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:topic/${data.aws_msk_cluster.this[0].cluster_name}/${data.aws_msk_cluster.this[0].cluster_uuid}/${var.msk_source_topic_name}" : null
+  msk_source_group_arn              = local.add_msk_source_policy ? "arn:aws:kafka:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:group/${data.aws_msk_cluster.this[0].cluster_name}/${data.aws_msk_cluster.this[0].cluster_uuid}/*" : null
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -95,7 +95,7 @@ data "aws_iam_policy_document" "kinesis" {
       resources = [var.kinesis_source_kms_arn]
       condition {
         test     = "StringEquals"
-        values   = ["kinesis.${data.aws_region.current.name}.amazonaws.com"]
+        values   = ["kinesis.${data.aws_region.current.id}.amazonaws.com"]
         variable = "kms:ViaService"
       }
       condition {
@@ -220,7 +220,7 @@ data "aws_iam_policy_document" "s3_kms" {
     ]))
     condition {
       test     = "StringEquals"
-      values   = ["s3.${data.aws_region.current.name}.amazonaws.com"]
+      values   = ["s3.${data.aws_region.current.id}.amazonaws.com"]
       variable = "kms:ViaService"
     }
     condition {
@@ -397,8 +397,8 @@ data "aws_iam_policy_document" "cw" {
       "logs:PutLogEvents"
     ]
     resources = distinct(compact([
-      var.enable_destination_log ? "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.destination_cw_log_group_name}:log-stream:${local.destination_cw_log_stream_name}" : "",
-      var.s3_backup_enable_log ? "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.s3_backup_cw_log_group_name}:log-stream:${local.s3_backup_cw_log_stream_name}" : ""
+      var.enable_destination_log ? "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:${local.destination_cw_log_group_name}:log-stream:${local.destination_cw_log_stream_name}" : "",
+      var.s3_backup_enable_log ? "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:${local.s3_backup_cw_log_group_name}:log-stream:${local.s3_backup_cw_log_stream_name}" : ""
     ]))
   }
 }
@@ -830,7 +830,7 @@ data "aws_iam_policy_document" "secretsmanager_cmk_encryption" {
     ]
     condition {
       test     = "StringEquals"
-      values   = ["secretsmanager.${data.aws_region.current.name}.amazonaws.com"]
+      values   = ["secretsmanager.${data.aws_region.current.id}.amazonaws.com"]
       variable = "kms:ViaService"
     }
   }
