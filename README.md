@@ -539,7 +539,7 @@ module "firehose" {
   name                  = "firehose-delivery-stream"
   destination           = "iceberg"
   s3_bucket_arn         = "<s3_bucket_arn>"
-  iceberg_catalog_arn   = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:catalog"
+  iceberg_catalog_arn   = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:catalog"
   iceberg_database_name = "<database>"
   iceberg_table_name    = "<table>"
 }
@@ -923,13 +923,13 @@ The destination variable configured in module is mapped to firehose valid destin
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.73 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.73, < 7.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.73 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.73, < 7.0 |
 
 ## Modules
 

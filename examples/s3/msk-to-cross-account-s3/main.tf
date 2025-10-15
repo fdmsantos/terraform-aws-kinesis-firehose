@@ -4,8 +4,8 @@ locals {
   vpc_cidr  = "10.0.0.0/16"
   azs       = slice(data.aws_availability_zones.available.names, 0, 2)
   topic     = "demo-topic"
-  topic_arn = "arn:aws:kafka:${data.aws_region.current.name}:${var.msk_aws_account_id}:topic/${var.name_prefix}-msk/${module.msk_cluster.cluster_uuid}/*"
-  group_arn = "arn:aws:kafka:${data.aws_region.current.name}:${var.msk_aws_account_id}:group/${var.name_prefix}-msk/${module.msk_cluster.cluster_uuid}/*"
+  topic_arn = "arn:aws:kafka:${data.aws_region.current.id}:${var.msk_aws_account_id}:topic/${var.name_prefix}-msk/${module.msk_cluster.cluster_uuid}/*"
+  group_arn = "arn:aws:kafka:${data.aws_region.current.id}:${var.msk_aws_account_id}:group/${var.name_prefix}-msk/${module.msk_cluster.cluster_uuid}/*"
 }
 
 resource "random_pet" "this" {

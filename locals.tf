@@ -137,7 +137,7 @@ locals {
   : null)
 
   data_format_conversion_glue_region = (var.enable_data_format_conversion ?
-    (var.data_format_conversion_glue_region != null ? var.data_format_conversion_glue_region : data.aws_region.current.name)
+    (var.data_format_conversion_glue_region != null ? var.data_format_conversion_glue_region : data.aws_region.current.id)
   : null)
 
   data_format_conversion_glue_role = (var.enable_data_format_conversion ? (

@@ -50,7 +50,7 @@ module "firehose" {
   s3_bucket_arn                = aws_s3_bucket.this.arn
   buffering_interval           = 30
   buffering_size               = 10
-  iceberg_catalog_arn          = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:catalog"
+  iceberg_catalog_arn          = "arn:${data.aws_partition.current.partition}:glue:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:catalog"
   iceberg_database_name        = aws_glue_catalog_database.this.name
   iceberg_table_name           = aws_glue_catalog_table.this.name
   s3_backup_mode               = "FailedOnly"
