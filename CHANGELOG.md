@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+### [3.8.4](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.3...v3.8.4) (2025-10-15)
+
+
+### Bug Fixes
+
+* Fix AWS provider v6 compatibility replacing deprecated region.name ([f66b574](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/f66b5742f9461eee185e416501fc0ab2e7d58316)), closes [#16](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/16)
+* Merge pull request [#21](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/21) from pdonorio/fix/aws-provider-v6-support ([62e6476](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/62e647668cdbae581d5c20cdb774f3ba32ab09bb))
+
 ### [3.8.3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.2...v3.8.3) (2025-10-09)
 
 
