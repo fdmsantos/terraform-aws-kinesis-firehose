@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+### [3.8.5](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.4...v3.8.5) (2026-02-13)
+
+
+### Bug Fixes
+
+* variable data_format_conversion_input_format error_message ([b9b44f1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/b9b44f11b2aa6353836f19ee46d9dc015220b1b0)), closes [#22](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/22)
+* variable data_format_conversion_input_format error_message [#22](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/22) ([3152c29](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/3152c2997c6f5f432acda134bb11590feb5249f6))
+
 ### [3.8.4](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.3...v3.8.4) (2025-10-15)
 
 
