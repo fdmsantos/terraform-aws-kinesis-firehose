@@ -560,7 +560,7 @@ variable "data_format_conversion_input_format" {
   type        = string
   default     = "OpenX"
   validation {
-    error_message = "Valid values are HIVE and OPENX."
+    error_message = "Valid values are HIVE and OpenX."
     condition     = contains(["HIVE", "OpenX"], var.data_format_conversion_input_format)
   }
 }
