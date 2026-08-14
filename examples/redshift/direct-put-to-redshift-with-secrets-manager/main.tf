@@ -9,6 +9,9 @@ resource "aws_s3_bucket" "s3" {
   force_destroy = true
 }
 
+# Firehose reaches a provisioned Redshift cluster over its public endpoint, so the
+# cluster must be publicly accessible. AWS provider v6 flipped the default of
+# publicly_accessible from true to false, hence it is set explicitly here.
 resource "aws_redshift_cluster" "this" {
   cluster_identifier  = "${var.name_prefix}-redshift-cluster"
   database_name       = "test"
@@ -17,6 +20,7 @@ resource "aws_redshift_cluster" "this" {
   node_type           = "dc2.large"
   cluster_type        = "single-node"
   skip_final_snapshot = true
+  publicly_accessible = true
   #   provisioner "local-exec" {
   #     command = "psql \"postgresql://${self.master_username}:${self.master_password}@${self.endpoint}/${self.database_name}\" -f ./redshift_table.sql"
   #   }

@@ -30,6 +30,9 @@ module "security_groups" {
   vpc_security_group_destination_vpc_id = module.vpc.vpc_id
 }
 
+# Firehose reaches a provisioned Redshift cluster over its public endpoint, so the
+# cluster must be publicly accessible. AWS provider v6 flipped the default of
+# publicly_accessible from true to false, hence it is set explicitly here.
 resource "aws_redshift_cluster" "this" {
   cluster_identifier        = "${var.name_prefix}-redshift-cluster"
   database_name             = "test"
@@ -38,6 +41,7 @@ resource "aws_redshift_cluster" "this" {
   node_type                 = "dc2.large"
   cluster_type              = "single-node"
   skip_final_snapshot       = true
+  publicly_accessible       = true
   cluster_subnet_group_name = aws_redshift_subnet_group.this.name
   vpc_security_group_ids    = [module.security_groups.destination_security_group_id]
 }
