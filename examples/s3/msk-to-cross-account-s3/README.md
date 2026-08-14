@@ -47,7 +47,7 @@ export BS=my-endpoint
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
@@ -55,7 +55,7 @@ export BS=my-endpoint
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 | <a name="provider_aws.account2"></a> [aws.account2](#provider\_aws.account2) | ~> 6.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.0 |
@@ -63,7 +63,7 @@ export BS=my-endpoint
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_ec2"></a> [ec2](#module\_ec2) | terraform-aws-modules/ec2-instance/aws | n/a |
 | <a name="module_firehose"></a> [firehose](#module\_firehose) | ../../../ | n/a |
 | <a name="module_msk_cluster"></a> [msk\_cluster](#module\_msk\_cluster) | terraform-aws-modules/msk-kafka-cluster/aws | 2.11.0 |
@@ -73,7 +73,7 @@ export BS=my-endpoint
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_iam_policy.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.msk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -91,7 +91,7 @@ export BS=my-endpoint
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_role_arn"></a> [aws\_role\_arn](#input\_aws\_role\_arn) | AWS Account 1 ARN Role | `string` | n/a | yes |
 | <a name="input_msk_aws_account_id"></a> [msk\_aws\_account\_id](#input\_msk\_aws\_account\_id) | MSK AWS Account ID | `string` | n/a | yes |
 | <a name="input_msk_aws_account_role_arn"></a> [msk\_aws\_account\_role\_arn](#input\_msk\_aws\_account\_role\_arn) | AWS Account 2 ARN Role | `string` | n/a | yes |
@@ -100,7 +100,7 @@ export BS=my-endpoint
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_kinesis_data_stream_name"></a> [kinesis\_data\_stream\_name](#output\_kinesis\_data\_stream\_name) | The name of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_arn"></a> [kinesis\_firehose\_arn](#output\_kinesis\_firehose\_arn) | The ARN of the Kinesis Firehose Stream |
 | <a name="output_kinesis_firehose_destination_id"></a> [kinesis\_firehose\_destination\_id](#output\_kinesis\_firehose\_destination\_id) | The Destination id of the Kinesis Firehose Stream |
