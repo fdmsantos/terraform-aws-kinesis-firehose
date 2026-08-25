@@ -18,7 +18,7 @@ Note that this example may create resources which cost money. Run `terraform des
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 2.0 |
@@ -26,20 +26,20 @@ Note that this example may create resources which cost money. Run `terraform des
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 2.0 |
 
 ## Modules
 
 | Name | Source | Version |
-| ---- | ------ | ------- |
+|------|--------|---------|
 | <a name="module_firehose"></a> [firehose](#module\_firehose) | ../../../ | n/a |
 
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_iam_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -52,13 +52,13 @@ Note that this example may create resources which cost money. Run `terraform des
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix to use in resources | `string` | `"direct-put-to-s3"` | no |
 
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_application_role_arn"></a> [application\_role\_arn](#output\_application\_role\_arn) | The ARN of the IAM application role created for Kinesis Firehose Stream Source |
 | <a name="output_application_role_name"></a> [application\_role\_name](#output\_application\_role\_name) | The Name of the IAM application role created for Kinesis Firehose Stream Source |
 | <a name="output_application_role_policy_arn"></a> [application\_role\_policy\_arn](#output\_application\_role\_policy\_arn) | The ARN of the IAM application role created for Kinesis Firehose Stream Source |

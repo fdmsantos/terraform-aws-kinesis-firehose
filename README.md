@@ -922,14 +922,14 @@ The destination variable configured in module is mapped to firehose valid destin
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0, < 7.0 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0, < 7.0 |
 
 ## Modules
@@ -939,7 +939,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_cloudwatch_log_group.log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_stream.backup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_stream) | resource |
 | [aws_cloudwatch_log_stream.destination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_stream) | resource |
@@ -1017,7 +1017,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_append_delimiter_to_record"></a> [append\_delimiter\_to\_record](#input\_append\_delimiter\_to\_record) | To configure your delivery stream to add a new line delimiter between records in objects that are delivered to Amazon S3. | `bool` | `false` | no |
 | <a name="input_application_role_description"></a> [application\_role\_description](#input\_application\_role\_description) | Description of IAM Application role to use for Kinesis Firehose Stream Source | `string` | `null` | no |
 | <a name="input_application_role_force_detach_policies"></a> [application\_role\_force\_detach\_policies](#input\_application\_role\_force\_detach\_policies) | Specifies to force detaching any policies the IAM Application role has before destroying it | `bool` | `true` | no |
@@ -1228,7 +1228,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_application_role_arn"></a> [application\_role\_arn](#output\_application\_role\_arn) | The ARN of the IAM role created for Kinesis Firehose Stream Source |
 | <a name="output_application_role_name"></a> [application\_role\_name](#output\_application\_role\_name) | The Name of the IAM role created for Kinesis Firehose Stream Source Source |
 | <a name="output_application_role_policy_arn"></a> [application\_role\_policy\_arn](#output\_application\_role\_policy\_arn) | The ARN of the IAM policy created for Kinesis Firehose Stream Source |
