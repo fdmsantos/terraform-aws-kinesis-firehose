@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.5...v4.0.0) (2026-08-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* minimum supported AWS provider version raised from 5.73 to 6.0
+
+### Features
+
+* minimum supported AWS provider version raised from 5.73 to 6.0 ([32f0ef3](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/32f0ef39f17cb98489d5c1edfa73e15cd5779bb3))
+
 ### [3.8.5](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.4...v3.8.5) (2026-02-13)
 
 
