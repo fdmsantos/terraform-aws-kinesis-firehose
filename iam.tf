@@ -226,7 +226,9 @@ data "aws_iam_policy_document" "s3_kms" {
     condition {
       test = "StringLike"
       values = distinct(compact([
+        local.enable_s3_backup ? var.s3_backup_bucket_arn : "",
         local.enable_s3_backup ? "${var.s3_backup_bucket_arn}/*" : "",
+        var.enable_s3_encryption ? var.s3_bucket_arn : "",
         var.enable_s3_encryption ? "${var.s3_bucket_arn}/*" : ""
       ]))
       variable = "kms:EncryptionContext:aws:s3:arn"
