@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+### [4.0.1](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v4.0.0...v4.0.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* allow S3 Bucket Key encryption context in delivery role KMS grant ([35b4a94](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/35b4a94615ec058d342d54e48cf03406740d2d2b))
+* Merge pull request [#27](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/issues/27) from Mjb141/fix/s3-kms-bucket-key-encryption-context ([8cd9b8d](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/commit/8cd9b8ddc15a11fdef33871feb3a3b8a1fb41a49))
+
 ## [4.0.0](https://github.com/fdmsantos/terraform-aws-kinesis-firehose/compare/v3.8.5...v4.0.0) (2026-08-25)
 
 
